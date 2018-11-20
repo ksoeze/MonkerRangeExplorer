@@ -1,0 +1,31 @@
+* Logging
+  CLOCK: [2018-11-20 Di 12:19]
+  CLOCK: [2018-11-19 Mo 13:25]--[2018-11-19 Mo 16:08] =>  2:43
+  CLOCK: [2018-11-18 So 23:04]--[2018-11-19 Mo 03:01] =>  3:57
+  CLOCK: [2018-11-17 Sa 14:15]--[2018-11-17 Sa 18:23] =>  4:08
+
+** [2018-11-16 Fr]
+mkvirtualenv monker_automation
+
+python -m pip install jedi
+python -m pip install importmagic
+python -m pip install autopep8
+python -m pip install yapf
+
+** [2018-11-17 Sa] 
+
+TODO 
+on trips board pairs where there is rank on board doesnt get added
+straights on 4 straight boards doesnt work properly (bad grouping)
+
+** [2018-11-19 Mo]
+   :PROPERTIES:
+   :ORDERED:  t
+   :END:
+
+TODO
+might be good idea to also fill description list for view file
+group made hands based on blocker on flush boards?
+group straights straight draws based on outs/nuttynes
+4 straight boards handled badly!! (blockers and straight grouping)
+   
