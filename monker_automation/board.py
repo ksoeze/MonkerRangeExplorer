@@ -29,6 +29,7 @@
 
 from monker_automation.utils import *
 from itertools import combinations
+from itertools import chain
 import random
 import collections
 
@@ -94,12 +95,21 @@ def return_string(board, street="river"):
 #         return return_cards
 
 
-def return_ranks(board=[]):
+def compact_range(hand_range):
+    # delets useless hands from hand range list ( for example KK if K is also in the range)
+    hand_range_compact = []
+    for x in hand_range:
+        if not any([r in x for r in hand_range if r != x]):
+            hand_range_compact.append(x)
+    return hand_range_compact
+
+
+def return_ranks(board):
     ranks = [r for r, s in board if r in RANKS]
     return sorted(ranks, key=lambda x: RANK_ORDER[x], reverse=True)
 
 
-def return_suits(board=[]):
+def return_suits(board):
     suits = [s for r, s in board if s in SUITS]
     suits = [(suits.count(x), x) for x in SUITS if suits.count(x) != 0]
     return sorted(suits, key=lambda tup: tup[0], reverse=True)
@@ -133,7 +143,7 @@ def return_kickers(board):
 def return_flushdraws(board):
     fd_suits = [s for c, s in return_suits(board) if c == 2]
     if not fd_suits:
-        return []
+        return ([], [])
     if len(fd_suits) == 2:
         return ([r+fd_suits[0]*2 for r in possible_flush_or_fd_ranks(board, fd_suits[0])],
                 [r+fd_suits[1]*2 for r in possible_flush_or_fd_ranks(board, fd_suits[1])])
@@ -158,27 +168,16 @@ def hand_board_intersections(board):  # not including full +
         sets = [str(r)*2 for r in ranks]
         two_pair = [''.join(r) for r in combinations(ranks, 2)]
         return sets + two_pair + ranks
-    # if rank_count_list[3]:
-    #    return rank_count_list[3]
     if rank_count_list[2]:
-        # quads=[rank_count_list[2][0]]
         trips = []
         if rank_count_list[1]:
-          #  quads.append(rank_count_list[1][0]*2)
             if RANK_ORDER[rank_count_list[1][0]] > RANK_ORDER[rank_count_list[2][0]]:
                 trips.append(rank_count_list[1][0])
         else:
             trips = [x*2 for x in rank_count_list[0]
                      if RANK_ORDER[x] > RANK_ORDER[rank_count_list[2][0]]]
-        # sorted(quads, key=lambda x:RANK_ORDER[x[0]], reverse=True) + trips
         return trips
     if rank_count_list[1]:
-        # quads=[r*2 for r in rank_count_list[1]]
-        # fulls=[''.join(r+r) for r in rank_count_list[0]]
-        # fulls=fulls+[x+y for x in rank_count_list[0] for y in rank_count_list[1]]
-        # if len(rank_count_list[1])==2:
-        #     fulls=fulls+[''.join(rank_count_list[1][0])+''.join(rank_count_list[1][1])]
-        # fulls=sort_fulls(ranks,fulls)
         trips = rank_count_list[1]
         two_pair = []
         possible_2_pair_ranks = [rank for rank in rank_count_list[0]
@@ -214,9 +213,22 @@ def return_fulls_or_better(board):
     return []
 
 
+def return_full_blockers(board):
+    board_only_ranks = return_rank_counts(board)[0]
+    board_only_ranks = parse_board(''.join(board_only_ranks))
+    intersections = hand_board_intersections(board_only_ranks)
+    blockers = []
+    for hand in intersections:
+        if len(hand) == 2:
+            if hand[0] != hand[1]:
+                blockers.append(hand)
+        else:
+            blockers.append(hand)
+    return blockers
+
+
 def return_str_flushes(board):
-    ranks = return_ranks(board)
-    straights = return_straights(board)
+    straights = list(chain.from_iterable(return_straights(board)))
     flush_suit = [s for c, s in return_suits(board) if c > 2]
     str_flush = []
 
@@ -231,9 +243,19 @@ def return_str_flushes(board):
     return str_flush
 
 
+def return_str_flush_blockers(board):
+    str_flushes = return_str_flushes(board)
+    if str_flushes:
+        return [str_flushes[0][:2], str_flushes[0][2:4]]
+    else:
+        return[]
+
+
 def return_straights(board):
     ranks = straight_ranks(board)
     straights = []
+    straight_rank = {}
+
     for s in STRAIGHTS:
         straight_combo = []
         for r in combinations(ranks, 3):
@@ -241,10 +263,16 @@ def return_straights(board):
             if len(stra) == 2 and stra not in straights:
                 straight_combo.append(
                     ''.join(sorted(stra, key=lambda x: RANK_ORDER[x], reverse=True)))
+                straight_rank[''.join(
+                    sorted(stra, key=lambda x: RANK_ORDER[x], reverse=True))]=STRAIGHTS.index(s)
         straight_combo.sort(key=lambda x: (
             RANK_ORDER[x[0]], RANK_ORDER[x[1]]), reverse=True)
         straights += straight_combo
-    return straights
+    straight_categories = [[], [], [], [], [], []]
+    for item in straights:
+        index = straight_rank[item]-straight_rank[straights[0]]
+        straight_categories[index].append(item)
+    return straight_categories
 
 
 def straight_ranks(board):
@@ -255,9 +283,9 @@ def straight_ranks(board):
 def return_straight_draws(board):
     ranks = return_ranks(board)
     if len(ranks) == 5:
-        return []
+        return {"wraps": [], "oesd": [], "gs": []}
     next_card_straight_hands = possible_straights_on_next_card(board)
-    straight_hands = return_straights(board)
+    straight_hands = list(chain.from_iterable(return_straights(board)))
     gs_or_oesd = [hand for card in next_card_straight_hands for hand in next_card_straight_hands[card]
                   if hand not in straight_hands]
     any_4_card_straight_combo = [
@@ -302,13 +330,45 @@ def return_straight_draws(board):
             else:
                 if combo[0] in combo[1] and combo[1] in any_4_card_straight_combo:
                     any_4_card_straight_combo.remove(combo[1])
-    return any_4_card_straight_combo
+
+    # for item in any_4_card_straight_combo:
+    #     print("{} OUTS: {}".format(item, len(hand_straight_outs[item])))
+    #     print("{} NUTTYNESS: {}".format(
+    #         item, sum(hand_straight_nuttynes[item])))
+
+    draws = {"wraps": [], "oesd": [], "gs": []}
+    for hand in any_4_card_straight_combo:
+        outs = len(hand_straight_outs[hand])
+        nuttynes = sum(hand_straight_nuttynes[hand])
+        if outs >= 5 and nuttynes < 5 or outs == 4 and nuttynes < 4 or outs == 3 and nuttynes < 3:
+            draws["wraps"].append(hand)
+        elif outs >= 3 and nuttynes < 5 or outs == 2 and nuttynes < 2:
+            draws["oesd"].append(hand)
+        elif outs >= 2 and nuttynes < 4 or outs == 1 and nuttynes < 2:
+            draws["gs"].append(hand)
+    for item in draws:
+        draws[item] = compact_range(draws[item])
+    return draws
+
+
+def return_straight_blocker_pairs(board):
+    blockers = []
+    straights = return_straights(board)
+    if not straights:
+        return blockers
+    pairs = return_pairs(board)
+    for p in pairs:
+        for s in straights[0]:
+            if p[0] in s:
+                blockers.append(p)
+    return blockers
 
 
 def possible_straights_on_next_card(board):
     next_card = {x: [] for x in RANKS}
     for card in next_card:
-        next_card[card] = return_straights(board + [card+"b"])
+        next_card[card] = list(chain.from_iterable(
+            return_straights(board + [card+"b"])))
     return next_card
 
 
@@ -340,6 +400,15 @@ def return_over_pairs(board):
         if RANK_ORDER[r] > RANK_ORDER[ranks[0]]:
             op.append(''.join(r+r))
     return op
+
+
+def return_middle_pairs(board):
+    ranks = return_ranks(board)
+    mp = []
+    for r in RANKS:
+        if RANK_ORDER[r] < RANK_ORDER[ranks[0]] and RANK_ORDER[r] > RANK_ORDER[ranks[1]]:
+            mp.append(''.join(r+r))
+    return mp
 
 
 def best_low_board(hand, low_ranks):
@@ -384,9 +453,9 @@ def return_lows(board):
 
 
 def test():
-    board_string = "9s9s9s9h"
+    board_string = "5s6d5c7dTc"
     sample_board = parse_board(board_string)
-    ranks = return_ranks(sample_board)
+    #ranks = return_ranks(sample_board)
 
     # print(sample_board)
     # print(return_ranks(sample_board))
@@ -395,16 +464,20 @@ def test():
     # print(return_flushes(sample_board))
     # print(return_flushdraws(sample_board,'c'))
     # print(rank_count(return_ranks(sample_board)))
-    # print(hand_board_intersections(return_ranks(sample_board)))
+    print(return_full_blockers(sample_board))
     # print(return_string(sample_board,"river"))
-    # print(return_straights(board))
-    # print(return_straight_draws(board))
-    # print(return_str_flush(sample_board))
+    # print(return_straights(sample_board))
+
+    # print(return_straight_draws(sample_board))
+    # print(return_straight_blocker_pairs(sample_board))
+    # print(return_straight_draws_categories(sample_board))
+    # print(return_str_flushes(sample_board))
+    # print(return_str_flush_blockers(sample_board))
     # print(return_next_cards("Ks4s3c",False))
     # print(return_lows(board))
-    print(pairs(ranks))
-    print(return_kicker(ranks))
-    print(return_rank_counts(ranks))
+    # print(pairs(ranks))
+    # print(return_kicker(ranks))
+    # print(return_rank_counts(ranks))
 
 
 if __name__ == '__main__':

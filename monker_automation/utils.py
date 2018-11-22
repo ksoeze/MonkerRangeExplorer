@@ -25,22 +25,43 @@ INVALID_CHAR = '#'
 QUAD_BOARD_PAIR_GROUPING = [1, 1, 2, 3]
 PAIRED_BOARD_FULL_OR_BETTER_GROUPING = [2, 2]
 FLUSH_GROUPING = [1, 1, 2]
-STRAIGHT_GROUPING = [1, 1]
 OVERPAIR_GROUPING = [1, 2]
 FLUSH_GROUPING = [1, 1, 2]
 SET_GROUPING = [1, 1]
-PAIR_GROUPING = [1]
-VIEW_TYPES = ["DEFAULT", "MADE_HANDS", "DRAWS"]
+PAIR_GROUPING = [1, 1]
+VIEW_TYPES = ["DEFAULT", "MADE_HANDS", "DRAWS", "BLOCKERS"]
 
 DEFAULT_VIEW_NAME = "/home/johann/monker/Views/OVERVIEW.txt"
 TOP_VIEW_LINE = "180\n"
 
 # range constants
 
-CHECK_RANGE_FILE = "/home/johann/monker/ranges/check.csv"
-BET_RANGE_FILE = "/home/johann/monker/ranges/bet.csv"
-RAISE_RANGE_FILE = "/home/johann/monker/ranges/raise.csv"
+RANGE_FOLDER = "/home/johann/monker/ranges/"
 
+# gui reader constants
+
+BACK_CO = (3888, 925)
+CHECK_CO = (3955, 925)
+BET_CO = (4039, 925)
+BOARD_CLICK = (4000, 255)
+LINE_CLICK = (4040, 1000)
+ACTION_1 = (4401, 95)
+ACTION_2 = (4912, 95)
+ACTION_3 = (5393, 95)
+
+SAVE_OK = (4648, 601)
+
+NUM_BACK = 10
+DELETE_BOARD = 10
+MOUSE_MOVEMENT_DEL = 0.2
+CLICK_DELAY = 0.1
+TYPE_DELAY = 0.1
+SLEEP_AFTER_SAVE = 0.5
+SLEEP_AFTER_FINISH = 1
+
+# analysis
+
+DEFAULT_VIEW_RESULT_FILENAME = "/home/johann/code/monker_automation/RESULTS.org"
 
 # developement constants
 

@@ -87,15 +87,15 @@ def enter_sequence_and_save_ranges(sequence, actions, board=""):
     results["line"] = copy_text(LINE_CLICK)
     # save ranges
     save_ranges(actions)
+    time.sleep(SLEEP_AFTER_FINISH)
     return results
 
 
 def test():
     # mouse_coordinates()
     line_before = []
-    sequence = [("CHECK", "FLOP"), ("BET", "FLOP"), ("CALL", "FLOP"),
-                ("CHECK", "TURN"), ("CHECK", "TURN"), ("BET", "RIVER")]
-    actions = ("FOLD", "CALL", "RAISE")
+    sequence = [("CHECK", "FLOP")]
+    actions = ("CHECK", "BET")
 
     # goto_start()
     # print(copy_text(BOARD_CLICK))
