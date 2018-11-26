@@ -76,6 +76,7 @@ def enter_sequence_and_save_ranges(sequence, actions, board=""):
     results["line"] = ""
     if len(actions) > 3:
         print("ONLY MAX 3 ACTIONS SUPPORTED (single betsize trees)")
+        print(actions)
         return results
     # enter board if given:
     if board != "":

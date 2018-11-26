@@ -1,5 +1,7 @@
 * Logging
-  CLOCK: [2018-11-22 Do 12:44]
+  CLOCK: [2018-11-26 Mo 11:41]--[2018-11-26 Mo 14:16] =>  2:35
+  CLOCK: [2018-11-25 So 14:07]--[2018-11-25 So 19:17] =>  5:10
+  CLOCK: [2018-11-22 Do 12:44]--[2018-11-22 Do 22:40] =>  9:56
   CLOCK: [2018-11-20 Di 15:56]--[2018-11-20 Di 17:23] =>  1:27
   CLOCK: [2018-11-20 Di 12:19]--[2018-11-20 Di 14:50] =>  2:31
   CLOCK: [2018-11-19 Mo 13:25]--[2018-11-19 Mo 16:08] =>  2:43
@@ -30,4 +32,12 @@ might be good idea to also fill description list for view file
 group made hands based on blocker on flush boards?
 group straights straight draws based on outs/nuttynes
 4 straight boards handled badly!! (blockers and straight grouping)
-   
+
+**
+** [2018-11-25 So]
+
+TODO baord string is empty when no action has happend
+TODO kill TK window
+TODO select CSV instead when saving range 4 the first time
+TODO exclude range not working currently (discard it?)
+

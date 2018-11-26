@@ -2,6 +2,7 @@
 
 from monker_automation.utils import *
 import monker_automation.board as board_util
+import os
 
 
 def regroup_list(hand_list, pattern):
@@ -613,7 +614,7 @@ def std_board(board):
         nfd_blocker = [i[:2] for i in nfd]
         secnfd_blocker = [i[:2] for i in secnfd]
         # sets + fd
-        print("set +fd")
+        #print("set +fd")
         view.append([fd, made_hands["sets"]])
         # top2, topbottom + fd
         view.append([fd, made_hands["top2"]+made_hands["topbottom"]])
@@ -845,7 +846,9 @@ def view_item_to_str(item):
     return string
 
 
-def print_view(view, filename=DEFAULT_VIEW_NAME):
+def print_view(view, view_type=VIEW_TYPES[0], filename=DEFAULT_VIEW_NAME):
+    filename = filename+"-"+view_type+".txt"
+    filename = os.path.join(VIEW_FOLDER, filename)
     with open(filename, "w") as f:
         f.write(TOP_VIEW_LINE)
         f.write("\n")

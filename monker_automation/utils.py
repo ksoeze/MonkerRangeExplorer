@@ -31,7 +31,8 @@ SET_GROUPING = [1, 1]
 PAIR_GROUPING = [1, 1]
 VIEW_TYPES = ["DEFAULT", "MADE_HANDS", "DRAWS", "BLOCKERS"]
 
-DEFAULT_VIEW_NAME = "/home/johann/monker/Views/OVERVIEW.txt"
+VIEW_FOLDER = "/home/johann/monker/Views/"
+DEFAULT_VIEW_NAME = "OVERVIEW"
 TOP_VIEW_LINE = "180\n"
 
 # range constants

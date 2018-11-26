@@ -4,6 +4,8 @@ from monker_automation.utils import *
 from monker_automation.views import get_view
 from monker_automation.views import view_item_to_str
 import os
+from itertools import accumulate
+import logging
 
 
 def read_range_file(filename):
@@ -109,7 +111,10 @@ def hand_in_range(hand, range_list, exclude_list=[]):
     return False
 
 
-def process_view(range_list, view, exclude):
+def process_view(range_list, view, exclude, exclude_list=[]):
+    logging.debug("Process VIEW:")
+    logging.debug(view)
+    # logging.debug(exclude_list)
     results = [[line, 0, 0] for line in view]
     results.insert(0, ["Total", 0, 0])
     results.append(["Other", 0, 0])
@@ -118,7 +123,7 @@ def process_view(range_list, view, exclude):
         results[0][1] += hand_line[1]
         results[0][2] += hand_line[2]
         for i in range(len(view)):
-            if hand_in_range(hand_line[0], view[i]):  # match hand
+            if hand_in_range(hand_line[0], view[i], exclude_list):  # match hand
                 results[i+1][1] += hand_line[1]  # weight count
                 results[i+1][2] += hand_line[2]  # ev count total
                 match = True
@@ -138,26 +143,33 @@ def total_counts(results):
     return totals
 
 
-def calc_percent(combo_list, reference):
+def cummulative_counts(count_list):
+    return [count_list[0]]+list(accumulate(count_list[1:]))
+
+
+def calc_percent(combo_list, reference, num_round=1):
     percent_list = []
     if type(reference) == list:
         for item, ref in zip(combo_list, reference):
-            value = item/ref*100
-            value = '{}'.format(round(value, 2))
+            value = item/ref*100 if ref != 0 else 0
+            value = '{0:.{1}f}'.format(value, num_round)
             percent_list.append(value)
     elif type(reference) == float:
         for item in combo_list:
-            value = item/reference*100
-            value = '{}'.format(round(value, 2))
+            value = item/reference*100 if reference != 0 else 0
+            value = '{0:.{1}f}'.format(value, num_round)
             percent_list.append(value)
     return percent_list
 
 
 def org_print_result_matrix(matrix, filename):
-    for line in matrix:
-        print(line)
-    with open(filename, 'w') as f:
-        for line in matrix:
+    with open(filename, 'a') as f:
+        # output = "| <30> |" + "\n"  # + "<10> |"*(len(matrix[0])-1) + "\n"
+        # f.write(output)
+        output = "|" + '|'.join(matrix[0]) + "|" + "\n"
+        f.write(output)
+        f.write("|-\n")
+        for line in matrix[1:]:
             output = "|" + '|'.join(line) + "|" + "\n"
             f.write(output)
 
@@ -168,7 +180,6 @@ def strategy_overview(actions, view):
     try:
         for action in actions:
             file_name = os.path.join(RANGE_FOLDER, action + ".csv")
-            print(file_name)
             hand_lists.append((action, read_range_file(file_name)))
     except:
         print("Something went wrong reading range files...")
@@ -186,14 +197,62 @@ def strategy_overview(actions, view):
     column = ["Total %"]+calc_percent(column, totals[0][1])
     result_text_matrix.append(column)
 
+    column = cummulative_counts(all_combos)
+    column = [""]+calc_percent(column, totals[0][1], 0)
+    result_text_matrix.append(column)
+
     for action, result in results:
         counts = [result_line[1] for result_line in result]
         column = [action]+calc_percent(counts, all_combos)
         result_text_matrix.append(column)
-        column = ["relative %"]+calc_percent(counts, counts[0])
+
+        column = ["Relative %"]+calc_percent(counts, counts[0])
         result_text_matrix.append(column)
-    result_text_matrix = [*zip(*result_text_matrix)]
+        column = [""] + \
+            calc_percent(cummulative_counts(counts), counts[0], 0)
+        result_text_matrix.append(column)
+    #result_text_matrix = [*zip(*result_text_matrix)]
     return result_text_matrix
+
+
+def get_view_results(actions, view, exclude=True, exclude_list=[]):
+    hand_lists = []
+    results = []
+    try:
+        for action in actions:
+            file_name = os.path.join(RANGE_FOLDER, action + ".csv")
+            hand_lists.append((action, read_range_file(file_name)))
+    except:
+        print("Something went wrong reading range files...")
+        exit()
+    for action, hand_list in hand_lists:
+        results.append((action, process_view(
+            hand_list, view, exclude, exclude_list)))
+
+    totals = total_counts(results)
+    all_combos = [result_line[1] for result_line in totals]
+
+    total_results = []
+    total_results.append(calc_percent(all_combos, totals[0][1]))
+    line = cummulative_counts(all_combos)
+    total_results.append(calc_percent(line, totals[0][1], 0))
+
+    action_results = {}
+    for a in actions:
+        action_results[a] = []
+
+    for action, result in results:
+        counts = [result_line[1] for result_line in result]
+        line = calc_percent(counts, all_combos)
+        action_results[action].append(line)
+
+        line = calc_percent(counts, counts[0])
+        action_results[action].append(line)
+
+        line = calc_percent(cummulative_counts(counts), counts[0], 0)
+        action_results[action].append(line)
+
+    return (total_results, action_results)
 
 
 def test():
@@ -201,12 +260,12 @@ def test():
     view = [["KK"]]
     view = get_view(board, VIEW_TYPES[0])
     range_list = read_range_file(CHECK_RANGE_FILE)
-    print(range_list[0])
+    # print(range_list[0])
     # exclude means we exclude ranges like in monker view
     view_counts = process_view(range_list, view, exclude=True)
     view_counts.sort(key=lambda x: x[1])
-    for item in view_counts:
-        print(item)
+#    for item in view_counts:
+#        print(item)
 
 
 if (__name__ == '__main__'):
