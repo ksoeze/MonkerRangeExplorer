@@ -112,12 +112,17 @@ def hand_in_range(hand, range_list, exclude_list=[]):
 
 
 def process_view(range_list, view, exclude, exclude_list=[]):
-    logging.debug("Process VIEW:")
-    logging.debug(view)
+    """
+    Takes a List of Hands containing Hand,COUNT,EV and a view LIST and returns a list 
+    len(view) +2 ("["TOTAL" on top/start", and ["Other"] @ bottom/end) with:
+    [VIEW_ITEM,COUNT,EV]
+    """
+    #logging.debug("Process VIEW:")
+    # logging.debug(view)
     # logging.debug(exclude_list)
     results = [[line, 0, 0] for line in view]
-    results.insert(0, ["Total", 0, 0])
-    results.append(["Other", 0, 0])
+    results.insert(0, [["Total"], 0, 0])
+    results.append([["Other"], 0, 0])
     for hand_line in range_list:
         match = False
         results[0][1] += hand_line[1]
@@ -136,6 +141,12 @@ def process_view(range_list, view, exclude, exclude_list=[]):
 
 
 def total_counts(results):
+    """
+    results is a list of tuples with:
+    ("action",return list of process_view)
+    returns list with [view entry,total counts]
+    ev ak 3rd element is ignored so far -> 0
+    """
     totals = [[line[0], 0, 0] for line in results[0][1]]
     for action, result in results:
         for i in range(len(totals)):
@@ -147,33 +158,38 @@ def cummulative_counts(count_list):
     return [count_list[0]]+list(accumulate(count_list[1:]))
 
 
-def calc_percent(combo_list, reference, num_round=1):
+def calc_percent(combo_list, reference):
     percent_list = []
     if type(reference) == list:
         for item, ref in zip(combo_list, reference):
             value = item/ref*100 if ref != 0 else 0
-            value = '{0:.{1}f}'.format(value, num_round)
+            #value = '{0:.{1}f}'.format(value, num_round)
             percent_list.append(value)
     elif type(reference) == float:
         for item in combo_list:
             value = item/reference*100 if reference != 0 else 0
-            value = '{0:.{1}f}'.format(value, num_round)
+            #value = '{0:.{1}f}'.format(value, num_round)
             percent_list.append(value)
     return percent_list
 
 
+# probably shouldnt be done here / this way
 def org_print_result_matrix(matrix, filename):
     with open(filename, 'a') as f:
         # output = "| <30> |" + "\n"  # + "<10> |"*(len(matrix[0])-1) + "\n"
         # f.write(output)
+        #line = ["{0:.{1}}".format(item,1) if type(item) == float else item for item in matrix[0]]
         output = "|" + '|'.join(matrix[0]) + "|" + "\n"
         f.write(output)
         f.write("|-\n")
         for line in matrix[1:]:
+            line = ["{0:.{1}f}".format(item, 1) if type(
+                item) == float else item for item in line]
             output = "|" + '|'.join(line) + "|" + "\n"
             f.write(output)
 
 
+# probably outdated --- CLEANUP / REPLACE BY get_view_results
 def strategy_overview(actions, view):
     hand_lists = []
     results = []
@@ -215,6 +231,7 @@ def strategy_overview(actions, view):
     return result_text_matrix
 
 
+# exclude list not working for now
 def get_view_results(actions, view, exclude=True, exclude_list=[]):
     hand_lists = []
     results = []
@@ -229,28 +246,51 @@ def get_view_results(actions, view, exclude=True, exclude_list=[]):
         results.append((action, process_view(
             hand_list, view, exclude, exclude_list)))
 
+    # generates total count list out of action result list
     totals = total_counts(results)
+    for item in totals:
+        logging.debug("Total Counts: {}".format(item))
+    # list of total counts
     all_combos = [result_line[1] for result_line in totals]
 
-    total_results = []
-    total_results.append(calc_percent(all_combos, totals[0][1]))
-    line = cummulative_counts(all_combos)
-    total_results.append(calc_percent(line, totals[0][1], 0))
+    total_results = {}
+    # add view
+    total_results["v"] = [line[0] for line in totals]
+    # add view converted to string
+    total_results["v_str"] = [view_item_to_str(line[0]) for line in totals]
+
+    # just total count number (aka first entry in total list)
+    total_combo_count = totals[0][1]
+
+    logging.debug("TOTAL_COMBOS: {}".format(total_combo_count))
+
+    # add percent of view entry regarding total/starting range
+    total_results["r"] = calc_percent(all_combos, total_combo_count)
+    # for item in total_results["r"]:
+    #     logging.debug("Total % {}".format(item))
+    # same but cummulative_counts (cumulate counts first then recalculate %)
+    total_cum_counts = cummulative_counts(all_combos)
+    total_results["r_cum"] = (calc_percent(
+        total_cum_counts, total_combo_count))
+
+    # for item in total_results["r_cum"]:
+    #     logging.debug("Total CUM% {}".format(item))
 
     action_results = {}
     for a in actions:
-        action_results[a] = []
+        action_results[a] = {}
 
     for action, result in results:
         counts = [result_line[1] for result_line in result]
-        line = calc_percent(counts, all_combos)
-        action_results[action].append(line)
+        percent = calc_percent(counts, all_combos)
+        action_results[action]["p"] = percent
 
-        line = calc_percent(counts, counts[0])
-        action_results[action].append(line)
+        percent_relativ = calc_percent(counts, counts[0])
+        action_results[action]["r"] = percent_relativ
 
-        line = calc_percent(cummulative_counts(counts), counts[0], 0)
-        action_results[action].append(line)
+        percent_cumulativ = calc_percent(
+            cummulative_counts(counts), counts[0])
+        action_results[action]["r_cum"] = percent_cumulativ
 
     return (total_results, action_results)
 

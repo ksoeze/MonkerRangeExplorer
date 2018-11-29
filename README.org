@@ -1,4 +1,6 @@
 * Logging
+  CLOCK: [2018-11-29 Do 18:27]--[2018-11-29 Do 21:12] =>  2:45
+  CLOCK: [2018-11-29 Do 13:17]--[2018-11-29 Do 15:50] =>  2:33
   CLOCK: [2018-11-26 Mo 11:41]--[2018-11-26 Mo 14:16] =>  2:35
   CLOCK: [2018-11-25 So 14:07]--[2018-11-25 So 19:17] =>  5:10
   CLOCK: [2018-11-22 Do 12:44]--[2018-11-22 Do 22:40] =>  9:56
@@ -7,6 +9,270 @@
   CLOCK: [2018-11-19 Mo 13:25]--[2018-11-19 Mo 16:08] =>  2:43
   CLOCK: [2018-11-18 So 23:04]--[2018-11-19 Mo 03:01] =>  3:57
   CLOCK: [2018-11-17 Sa 14:15]--[2018-11-17 Sa 18:23] =>  4:08
+#+BEGIN: clocktable :maxlevel 2 :scope subtree
+#+CAPTION: Clock summary at [2018-11-29 Do 21:12]
+| Headline     | Time       |
+|--------------+------------|
+| *Total time* | *1d 13:45* |
+|--------------+------------|
+| Logging      | 1d 13:45   |
+#+END:
+
+** VIEWS
+*** Kategorien Stand [2018-11-26 Mo]
+- [straight flushes]
+- [quads, fulls]
+- [flushes]
+- [flush blocker]
+- [nutstraights] [2nd nutstraights] [3rd nutstraights] [4th nutstraights]
+- [straight blockers] (beinhaltet 1 oder 2 pairs die nutstraight karten blocken)
+- [sets]
+- [top 2]
+- [2 pair (top card) + any other card not top 2]
+- [other 2 pair]
+- [board pairs]
+- [overpairs]
+- [middlepairs (<top card > 2nd board card)]
+- [pocketpairs (overall including overpairs, middlepairs etc)]
+- [board pairs]
+- [kickers]
+
+- [flushdraws] (ansich liste top -> bottom aber derzeitige einteilung oft nfd (egal ob 1er oder 2) und rest fd)
+- [flushdraw blockers] (ähnliche praktische einteilung wie bei flushdraws)
+- [wraps] (> 9 outs + "nuttyness kriterium"...dh manche "idiot" wraps landen in oesd kategorie)
+- [oesd]  (schlechte wraps + im wesentlichen nut und "2nd nut" oesd)
+- [gs] (schlechte oesd + nut oder 2nd nut gs)
+*** Derzeitige Einteilung [2018-11-26 Mo]
+es gibt 4 views (default,made_hands,draws,blockers) (quad und trips baord haben keine draw views etc) für die 5 boardtypen (quad,trips,paired,flush,straight,standard)
+in klammer steht die einteilung einer kategorie liste:
+z.b. [pairs] mit [1,2,4] bedeutet folgende view entries:
+- AA
+- KK,QQ
+- JJ,TT,99,88
+- rest dh 77,66,55,44,33,22  
+
+**** QUAD
+***** Default
+- all pairs [1, 1, 2, 3]
+- kicker1kicker2, kicker1kicker3, kicker1kicker4
+- kicker1
+**** TRIPS
+***** Default (== MadeHands)
+- str flush
+- quads
+- overfulls
+- pairs [1,1,2,3]
+- flushes
+- straights
+- if no flushes/straights possible -> kicker1kicker2, kicker1kicker3, kicker1kicker4
+***** Blocker
+- str flush blocker
+- overfull blockers
+- pair "blockers" [1,1,2,3]
+**** Paired Board
+***** Default
+- str flush
+- full or better [2,2]
+- nf + trips
+- nf + overfull blockers
+- flush + trips
+- flushes [1,1,2]
+if flush and striaght:
+- nut and 2nd nutstraights
+
+- nut and 2nd nutflush blocker
+if no flush but straight:
+- nutstraight + trips
+- nutstraight + overfull blockers
+- nutstraight
+- 2nd nutstraight + trips
+- 2nd nutstraight
+- 3rd nutstraight
+if no flush or no straight:
+- trips + nutkicker
+- trips + 2nd nutkicker, 3rd nutkicker
+
+-trips
+
+- nfd + top pair or best 2 overpairs
+- fd + top pair or best 2 overpairs
+- fd + oesd +
+- nfd bare
+- fd bare
+- nfd blocker
+if straight draws but not flushes
+- oesd+ and top pair or best 2 overpairs
+- oesd+
+- gs+ and top pair or best 2 overpairs
+- gs+
+
+- overpairs [1,2]
+- top pair
+- middlepairs
+- other board pairs
+***** Made Hands
+- str flush
+- full or better [2,2]
+- flushes [1,1,2]
+if flush
+- nut +2nd nutstraight
+
+- nutstraight
+- 2nd nutstraight
+- 3rd nutstraight
+if no flush or no straight:
+- trips + nutkicker
+- trips + 2nd nutkicker, 3rd nutkicker
+
+-trips
+- overpairs [1,2]
+- top pair
+- middlepairs
+- other board pairs
+***** Draw Hands
+- nfd
+- fd
+- oesd+
+- gs
+***** Blocker Hands
+- str flush blockers
+- 2 board pair blockers
+- pair blockers [1,1]
+- nf blocker
+- 2nd nf, 3rd nf blocker
+- str blocker
+- nfd blocker
+- fd blocker
+**** Flush Board
+***** Default
+- flushes [1,1,2]
+- sets [1,1]
+- nutstraight
+- 2nd nutstraight
+- 3rd nutstraight
+- top 2
+- 2 pair with topcard
+- other 2 pair
+- nf blocker
+- 2nd nf blocker
+- oesd+
+- flushblocker + best 2 op or top pair
+- best 2 op or top pair no flushblocker
+- random flushblocker
+***** Made Hands
+- flushes [1,1,2]
+- sets [1,1]
+- nutstraight
+- 2nd nutstraight
+- 3rd nutstraight
+- top 2
+- 2 pair with topcard
+- other 2 pair
+- best 2 op or top pair no flushblocker
+***** Draws
+- wraps
+- oesd
+- gs
+***** Blocker
+- flush blockers [1,1,2]
+**** Straight Board
+***** Default
+if fd:
+- nut or 2nd nutstraight + fd or set
+- fd + set
+
+- nut or 2nd nutstr + set or top 2
+- nutstraights
+- 2nd nutstraights
+- 3rd nutstraights
+- sets + 1 nutstraight card
+- sets [1,1]
+- 2 pair + fd (comment: vielleicht einheitlichere abfolge von fd hands siehe default board...fd + made hands -> made hands -> fd hands vs fd + made hands -> fd hands -> made hands bare)
+- nfd + oesd or better gs (== top half of gs hands)
+- fd + oesd or better gs
+- fd + blockerpairs
+- nfd bare
+- fd bare
+
+-top2 or topbottom + 1 nutblocker
+-top2
+-topbottom
+-2 pair
+-nut str blocker pairs
+-overpairs or tp + better gs+
+- overpairs [1,2]
+- oesd
+- gs
+- top pair
+- one nut str blocker
+***** Made
+- nutstraights
+- 2nd nutstraights
+- 3rd nutstraights
+- sets [1,1]
+-top2
+-topbottom
+-2 pair
+- overpairs [1,2]
+- top pair
+***** Draws
+-nfd
+-fd
+-wraps
+-oesd
+-gs
+***** Blocker
+- nutstraight blocker pairs
+- nfd blocker
+- fd blocker
+- 1 nutstraight blocker
+**** Standard Board
+***** Default
+- fd + sets
+- fd + top2, topbottom
+- nfd + any2, top pair, top 2 overpairs
+- nfd + better gs +
+- nfd
+- fd + any 2, top pair, top 2 overpairs, better gs+
+- fd + overpairs
+- fd
+- sets, top2 + better gs
+- sets [1,1]
+- top 2
+- top bottom
+- any 2
+- nfb + overpairs, toppair
+- nfb + gs+
+- nfb bare
+- 2nd nfb overall
+- overpairs, tp + oesd+
+- overpairs, tp + gs
+- wraps
+- oesd
+- gs
+- overpairs [1,2]
+- board pairs [1,1]
+- middle pairs
+***** Made 
+- sets [1,1]
+- top 2
+- top bottom
+- any 2
+- overpairs [1,2]
+- board pairs [1,1]
+- middle pairs
+***** Draws
+- nfd
+- fd
+- wraps
+- oesd
+- gs
+***** Blocker
+- nfd blocker
+- fd blocker
+- board pair "blocker" [1,1]
+- nutstraightdraw blocker pairs
+
 
 ** [2018-11-16 Fr]
 mkvirtualenv monker_automation
@@ -40,4 +306,36 @@ TODO baord string is empty when no action has happend
 TODO kill TK window
 TODO select CSV instead when saving range 4 the first time
 TODO exclude range not working currently (discard it?)
+TODO clean view of empty lists and redundant entries
+** [2018-11-29 Do]
 
+install numpy & matplotlib
+
+rewrite get_view_results():
+returns total_results, action_results
+with total_results:
+["v_str"] -> view entries as string with first entry "Total" then view entries and then "Other"
+["v"] -> view entries as list like internal representation + first is ["Total"] and last is ["Other"]
+["r"] -> list of % as floats including the total numbers and other numbers
+["r_cum"] -> list of % as floats cumulativ with first entry 100% and last also 100%
+
+and action_results:
+a dictionary with actions provided as input to get_view_results() as keys and every action has:
+["p"] -> percent of how often with take this action in this spot with first being total action %
+["r"] -> relativ percent of view items in this action range with first beeing 100% 
+["r_cum"] -> relativ percent cumulativ with first entry again beeing 100% and last also should be 100%
+
+results of process_view is list of:
+(action,[view (mit Total on top and other @ bottom),count,ev])
+
+total_counts(
+
+TODO/IDEA extend gui tool with saving ranges based on previous actions in a tree struktur
+-> ranges/KhJd5h/OOP/check.bla; bet.bla
+   ranges/KhJd/5h/OOP-CHECK-IP/check.bla; bet.bla etc
+add path argument to get_view_results etc
+
+
+TODO show absolut and relativ percent in view plot after category
+TODO inverse actions and cards in order to show TOP->BOTTOM and raise/bet -> fold/call
+TODO check if range files are equal -> probably sign of wrong gui input

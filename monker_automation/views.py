@@ -121,7 +121,9 @@ def paired_board(board):
     fd = board_util.return_flushdraws(board)
 
     if board_util.return_str_flushes(board) != []:
+        # str flushes
         view.append(board_util.return_str_flushes(board))
+    # fulls or better
     view += regroup_list(board_util.return_fulls_or_better(board),
                          PAIRED_BOARD_FULL_OR_BETTER_GROUPING)
 
@@ -129,30 +131,43 @@ def paired_board(board):
     straights = board_util.return_straights(board)
 
     if flushes:
+        # nf + trips
         view.append([[flushes[0]], rank_count_list[1]])
+        # nf + overfull blocker
         view.append([[flushes[0]], [rank for rank in rank_count_list[0]
                                     if RANK_ORDER[rank] > RANK_ORDER[rank_count_list[1][0]]]])
+        # fd + trips
         view.append([[flushes[0][1:]], rank_count_list[1]])
+        # flushes
         view += (regroup_list(flushes, FLUSH_GROUPING))
         if straights[0]:
+            # straights
             view.append(straights[0]+straights[1])
+        # nf and 2nd nf blocker
         view.append([flushes[0][:2], flushes[1][:2]])
     elif straights[0]:
+        # nutstraight + trips
         view.append([straights[0], rank_count_list[1]])
+        # nutstraight + overfull blockers
         view.append([straights[0], [rank for rank in rank_count_list[0]
                                     if RANK_ORDER[rank] > RANK_ORDER[rank_count_list[1][0]]]])
+        # nutstraight
         view.append(straights[0])
+        # 2nd nutstraight
         if straights[1]:
             view.append([straights[1], rank_count_list[1]])
-        view.append(straights[1])
+            view.append(straights[1])
+        # 3rd nutstraight
         if straights[2]:
             view.append(straights[2])
 
     if not flushes and not straights[0]:
+        # trips + kickers
         view.append([kickers[0]+intersections[0]])
         view.append([kickers[1]+intersections[0],
                      kickers[2]+intersections[0]])
 
+    # trips
     view.append([intersections[0]])
 
     fd_1, fd_2 = board_util.return_flushdraws(board)
@@ -358,8 +373,8 @@ def flush_board(board):
     view.append(made_hands["random2"])
 
     # flush blocker
-    view.append(flush_blockers[0])
-    view.append(flush_blockers[1])
+    view.append([flush_blockers[0]])
+    view.append([flush_blockers[1]])
 
     # oesd or better
     if str_draws:
@@ -450,7 +465,7 @@ def straight_board(board):
         view.append([fd, made_hands["sets"]])
     else:
         # nut or 2nd striaght + >top2
-        view.append([straights[0]+straights[1], fd +
+        view.append([straights[0]+straights[1],
                      made_hands["sets"]+made_hands["top2"]])
 
     # straights bare
@@ -614,7 +629,6 @@ def std_board(board):
         nfd_blocker = [i[:2] for i in nfd]
         secnfd_blocker = [i[:2] for i in secnfd]
         # sets + fd
-        #print("set +fd")
         view.append([fd, made_hands["sets"]])
         # top2, topbottom + fd
         view.append([fd, made_hands["top2"]+made_hands["topbottom"]])
@@ -636,6 +650,8 @@ def std_board(board):
                          straight_draws["wraps"] +
                          straight_draws["oesd"] +
                          straight_draws["gs"][:len(straight_draws["gs"])//2]])
+        else:
+            view.append([fd, made_hands["random2"] + [made_hands["pair"][0]]])
         # fd + op
         view.append([fd, overpairs])
         # fd
@@ -767,58 +783,70 @@ def std_board_blocker(board):
     return view
 
 
+def clean(view):
+    new_view = []
+    for item in view:
+        if len(item) == 0:  # discard empty view entry
+            continue
+        if type(item[0]) != list:  # standard view entry -> list of strings
+            new_view.append(board_util.compact_range(item))
+        elif len(item[0]) != 0 and len(item[1]) != 0:  # discard emtpy view entry
+            new_view.append([board_util.compact_range(i) for i in item])
+    return new_view
+
+
 def get_view(board, view_type):
     board = board_util.parse_board(board)
     rank_count_list = board_util.return_rank_counts(board)
 
     if view_type == "DEFAULT":
         if rank_count_list[3] != []:
-            return quad_board(board)
+            return clean(quad_board(board))
         if rank_count_list[2] != []:
-            return trips_board(board)
+            return clean(trips_board(board))
         if rank_count_list[1] != []:
-            return paired_board(board)
+            return clean(paired_board(board))
         if board_util.return_flushes(board):
-            return flush_board(board)
+            return clean(flush_board(board))
         if board_util.return_straights(board)[0]:
-            return straight_board(board)
-        return std_board(board)
+            return clean(straight_board(board))
+        return clean(std_board(board))
     elif view_type == "MADE_HANDS":
         if rank_count_list[3] != []:
-            return quad_board(board)
+            return clean(quad_board(board))
         if rank_count_list[2] != []:
-            return trips_board(board)
+            return clean(trips_board(board))
         if rank_count_list[1] != []:
-            return paired_board_made(board)
+            return clean(paired_board_made(board))
         if board_util.return_flushes(board):
-            return flush_board_made(board)
+            return clean(flush_board_made(board))
         if board_util.return_straights(board)[0]:
-            return straight_board_made(board)
-        return std_board_made(board)
+            return clean(straight_board_made(board))
+        return clean(std_board_made(board))
     elif view_type == "DRAWS":
         if rank_count_list[3] != []:
             return []
         if rank_count_list[2] != []:
             return []
         if rank_count_list[1] != []:
-            return paired_board_draw(board)
+            return clean(paired_board_draw(board))
         if board_util.return_flushes(board):
-            return flush_board_draw(board)
+            return clean(flush_board_draw(board))
         if board_util.return_straights(board)[0]:
-            return straight_board_draw(board)
-        return std_board_draw(board)
+            return clean(straight_board_draw(board))
+        return clean(std_board_draw(board))
     elif view_type == "BLOCKERS":
         if rank_count_list[3] != []:
             return []
         if rank_count_list[2] != []:
-            return trips_board_blocker(board)
+            return clean(trips_board_blocker(board))
         if rank_count_list[1] != []:
-            return paired_board_blocker(board)
+            return clean(paired_board_blocker(board))
         if board_util.return_flushes(board):
-            return flush_board_blocker(board)
+            return clean(flush_board_blocker(board))
         if board_util.return_straights(board)[0]:
-            return straight_board_blocker(board)
-        return std_board_blocker(board)
+            return clean(straight_board_blocker(board))
+        return clean(std_board_blocker(board))
     print("Unsupported VIEW TYPE")
     return []
 
@@ -860,7 +888,7 @@ def print_view(view, view_type=VIEW_TYPES[0], filename=DEFAULT_VIEW_NAME):
 
 
 def test():
-    board_string = "Ad8d6c2cKs"
+    board_string = "8dTc2c4c"
     view_default = get_view(board_string, VIEW_TYPES[0])
     view_made = get_view(board_string, VIEW_TYPES[1])
     view_draws = get_view(board_string, VIEW_TYPES[2])

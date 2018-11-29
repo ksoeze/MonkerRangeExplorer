@@ -8,7 +8,8 @@ from monker_automation.range import get_view_results
 from monker_automation.views import get_view
 from monker_automation.views import print_view
 from monker_automation.views import view_item_to_str
-
+from monker_automation.plot import plot_default
+from monker_automation.plot import plot_range_distribution
 import logging
 
 
@@ -22,15 +23,43 @@ def print_result_header(header, gui_log, result_filename=DEFAULT_VIEW_RESULT_FIL
         f.write("\n\nRESULTS: \n\n")
 
 
+# def default_view(sequence, actions, board, enter_cards="", result_filename=DEFAULT_VIEW_RESULT_FILENAME):
+#     # generate view
+#     view = get_view(board, VIEW_TYPES[0])
+#     print_view(view, VIEW_TYPES[0], board)
+#     debug = enter_sequence_and_save_ranges(sequence, actions, enter_cards)
+#     # print(debug)
+#     results = strategy_overview(actions, view)
+#     print_result_header("General Overview", debug)
+#     org_print_result_matrix(results, result_filename)
+
 def default_view(sequence, actions, board, enter_cards="", result_filename=DEFAULT_VIEW_RESULT_FILENAME):
-    # generate view
     view = get_view(board, VIEW_TYPES[0])
     print_view(view, VIEW_TYPES[0], board)
     debug = enter_sequence_and_save_ranges(sequence, actions, enter_cards)
-    # print(debug)
-    results = strategy_overview(actions, view)
-    print_result_header("General Overview", debug)
-    org_print_result_matrix(results, result_filename)
+    debug = ""
+    total_results, action_results = get_view_results(actions, view)
+    output_table = []
+    first_line = ["Description"]+total_results["v_str"]
+    output_table.append(first_line)
+    # Total
+    output_table.append(["Total %"] + total_results["r"])
+    # Total cum
+    output_table.append([" "] + total_results["r_cum"])
+    for action in action_results:
+        # percent of action with view entry
+        output_table.append([action]+action_results[action]["p"])
+        # range distribution of this action
+        output_table.append(["Relativ %"]+action_results[action]["r"])
+        # range distribution of this action cum
+        output_table.append([" "]+action_results[action]["r_cum"])
+    # print_result_header("Genera Overview", debug)
+    # transpose table
+    output_table = [*zip(*output_table)]
+    # org_print_result_matrix(output_table, result_filename)
+    titel = "KdJh5h-4c4s - 3 Barrel Strategy TEST"
+    plot_default(titel, total_results, action_results, list(reversed(actions)))
+    plot_range_distribution(titel, total_results, action_results, actions)
 
 
 def run_out_analysis(sequences, board, enter_cards="", player="", result_filename=DEFAULT_VIEW_RESULT_FILENAME):
@@ -50,6 +79,17 @@ def run_out_analysis(sequences, board, enter_cards="", player="", result_filenam
         results.append(line)
         line = [""]+total_results[1][1:]  # cumulative
         results.append(line)
+        # print infos for action if wanted
+        if len(item) == 4:
+            print_action = item[3]
+            line = [print_action]+action_results[print_action][0][1:]
+            results.append(line)
+            # if wanted print range % for this action
+            line = ["%"]+action_results[print_action][1][1:]
+            results.append(line)
+            # if wanted print cummulative_counts
+            line = [" "]+action_results[print_action][2][1:]
+            results.append(line)
         line = ["-"]*len(total_results[0])  # for better visibility in org mode
         results.append(line)
 
@@ -117,8 +157,8 @@ def view_matrix(sequence, actions, board, general_view=VIEW_TYPES[1], subview=VI
 
 
 def test_runout_analysis():
-    board = "KdJh5h5c8h"
-    enter_cards = "5c8h"
+    board = "KdJh5hQs3c"
+    enter_cards = "Qs3c"
 
     # lines for BB
     sequence = []
@@ -140,7 +180,8 @@ def test_runout_analysis():
     sequence.append(["X->B",
                      [("CHECK", "FLOP"), ("CHECK", "FLOP"),
                       ("BET", "TURN"), ("CALL", "TURN")],
-                     ("CHECK", "BET")])
+                     ("CHECK", "BET"),
+                     "BET"])
     sequence.append(["X->X/C",
                      [("CHECK", "FLOP"), ("CHECK", "FLOP"),
                       ("CHECK", "TURN"), ("BET", "TURN"), ("CALL", "TURN")],
@@ -200,20 +241,29 @@ def test_matrix_analysis(board, general_view=VIEW_TYPES[1], subview=VIEW_TYPES[2
 def test():
     logger = logging.getLogger()
     logger.setLevel("DEBUG")
+    board = "KdJh5h4c4s"
     board = "KdJh5h"
-    # board = "KdJh5h5c8h"
     sequence = [("CHECK", "FLOP")]
-    actions = ("CHECK", "BET")
-    default_view(sequence, actions, board)
+    #actions = ("CHECK", "BET")
+    #default_view(sequence, actions, board)
+    #sequence = [("CHECK", "FLOP"), ("BET", "FLOP")]
+    #actions = ("FOLD", "CALL", "RAISE")
+    #default_view(sequence, actions, board)
+    # sequence = [("CHECK", "FLOP"), ("BET", "FLOP"),
+    #             ("CALL", "FLOP"), ("CHECK", "TURN"), ("CHECK", "TURN")]
+    actions = ("FOLD", "CALL", "RAISE")
+    #actions = ("CHECK", "BET")
+    sequence = [("CHECK", "FLOP"), ("BET", "FLOP"), ("CALL", "FLOP"),
+                ("CHECK", "TURN"), ("BET", "TURN"), ("CALL", "TURN"),
+                ("CHECK", "RIVER"), ("BET", "LAST")
+                ]
     sequence = [("CHECK", "FLOP"), ("BET", "FLOP")]
     actions = ("FOLD", "CALL", "RAISE")
-    default_view(sequence, actions, board)
-    sequence = [("CHECK", "FLOP"), ("BET", "FLOP"), ("RAISE", "FLOP")]
-    actions = ("FOLD", "CALL", "RAISE")
-    default_view(sequence, actions, board)
 
-    test_runout_analysis()
-    test_matrix_analysis(board)
+    default_view(sequence, actions, board)
+    #default_view(sequence, actions, board)
+    # test_runout_analysis()
+    # test_matrix_analysis(board)
 
 
 if (__name__ == '__main__'):
