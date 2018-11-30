@@ -2,6 +2,7 @@
 
 from monker_automation.utils import *
 from monker_automation.gui import enter_sequence_and_save_ranges
+from monker_automation.gui import read_situation_and_save_ranges
 from monker_automation.range import strategy_overview
 from monker_automation.range import org_print_result_matrix
 from monker_automation.range import get_view_results
@@ -58,6 +59,17 @@ def default_view(sequence, actions, board, enter_cards="", result_filename=DEFAU
     output_table = [*zip(*output_table)]
     # org_print_result_matrix(output_table, result_filename)
     titel = "KdJh5h-4c4s - 3 Barrel Strategy TEST"
+    plot_default(titel, total_results, action_results, list(reversed(actions)))
+    plot_range_distribution(titel, total_results, action_results, actions)
+
+
+def current_view():
+    infos = read_situation_and_save_ranges()
+    board = infos["board"]
+    view = get_view(board, VIEW_TYPES[0])
+    actions = infos["actions"]
+    total_results, action_results = get_view_results(actions, view)
+    titel = board + "MAGIC"
     plot_default(titel, total_results, action_results, list(reversed(actions)))
     plot_range_distribution(titel, total_results, action_results, actions)
 
@@ -260,7 +272,8 @@ def test():
     sequence = [("CHECK", "FLOP"), ("BET", "FLOP")]
     actions = ("FOLD", "CALL", "RAISE")
 
-    default_view(sequence, actions, board)
+    current_view()
+    #default_view(sequence, actions, board)
     #default_view(sequence, actions, board)
     # test_runout_analysis()
     # test_matrix_analysis(board)

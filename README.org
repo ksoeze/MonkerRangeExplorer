@@ -1,4 +1,6 @@
 * Logging
+  CLOCK: [2018-11-30 Fr 20:40]--[2018-11-30 Fr 21:54] =>  1:14
+  CLOCK: [2018-11-30 Fr 12:55]--[2018-11-30 Fr 15:42] =>  2:47
   CLOCK: [2018-11-29 Do 18:27]--[2018-11-29 Do 21:12] =>  2:45
   CLOCK: [2018-11-29 Do 13:17]--[2018-11-29 Do 15:50] =>  2:33
   CLOCK: [2018-11-26 Mo 11:41]--[2018-11-26 Mo 14:16] =>  2:35
@@ -10,12 +12,12 @@
   CLOCK: [2018-11-18 So 23:04]--[2018-11-19 Mo 03:01] =>  3:57
   CLOCK: [2018-11-17 Sa 14:15]--[2018-11-17 Sa 18:23] =>  4:08
 #+BEGIN: clocktable :maxlevel 2 :scope subtree
-#+CAPTION: Clock summary at [2018-11-29 Do 21:12]
+#+CAPTION: Clock summary at [2018-11-30 Fr 21:54]
 | Headline     | Time       |
 |--------------+------------|
-| *Total time* | *1d 13:45* |
+| *Total time* | *1d 17:46* |
 |--------------+------------|
-| Logging      | 1d 13:45   |
+| Logging      | 1d 17:46   |
 #+END:
 
 ** VIEWS
@@ -339,3 +341,11 @@ add path argument to get_view_results etc
 TODO show absolut and relativ percent in view plot after category
 TODO inverse actions and cards in order to show TOP->BOTTOM and raise/bet -> fold/call
 TODO check if range files are equal -> probably sign of wrong gui input
+** [2018-11-30 Fr]
+
+TODO when having AI as only option after bet it asumes fold call AI ranges even when there is no call because 
+of very low spr
+
+TODO BUG on view board KdJh5h4c (striaght draws)
+TODO set > straight on flush boards
+TODO gui -> check oop (no donk/bet) not working (thinks check and bet?!)

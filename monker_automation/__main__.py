@@ -6,6 +6,8 @@
 from monker_automation.analysis import test
 #from monker_automation.board import test
 
+import cProfile
+
 
 def main():
     test()
@@ -13,3 +15,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    #cProfile.run(main(), sort='cumtime')

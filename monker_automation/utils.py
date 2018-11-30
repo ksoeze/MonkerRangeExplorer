@@ -41,16 +41,24 @@ RANGE_FOLDER = "/home/johann/monker/ranges/"
 
 # gui reader constants
 
-BACK_CO = (3888, 925)
+BACK_CO = (3885, 923)
 CHECK_CO = (3955, 925)
 BET_CO = (4039, 925)
 BOARD_CLICK = (4000, 255)
 LINE_CLICK = (4040, 1000)
-ACTION_1 = (4401, 95)
-ACTION_2 = (4912, 95)
-ACTION_3 = (5393, 95)
+# index 0 is for 1 range; index 2 for 2 ranges etc
+RANGE_CO = [[(4400, 95)],
+            [(4400, 95), (5400, 95)],
+            [(4400, 95), (4900, 95), (5400, 95)],
+            [(4400, 95), (4750, 95), (5050, 95), (5400, 95)],
+            [(4400, 95), (4650, 95), (4920, 95), (5150, 95), (5400, 95)],
+            [(4400, 95), (4600, 95), (4820, 95),
+             (5000, 95), (5200, 95), (5400, 95)],
+            ]
 
 SAVE_OK = (4648, 601)
+CSV_SELECT = (4577, 534)
+FILE_TEXT = (4592, 569)
 
 NUM_BACK = 10
 DELETE_BOARD = 10
@@ -60,6 +68,17 @@ TYPE_DELAY = 0.1
 SLEEP_AFTER_SAVE = 0.5
 SLEEP_AFTER_FINISH = 1
 
+FOLD = "FOLD"
+BACK = "BACK"
+CHECK = "CHECK"
+CALL = "CALL"
+POSSIBLE_BET_RAISE = ["40", "60", "80", "100", "AllIn"]
+BUTTON_FILES = {"CHECK": "check.png", "CALL": "call.png",
+                "40": "40.png", "60": "60.png", "80": "80.png", "100": "100.png", "AllIn": "allin.png"}
+BUTTON_FILES_FOLDER = "/home/johann/code/monker_automation/monker_automation/buttons/"
+BUTTON_REGION = (3930, 911, 4200, 935)
+CHECK_CALL_REGION = (3930, 911, 4000, 936)  # restrict for performance reasons
+MAX_BETS_RAISES = 2
 # analysis
 
 DEFAULT_VIEW_RESULT_FILENAME = "/home/johann/code/monker_automation/RESULTS.org"

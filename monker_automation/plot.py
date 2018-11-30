@@ -36,13 +36,20 @@ def plot_default(titel, total_results, action_results, actions, cumulative=True)
     bars = []
     base_value = np.array([0.0]*len(total_results["v_str"][1:]))
 
+    num_bets = 0
     for index in range(len(actions)):
         if "CHECK" in actions[index] or "CALL" in actions[index]:
             color = "#8FBC8B"
         elif "FOLD" in actions[index]:
             color = "#6DA2C0"
         elif "RAISE" in actions[index] or "BET" in actions[index]:
-            color = "#E9967A"
+            if num_bets == 0:
+                color = "#E9967A"
+            elif num_bets == 1:
+                color = "#CF7D65"
+            elif num_bets == 2:
+                color = "#B15B4A"
+            num_bets += 1
         else:
             color = "b"
         if index == 0:
