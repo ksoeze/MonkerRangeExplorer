@@ -60,6 +60,9 @@ SAVE_OK = (4648, 601)
 CSV_SELECT = (4577, 534)
 FILE_TEXT = (4592, 569)
 
+BOARD_SCREEN_REGION = (3842, 578, 450, 450)
+RANGE_SCREEN_REGION = (4298, 2, 1185, 98)
+
 NUM_BACK = 10
 DELETE_BOARD = 10
 MOUSE_MOVEMENT_DEL = 0.2
@@ -72,16 +75,28 @@ FOLD = "FOLD"
 BACK = "BACK"
 CHECK = "CHECK"
 CALL = "CALL"
+POSSIBLE_BET_RAISE = ["80", "100", "AllIn"]
 POSSIBLE_BET_RAISE = ["40", "60", "80", "100", "AllIn"]
-BUTTON_FILES = {"CHECK": "check.png", "CALL": "call.png",
-                "40": "40.png", "60": "60.png", "80": "80.png", "100": "100.png", "AllIn": "allin.png"}
+POSSIBLE_BET_RAISE = ["30", "50", "70", "100", "AllIn"]
+BUTTON_FILES = {"CHECK": "check.png", "CALL": "call.png", "30": "30.png",
+                "40": "40.png", "50": "50.png", "60": "60.png", "70": "70.png",
+                "80": "80.png", "100": "100.png", "AllIn": "allin.png"}
 BUTTON_FILES_FOLDER = "/home/johann/code/monker_automation/monker_automation/buttons/"
 BUTTON_REGION = (3930, 911, 4200, 935)
 CHECK_CALL_REGION = (3930, 911, 4000, 936)  # restrict for performance reasons
-MAX_BETS_RAISES = 2
+MAX_BETS_RAISES = 4
 # analysis
 
 DEFAULT_VIEW_RESULT_FILENAME = "/home/johann/code/monker_automation/RESULTS.org"
+DEFAULT_REPORT_DIRECTORY = "/home/johann/Documents/poker/monker-documentation/MonkerReports/"
+DEFAULT_REPORT_VIEW_DIR = "/home/johann/Documents/poker/monker-documentation/MonkerReports/views/"
+STRATEGY_PNG_NAME = "strat.png"
+RANGE_PNG_NAME = "range.png"
+VIEW_PDF_NAME = "view.pdf"
+#STRATEGY_PDF_NAME = "strategy.pdf"
+REPORT_PDF_NAME = "report.pdf"
+TABLE_PNG_NAME = "table.png"
+RANGE_HEADER_PNG_NAME = "range_header.png"
 
 # developement constants
 

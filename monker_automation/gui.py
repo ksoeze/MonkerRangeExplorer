@@ -121,8 +121,8 @@ def available_buttons():
     last_action = last_action[-8:]
     is_bet = any([CALL in last_action, "FLOP" in last_action,
                   "TURN" in last_action, "RIVER" in last_action])
-    print(last_action)
-    print(is_bet)
+    # print(last_action)
+    # print(is_bet)
 
     for size in POSSIBLE_BET_RAISE:
         img = os.path.join(BUTTON_FILES_FOLDER, BUTTON_FILES[size])
@@ -173,6 +173,14 @@ def read_situation_and_save_ranges():
 
     results["actions"] = actions
     results["button_coordinates"] = buttons
+
+    file_name = os.path.join(DEFAULT_REPORT_DIRECTORY, TABLE_PNG_NAME)
+    results["board_img"] = pyautogui.screenshot(region=BOARD_SCREEN_REGION)
+    results["board_img"].save(file_name)
+
+    file_name = os.path.join(DEFAULT_REPORT_DIRECTORY, RANGE_HEADER_PNG_NAME)
+    results["range_img"] = pyautogui.screenshot(region=RANGE_SCREEN_REGION)
+    results["range_img"].save(file_name)
 
     save_ranges(actions)
     return results

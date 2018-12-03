@@ -1,4 +1,6 @@
 * Logging
+  CLOCK: [2018-12-03 Mo 12:20]--[2018-12-03 Mo 14:37] =>  2:17
+  CLOCK: [2018-12-01 Sa 18:53]--[2018-12-01 Sa 22:46] =>  3:53
   CLOCK: [2018-11-30 Fr 20:40]--[2018-11-30 Fr 21:54] =>  1:14
   CLOCK: [2018-11-30 Fr 12:55]--[2018-11-30 Fr 15:42] =>  2:47
   CLOCK: [2018-11-29 Do 18:27]--[2018-11-29 Do 21:12] =>  2:45
@@ -12,12 +14,12 @@
   CLOCK: [2018-11-18 So 23:04]--[2018-11-19 Mo 03:01] =>  3:57
   CLOCK: [2018-11-17 Sa 14:15]--[2018-11-17 Sa 18:23] =>  4:08
 #+BEGIN: clocktable :maxlevel 2 :scope subtree
-#+CAPTION: Clock summary at [2018-11-30 Fr 21:54]
+#+CAPTION: Clock summary at [2018-12-03 Mo 23:06]
 | Headline     | Time       |
 |--------------+------------|
-| *Total time* | *1d 17:46* |
+| *Total time* | *1d 23:56* |
 |--------------+------------|
-| Logging      | 1d 17:46   |
+| Logging      | 1d 23:56   |
 #+END:
 
 ** VIEWS
@@ -284,31 +286,6 @@ python -m pip install importmagic
 python -m pip install autopep8
 python -m pip install yapf
 
-** [2018-11-17 Sa] 
-
-TODO 
-on trips board pairs where there is rank on board doesnt get added
-straights on 4 straight boards doesnt work properly (bad grouping)
-
-** [2018-11-19 Mo]
-   :PROPERTIES:
-   :ORDERED:  t
-   :END:
-
-TODO
-might be good idea to also fill description list for view file
-group made hands based on blocker on flush boards?
-group straights straight draws based on outs/nuttynes
-4 straight boards handled badly!! (blockers and straight grouping)
-
-**
-** [2018-11-25 So]
-
-TODO baord string is empty when no action has happend
-TODO kill TK window
-TODO select CSV instead when saving range 4 the first time
-TODO exclude range not working currently (discard it?)
-TODO clean view of empty lists and redundant entries
 ** [2018-11-29 Do]
 
 install numpy & matplotlib
@@ -332,20 +309,29 @@ results of process_view is list of:
 
 total_counts(
 
-TODO/IDEA extend gui tool with saving ranges based on previous actions in a tree struktur
--> ranges/KhJd5h/OOP/check.bla; bet.bla
-   ranges/KhJd/5h/OOP-CHECK-IP/check.bla; bet.bla etc
-add path argument to get_view_results etc
+** [2018-12-01 Sa]
+The A4 size print measures 21.0 x 29.7cm, 8.27 x 11.69 inches
 
-
-TODO show absolut and relativ percent in view plot after category
-TODO inverse actions and cards in order to show TOP->BOTTOM and raise/bet -> fold/call
-TODO check if range files are equal -> probably sign of wrong gui input
-** [2018-11-30 Fr]
-
-TODO when having AI as only option after bet it asumes fold call AI ranges even when there is no call because 
-of very low spr
-
-TODO BUG on view board KdJh5h4c (striaght draws)
-TODO set > straight on flush boards
-TODO gui -> check oop (no donk/bet) not working (thinks check and bet?!)
+* FIXMEs TODOs
+** View changes
+- on trips board pairs where there is rank on board doesnt get added [2018-12-03 Mo]
+- might be good idea to also fill description list for view file [2018-12-03 Mo]
+- group made hands based on blocker on flush boards?
+- set > straight on flush board
+- clear up empty ranges from view
+** Errors
+- baord string is empty when no action has happend (click 2 times on a card which isnt on board) [2018-12-03 Mo]
+- exclude range not working currently (discard it?) [2018-12-03 Mo]
+- emtpy view items are shown in graph [2018-12-03 Mo]
+- clean view of empty lists and redundant entries [2018-12-03 Mo] (partly done?! straight draws are still massive)
+- inverse actions and cards in order to show TOP->BOTTOM and raise/bet -> fold/call
+- check if range files are equal -> probably sign of wrong gui input
+- when having AI as only option after bet it asumes fold call AI ranges even when there is no call because 
+  of very low spr
+- straight categories are wrong on KJ45A board straights[0] is QT but striaghts[1] is empty instead of 23 (which is in striaghts[9]) or so 
+** Potentional Improvements
+- TODO/IDEA extend gui tool with saving ranges based on previous actions in a tree struktur
+  ranges/KhJd5h/OOP/check.bla; bet.bla
+  ranges/KhJd/5h/OOP-CHECK-IP/check.bla; bet.bla etc
+  add path argument to get_view_results etc
+- pdf merger supports bookmarks (add bookmark with board and line ?)

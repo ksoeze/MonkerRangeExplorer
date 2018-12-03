@@ -874,9 +874,12 @@ def view_item_to_str(item):
     return string
 
 
-def print_view(view, view_type=VIEW_TYPES[0], filename=DEFAULT_VIEW_NAME):
-    filename = filename+"-"+view_type+".txt"
-    filename = os.path.join(VIEW_FOLDER, filename)
+def print_view(view, view_type=VIEW_TYPES[0], view_folder=VIEW_FOLDER, filename=DEFAULT_VIEW_NAME):
+    if filename:
+        filename = filename+"-"+view_type+".txt"
+    else:
+        filename = view_type+".txt"
+    filename = os.path.join(view_folder, filename)
     with open(filename, "w") as f:
         f.write(TOP_VIEW_LINE)
         f.write("\n")
@@ -888,7 +891,7 @@ def print_view(view, view_type=VIEW_TYPES[0], filename=DEFAULT_VIEW_NAME):
 
 
 def test():
-    board_string = "8dTc2c4c"
+    board_string = "7d8c6c5s4d"
     view_default = get_view(board_string, VIEW_TYPES[0])
     view_made = get_view(board_string, VIEW_TYPES[1])
     view_draws = get_view(board_string, VIEW_TYPES[2])

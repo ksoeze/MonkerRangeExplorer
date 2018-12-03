@@ -252,7 +252,8 @@ def return_str_flush_blockers(board):
 
 
 def return_straights(board):
-    ranks = straight_ranks(board)
+    # ranks = straight_ranks(board)
+    ranks = return_ranks(board)
     straights = []
     straight_rank = {}
 
@@ -268,22 +269,27 @@ def return_straights(board):
         straight_combo.sort(key=lambda x: (
             RANK_ORDER[x[0]], RANK_ORDER[x[1]]), reverse=True)
         straights += straight_combo
-    straight_categories = [[], [], [], [], [], []]
+    # print(straights)
+    straight_categories = [[], [], [], [], [], [], [], [], [], []]
     for item in straights:
         index = straight_rank[item]-straight_rank[straights[0]]
+        # print(str(board)+":")
+        # print("straight rank: " +
+        #      str(straight_rank[item]) + "for straight: " + str(item))
         straight_categories[index].append(item)
     return straight_categories
 
 
-def straight_ranks(board):
-    ranks = return_rank_counts(board)
-    return ranks[0]+ranks[1]+ranks[2]
+# def straight_ranks(board):
+#     ranks = return_rank_counts(board)
+#     return ranks[0]+ranks[1]+ranks[2]
 
 
 def return_straight_draws(board):
     ranks = return_ranks(board)
     if len(ranks) == 5:
         return {"wraps": [], "oesd": [], "gs": []}
+    #print("Board @ start of algo: " + str(board))
     next_card_straight_hands = possible_straights_on_next_card(board)
     straight_hands = list(chain.from_iterable(return_straights(board)))
     gs_or_oesd = [hand for card in next_card_straight_hands for hand in next_card_straight_hands[card]

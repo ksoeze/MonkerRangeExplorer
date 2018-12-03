@@ -12,6 +12,9 @@ from monker_automation.views import view_item_to_str
 from monker_automation.plot import plot_default
 from monker_automation.plot import plot_range_distribution
 import logging
+import pickle
+
+import matplotlib.pyplot as plt
 
 
 def print_result_header(header, gui_log, result_filename=DEFAULT_VIEW_RESULT_FILENAME):
@@ -40,6 +43,7 @@ def default_view(sequence, actions, board, enter_cards="", result_filename=DEFAU
     debug = enter_sequence_and_save_ranges(sequence, actions, enter_cards)
     debug = ""
     total_results, action_results = get_view_results(actions, view)
+
     output_table = []
     first_line = ["Description"]+total_results["v_str"]
     output_table.append(first_line)
@@ -59,19 +63,31 @@ def default_view(sequence, actions, board, enter_cards="", result_filename=DEFAU
     output_table = [*zip(*output_table)]
     # org_print_result_matrix(output_table, result_filename)
     titel = "KdJh5h-4c4s - 3 Barrel Strategy TEST"
-    plot_default(titel, total_results, action_results, list(reversed(actions)))
+    plot_default(
+        titel, total_results, action_results, list(reversed(actions)))
     plot_range_distribution(titel, total_results, action_results, actions)
 
 
 def current_view():
     infos = read_situation_and_save_ranges()
+    # with open("infos_pickle", "wb") as f:
+    #     pickle.dump(infos, f)
+    # with open("infos_pickle", "rb") as f:
+    #    infos = pickle.load(f)
     board = infos["board"]
     view = get_view(board, VIEW_TYPES[0])
     actions = infos["actions"]
+
     total_results, action_results = get_view_results(actions, view)
-    titel = board + "MAGIC"
-    plot_default(titel, total_results, action_results, list(reversed(actions)))
-    plot_range_distribution(titel, total_results, action_results, actions)
+
+    # with open("results_pickle", "wb") as f:
+    #     pickle.dump((total_results, action_results), f)
+    # with open("results_pickle", "rb") as f:
+    #    total_results, action_results = pickle.load(f)
+    default_view = plot_default(total_results, action_results, actions)
+    range_view = plot_range_distribution(
+        total_results, action_results, actions)
+    return infos
 
 
 def run_out_analysis(sequences, board, enter_cards="", player="", result_filename=DEFAULT_VIEW_RESULT_FILENAME):
@@ -151,7 +167,7 @@ def view_matrix(sequence, actions, board, general_view=VIEW_TYPES[1], subview=VI
         total_results, action_results = get_view_results(actions, new_view)
         line = [view_item_to_str(subview_view[index]),
                 total_subview_results[0][index+1]]
-        line += total_results[0][1:-1]
+        line += total_results[0][1: -1]
         results.append(line)
 
     exclude_list = [hand for rng in subview_view for hand in rng]
@@ -256,15 +272,15 @@ def test():
     board = "KdJh5h4c4s"
     board = "KdJh5h"
     sequence = [("CHECK", "FLOP")]
-    #actions = ("CHECK", "BET")
-    #default_view(sequence, actions, board)
-    #sequence = [("CHECK", "FLOP"), ("BET", "FLOP")]
-    #actions = ("FOLD", "CALL", "RAISE")
-    #default_view(sequence, actions, board)
+    # actions = ("CHECK", "BET")
+    # default_view(sequence, actions, board)
+    # sequence = [("CHECK", "FLOP"), ("BET", "FLOP")]
+    # actions = ("FOLD", "CALL", "RAISE")
+    # default_view(sequence, actions, board)
     # sequence = [("CHECK", "FLOP"), ("BET", "FLOP"),
     #             ("CALL", "FLOP"), ("CHECK", "TURN"), ("CHECK", "TURN")]
     actions = ("FOLD", "CALL", "RAISE")
-    #actions = ("CHECK", "BET")
+    # actions = ("CHECK", "BET")
     sequence = [("CHECK", "FLOP"), ("BET", "FLOP"), ("CALL", "FLOP"),
                 ("CHECK", "TURN"), ("BET", "TURN"), ("CALL", "TURN"),
                 ("CHECK", "RIVER"), ("BET", "LAST")
@@ -273,8 +289,8 @@ def test():
     actions = ("FOLD", "CALL", "RAISE")
 
     current_view()
-    #default_view(sequence, actions, board)
-    #default_view(sequence, actions, board)
+    # default_view(sequence, actions, board)
+    # default_view(sequence, actions, board)
     # test_runout_analysis()
     # test_matrix_analysis(board)
 
