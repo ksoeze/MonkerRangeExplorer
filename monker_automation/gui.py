@@ -186,6 +186,47 @@ def read_situation_and_save_ranges():
     return results
 
 
+def update_board(start_board="", cards=[]):
+    full_board = "".join([start_board]+cards)
+    try:
+        current_board = copy_text(BOARD_CLICK)
+        current_board = current_board.replace(" ", "")
+        if current_board == full_board:
+            return
+    except:
+        logging.warning("Empty board...trying to initialise")
+        # TODO proper error handling...for now asume emtpy board
+
+    move_click(BOARD_CLICK)
+    for i in range(DELETE_BOARD):
+        pyautogui.press('backspace')
+        time.sleep(TYPE_DELAY)
+    for card in cards:
+        pyautogui.typewrite(" ", interval=TYPE_DELAY)
+        pyautogui.typewrite(card, interval=TYPE_DELAY)
+    if cards == []:
+        pyautogui.typewrite(" ", interval=TYPE_DELAY)
+    current_board = copy_text(BOARD_CLICK)
+    current_board = current_board.replace(" ", "")
+    if current_board != full_board and start_board != "":
+        logging.error("ERROR entering Board...exiting")
+        exit()
+    return current_board
+
+
+def click_action(action, buttons):
+    try:
+        coordinates = buttons[action]
+    except ValueError:
+        logging.error("Impossible action in current Situation..exiting")
+        exit()
+    move_click(coordinates)
+
+
+def click_back():
+    move_click(BACK_CO)
+
+
 def test():
     mouse_coordinates()
     line_before = []

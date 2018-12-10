@@ -44,6 +44,7 @@ RANGE_FOLDER = "/home/johann/monker/ranges/"
 BACK_CO = (3885, 923)
 CHECK_CO = (3955, 925)
 BET_CO = (4039, 925)
+#BUTTONS_CO = [(3955, 925), (4039, 925), (4123, 925), (4200, 925)]
 BOARD_CLICK = (4000, 255)
 LINE_CLICK = (4040, 1000)
 # index 0 is for 1 range; index 2 for 2 ranges etc
@@ -64,10 +65,10 @@ BOARD_SCREEN_REGION = (3842, 578, 450, 450)
 RANGE_SCREEN_REGION = (4298, 2, 1185, 98)
 
 NUM_BACK = 10
-DELETE_BOARD = 10
-MOUSE_MOVEMENT_DEL = 0.2
-CLICK_DELAY = 0.1
-TYPE_DELAY = 0.1
+DELETE_BOARD = 7
+MOUSE_MOVEMENT_DEL = 0.1
+CLICK_DELAY = 0.01
+TYPE_DELAY = 0.01
 SLEEP_AFTER_SAVE = 0.5
 SLEEP_AFTER_FINISH = 1
 
@@ -75,16 +76,25 @@ FOLD = "FOLD"
 BACK = "BACK"
 CHECK = "CHECK"
 CALL = "CALL"
-POSSIBLE_BET_RAISE = ["80", "100", "AllIn"]
 POSSIBLE_BET_RAISE = ["40", "60", "80", "100", "AllIn"]
-POSSIBLE_BET_RAISE = ["30", "50", "70", "100", "AllIn"]
+POSSIBLE_BET_RAISE = ["50", "100", "AllIn"]
+POSSIBLE_BET_RAISE = ["50", "60", "70", "80", "100", "AllIn"]
+POSSIBLE_BET_RAISE = ["80", "100", "AllIn"]
+#POSSIBLE_BET_RAISE = ["30", "40","50", "70", "80","100", "AllIn"]
 BUTTON_FILES = {"CHECK": "check.png", "CALL": "call.png", "30": "30.png",
                 "40": "40.png", "50": "50.png", "60": "60.png", "70": "70.png",
                 "80": "80.png", "100": "100.png", "AllIn": "allin.png"}
 BUTTON_FILES_FOLDER = "/home/johann/code/monker_automation/monker_automation/buttons/"
 BUTTON_REGION = (3930, 911, 4200, 935)
 CHECK_CALL_REGION = (3930, 911, 4000, 936)  # restrict for performance reasons
-MAX_BETS_RAISES = 4
+MAX_BETS_RAISES = 1
+
+# info tree creation
+LINE_START = "|"
+MIN_BET_FREQ = 20
+MIN_RAISE_FREQ = 10
+
+
 # analysis
 
 DEFAULT_VIEW_RESULT_FILENAME = "/home/johann/code/monker_automation/RESULTS.org"
