@@ -109,6 +109,7 @@ def plot_default(total_results, action_results, actions, cumulative=True):
     filename = os.path.join(DEFAULT_REPORT_DIRECTORY, STRATEGY_PNG_NAME)
     plt.tight_layout()
     plt.savefig(filename, dpi=200, bbox_inches='tight', pad_inches=0)
+    plt.close()
     # plt.show()
 
 
@@ -135,11 +136,16 @@ def plot_range_distribution(total_results, action_results, actions):
     colors = plt.cm.inferno(np.linspace(0, 1, len(x_ticks)))
     colors = plt.cm.viridis(np.linspace(0, 1, len(x_ticks)))
 
-    colors = [(0, 0, 0), (1, 0, 0), (0, 0, 1), (0, 1, 0), (1, 1, 0)]
+    colors = [(0, 0, 0), (1, 0, 0), (0, 0, 1), (0, 1, 0), (1, 1, 0),
+              (0.5, 0.5, 0.5), (0.5, 0, 0), (0, 0, 0.5), (0, 0.5, 0), (0.5, 0.5, 0)]
     colors = LinearSegmentedColormap.from_list("test", colors)
     colors = colors(np.linspace(0, 1, len(x_ticks)))
 
     for index in range(len(x_ticks)):
+        try:
+            table[index]
+        except IndexError:
+            continue  # empty range i guess...dont try to plot
         if index == 0:
             y_axes = np.arange(len(y_ticks))
             bar = plt.barh(y_axes, table[index], 0.6, color=colors[index])
@@ -162,5 +168,6 @@ def plot_range_distribution(total_results, action_results, actions):
     # plt.axvline(x=100, linestyle="--")
     filename = os.path.join(DEFAULT_REPORT_DIRECTORY, RANGE_PNG_NAME)
     plt.savefig(filename, dpi=200, bbox_inches='tight', pad_inches=0)
+    plt.close()
     # plt.show()
     # return plt

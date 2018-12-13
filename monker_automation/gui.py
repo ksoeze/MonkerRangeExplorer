@@ -194,7 +194,7 @@ def update_board(start_board="", cards=[]):
         if current_board == full_board:
             return
     except:
-        logging.warning("Empty board...trying to initialise")
+        logging.info("Empty board...trying to initialise")
         # TODO proper error handling...for now asume emtpy board
 
     move_click(BOARD_CLICK)
@@ -206,6 +206,9 @@ def update_board(start_board="", cards=[]):
         pyautogui.typewrite(card, interval=TYPE_DELAY)
     if cards == []:
         pyautogui.typewrite(" ", interval=TYPE_DELAY)
+    # choose check one time and go back in order to update ranges
+    move_click(CHECK_CO)
+    move_click(BACK_CO)
     current_board = copy_text(BOARD_CLICK)
     current_board = current_board.replace(" ", "")
     if current_board != full_board and start_board != "":

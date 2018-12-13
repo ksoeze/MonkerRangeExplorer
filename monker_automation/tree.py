@@ -4,8 +4,11 @@ from monker_automation.utils import *
 from monker_automation.gui import update_board
 from monker_automation.gui import click_action, click_back, goto_start
 from monker_automation.gui import read_situation_and_save_ranges
-
-from anytree import Node
+from monker_automation.views import get_view
+from monker_automation.range import get_view_results
+from monker_automation.pdftest import print_pdf, add_analysis_to_report
+from monker_automation.plot import plot_default, plot_range_distribution
+from anytree import Node, RenderTree
 import logging
 
 _current_card_lvl = 0
@@ -13,6 +16,8 @@ _start_board = ""
 _current_board = ""
 _current_card_list = []
 _infos = {}
+_line = []
+_line_list = []
 
 
 # TODO change available buttons in gui.py to make this unessasay
@@ -25,40 +30,108 @@ def convert_button_dic(buttons):
         bu_dic[CALL] = buttons[CALL]
     for bet in buttons["BET"]:
         bu_dic[bet[0]] = bet[1]
+    # print(bu_dic)
     return bu_dic
 
 
+def valid_line():
+    if _line_list == []:
+        return True  # if no lines given all lines are valid
+    for line in _line_list:
+        is_valid_line = True
+        if len(line) != len(_line):
+            is_valid_line = False
+        else:
+            for tested_action, current_action in zip(line, _line):
+                if CHECK in tested_action or CALL in tested_action or "BET" in tested_action or "RAISE" in tested_action:
+                    if tested_action not in current_action:
+                        is_valid_line = False
+        if is_valid_line:
+            return True
+    return False
+
+
+def skip_path():
+    if _line_list == []:
+        return False
+    line_list_long = []
+    skip_path = True
+    for line in _line_list:
+        if len(line) >= len(_line):
+            line_list_long.append(line)
+            skip_path = False
+    if skip_path:
+        return True
+    # print(line_list_long)
+    for i in range(len(_line)):
+        if CHECK in line[i] or CALL in line[i] or "BET" in line[i] or "RAISE" in line[i]:
+            if all([line[i] not in _line[i] for line in line_list_long]):
+                return True
+    return False
+
+
 def should_visit(action, action_results):
-    return True
+    if "RAISE" in action:
+        total_value = action_results[action]["p"][0]
+        if total_value < MIN_RAISE_FREQ:
+            return False
+        else:
+            return True
+    else:
+        total_value = action_results[action]["p"][0]
+        if total_value < MIN_FREQ:
+            return False
+        else:
+            return True
 
 
-def add_subtrees(parent, line, cards_lvl1, cards_lvl2):
-    logging.debug("LINE: {}".format(line))
-    if not(line[-1] == CALL or line[-2:] == [CHECK, CHECK]):
+def print_infos(node_name, total_results, action_results, infos):
+    plot_default(total_results, action_results, infos["actions"])
+    plot_range_distribution(total_results, action_results, infos["actions"])
+    print_pdf()
+    add_analysis_to_report()
+    # TODO add infos to dictionary and save results at the end?
+
+
+def add_subtrees(parent, cards_lvl1, cards_lvl2):
+    global _line
+    global _current_board
+    # only parse lines which are of interest
+
+    if not(_line[-1] == CALL or _line[-2:] == [CHECK, CHECK]):
         infos = read_situation_and_save_ranges()
-        # view = get_view(infos["board"], VIEW_TYPES[0])  # fix this?
+        view = get_view(_current_board, VIEW_TYPES[0])  # fix this?
         buttons = convert_button_dic(infos["button_coordinates"])
         actions = infos["actions"]
-        total_results, action_results = ([], [])
-        #total_results, action_results = get_view_results(actions, view)
-        node_name = "-".join(line)
-        logging.debug(node_name)
+
+        node_name = "-".join(_line)
+        node_name = _line[-1]
         node = Node(node_name, parent=parent)  # , gui_info=infos,
         # overall_results=total_results, relativ_results=action_results)
+        # total_results, action_results = ([], [])
+        total_results, action_results = get_view_results(actions, view)
+        logging.info("adding node of LINE: {}".format(_line))
+        logging.info("current board is: {}".format(_current_board))
+
+        if valid_line():
+            logging.info("VALID LINE: {}".format(_line))
+            print_infos(node_name, total_results, action_results, infos)
         for button in buttons:
             if should_visit(button, action_results):
-                click_action(button, buttons)
-                line.append(button)
-                add_subtrees(node, line, cards_lvl1, cards_lvl2)
-                click_back()
-                line = line[:-1]
+                _line.append(button)
+                logging.info("Increased LINE: {}".format(_line))
+                if not skip_path():
+                    click_action(button, buttons)
+                    add_subtrees(node, cards_lvl1, cards_lvl2)
+                    click_back()
+                else:
+                    logging.info("Skip PATH: {}".format(_line))
+                _line = _line[:-1]
+                logging.info("Decreased LINE: {}".format(_line))
     else:
-        logging.debug("ADDING CARD TO LINE")
+        logging.info("ADDING CARD TO LINE")
         global _current_card_lvl
-        global _current_board
         global _current_card_list
-
-        logging.debug("Current Card LVL: {}".format(_curre))
 
         if _current_card_lvl == 0:
             for card in cards_lvl1:
@@ -67,13 +140,13 @@ def add_subtrees(parent, line, cards_lvl1, cards_lvl2):
                 _current_card_lvl += 1
                 _current_board += card
                 _current_card_list.append(card)
-                line.append(card)
+                _line.append(card)
                 update_board(_start_board, _current_card_list)
-                add_subtrees(parent, line, cards_lvl1, cards_lvl2)
+                add_subtrees(parent, cards_lvl1, cards_lvl2)
                 _current_card_lvl -= 1
                 _current_board = _current_board[:-2]
                 _current_card_list = _current_card_list[:-1]
-                line = line[:-1]
+                _line = _line[:-1]
         elif _current_card_lvl == 1:
             for card in cards_lvl2:
                 if card in _current_board:  # invalid card
@@ -81,26 +154,34 @@ def add_subtrees(parent, line, cards_lvl1, cards_lvl2):
                 _current_card_lvl += 1
                 _current_board += card
                 _current_card_list.append(card)
-                line.append(card)
+                _line.append(card)
                 update_board(_start_board, _current_card_list)
-                add_subtrees(parent, line, cards_lvl1, cards_lvl2)
+                add_subtrees(parent, cards_lvl1, cards_lvl2)
                 _current_card_lvl -= 1
                 _current_board = _current_board[:-2]
                 _current_card_list = _current_card_list[:-1]
-                line = line[:-1]
-    return
+                _line = _line[:-1]
+    if _line == [LINE_START]:
+        return node
+    else:
+        return
 
 
-def walk_tree(turn_cards=[], river_cards=[]):
-    #last_line = []
-    current_line = []
-    current_line.append(LINE_START)
+def walk_tree(valid_lines=[], turn_cards=[], river_cards=[]):
+    global _line
+    global _start_board
+    global _current_board
+    global _line_list
+    # last_line = []
+    _line.append(LINE_START)
+    goto_start()
     start_board = update_board()
-    current_board = start_board
-    _start_board = current_board
-    _current_board = current_board
-    current_board_list = [current_board[i:i+2]
-                          for i in range(0, len(current_board), 2)]
+    _start_board = start_board
+    _current_board = start_board
+    _line_list = valid_lines
+
+    current_board_list = [_current_board[i:i+2]
+                          for i in range(0, len(_current_board), 2)]
 
     if turn_cards == [] and river_cards != []:
         cards_lvl1 = [
@@ -118,15 +199,20 @@ def walk_tree(turn_cards=[], river_cards=[]):
         logging.error("Invalid combo of turn and or rivercards")
         exit()
 
-    add_subtrees(None, current_line, cards_lvl1, cards_lvl2)
+    root = add_subtrees(None, cards_lvl1, cards_lvl2)
+    for pre, fill, node in RenderTree(root):
+        print("%s%s" % (pre, node.name))
 
 
 def test():
     logger = logging.getLogger()
-    logger.setLevel("DEBUG")
-    turn_cards = ["4h"]
-    river_cards = ["2d"]
-    walk_tree(turn_cards, river_cards)
+    logger.setLevel("INFO")
+    turn_cards = ["Ad", "Tc", "4h", "9c"]
+    river_cards = ["Kc", "Jd", "5d"]
+    # valid_lines = [OOP_BET, OOP_BET_BET, OOP_BET_BET_BET,
+    #               IP_vsBET, IP_CALL_vsBET, IP_CALL_CALL_vsBET]
+    valid_lines = []
+    walk_tree(valid_lines, turn_cards, river_cards)
 
 
 if (__name__ == '__main__'):

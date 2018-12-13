@@ -76,23 +76,58 @@ FOLD = "FOLD"
 BACK = "BACK"
 CHECK = "CHECK"
 CALL = "CALL"
+BET = "BET"
+RAISE = "RAISE"
 POSSIBLE_BET_RAISE = ["40", "60", "80", "100", "AllIn"]
 POSSIBLE_BET_RAISE = ["50", "100", "AllIn"]
 POSSIBLE_BET_RAISE = ["50", "60", "70", "80", "100", "AllIn"]
-POSSIBLE_BET_RAISE = ["80", "100", "AllIn"]
+POSSIBLE_BET_RAISE = ["20", "30", "40", "50", "70", "80", "100", "AllIn"]
 #POSSIBLE_BET_RAISE = ["30", "40","50", "70", "80","100", "AllIn"]
-BUTTON_FILES = {"CHECK": "check.png", "CALL": "call.png", "30": "30.png",
+BUTTON_FILES = {"CHECK": "check.png", "CALL": "call.png", "MIN": "min.png", "20": "20.png", "30": "30.png",
                 "40": "40.png", "50": "50.png", "60": "60.png", "70": "70.png",
                 "80": "80.png", "100": "100.png", "AllIn": "allin.png"}
 BUTTON_FILES_FOLDER = "/home/johann/code/monker_automation/monker_automation/buttons/"
 BUTTON_REGION = (3930, 911, 4200, 935)
 CHECK_CALL_REGION = (3930, 911, 4000, 936)  # restrict for performance reasons
-MAX_BETS_RAISES = 1
+MAX_BETS_RAISES = 2
 
 # info tree creation
 LINE_START = "|"
-MIN_BET_FREQ = 20
+MIN_FREQ = 25
 MIN_RAISE_FREQ = 10
+
+# standard lines
+
+# 1 bet lines
+CARD_DUMMY = ["Ah"]
+OOP_BET = [LINE_START, ]
+IP_BET = [LINE_START, CHECK]
+OOP_X_BET = IP_BET+[CHECK]+CARD_DUMMY
+IP_X_BET = OOP_X_BET+[CHECK]
+OOP_X_X_BET = IP_X_BET+[CHECK]+CARD_DUMMY
+IP_X_X_BET = OOP_X_X_BET+[CHECK]
+
+# 2nd and 3rd barrel of IP and action vs bet
+OOP_vsBET = [LINE_START, CHECK, BET]
+IP_BET_BET = OOP_vsBET + [CALL] + CARD_DUMMY+[CHECK]
+OOP_CALL_vsBET = IP_BET_BET + [BET]
+IP_BET_BET_BET = OOP_CALL_vsBET + [CALL] + CARD_DUMMY+[CHECK]
+OOP_CALL_CALL_vsBET = IP_BET_BET_BET + [BET]
+
+# 2nd and 3rd barrel of OOP and action vs bet
+IP_vsBET = [LINE_START, BET]
+OOP_BET_BET = IP_vsBET+[CALL] + CARD_DUMMY
+IP_CALL_vsBET = OOP_BET_BET + [BET]
+OOP_BET_BET_BET = IP_CALL_vsBET + [CALL] + CARD_DUMMY
+IP_CALL_CALL_vsBET = OOP_BET_BET_BET + [BET]
+
+# one bet and face raise
+IP_BET_vsRAISE = IP_BET+[RAISE]
+OOP_BET_vsRAISE = OO_BET+[RAISE]
+IP_X_BET_vsRAISE = IP_X_BET + [RAISE]
+OOP_X_BET_vsRAISE = OOP_X_BET + [RAISE]
+IP_X_X_BET_vsRAISE = IP_X_X_BET + [RAISE]
+OOP_X_X_BET_vsRAISE = OOP_X_X_BET + [RAISE]
 
 
 # analysis
