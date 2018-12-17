@@ -365,3 +365,9 @@ The A4 size print measures 21.0 x 29.7cm, 8.27 x 11.69 inches
   add path argument to get_view_results etc
 - pdf merger supports bookmarks (add bookmark with board and line ?)
 - IDEA: print pdf as in quiz style leaving certain information blank/no color
+- SUB-Kategorien VIEWS für bestimmte hände...z.b nur overpairs; nur 2 pairs; nur fd; nur oesd etc
+- Ausgabe in editierbares FORMAT -> ods
+- Ausgabe für schwarz weiß druck andere Farben
+- Equity Graph
+- Interaktives QUIZ...wobei geht eher richtung GUI
+- EV ausgabe hinzufügen?

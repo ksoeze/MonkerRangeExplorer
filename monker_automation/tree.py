@@ -18,7 +18,7 @@ _current_card_list = []
 _infos = {}
 _line = []
 _line_list = []
-
+_invalid_sequences=[]
 
 # TODO change available buttons in gui.py to make this unessasay
 # or move it there...
@@ -52,6 +52,16 @@ def valid_line():
 
 
 def skip_path():
+    #invalid sequences is stronger bind than valide line list
+    if _invalid_sequences != []:
+        if len(_line) <2:
+            return False
+        else:
+            for sequence in _invalid_sequences:
+                if sequence[0] in _line[-2] and sequence[1] in _line[-1]:
+                    return True
+        return False
+    
     if _line_list == []:
         return False
     line_list_long = []
@@ -64,7 +74,7 @@ def skip_path():
         return True
     # print(line_list_long)
     for i in range(len(_line)):
-        if CHECK in line[i] or CALL in line[i] or "BET" in line[i] or "RAISE" in line[i]:
+        if CHECK in _line[i] or CALL in _line[i] or "BET" in _line[i] or "RAISE" in _line[i]:
             if all([line[i] not in _line[i] for line in line_list_long]):
                 return True
     return False
@@ -88,7 +98,7 @@ def should_visit(action, action_results):
 def print_infos(node_name, total_results, action_results, infos):
     plot_default(total_results, action_results, infos["actions"])
     plot_range_distribution(total_results, action_results, infos["actions"])
-    print_pdf()
+    print_pdf(_line)
     add_analysis_to_report()
     # TODO add infos to dictionary and save results at the end?
 
@@ -167,11 +177,13 @@ def add_subtrees(parent, cards_lvl1, cards_lvl2):
         return
 
 
-def walk_tree(valid_lines=[], turn_cards=[], river_cards=[]):
+def walk_tree(valid_lines=[], invalid_sequences=[], turn_cards=[], river_cards=[]):
     global _line
     global _start_board
     global _current_board
     global _line_list
+    global _invalid_sequences
+    
     # last_line = []
     _line.append(LINE_START)
     goto_start()
@@ -179,6 +191,7 @@ def walk_tree(valid_lines=[], turn_cards=[], river_cards=[]):
     _start_board = start_board
     _current_board = start_board
     _line_list = valid_lines
+    _invalid_sequences = invalid_sequences
 
     current_board_list = [_current_board[i:i+2]
                           for i in range(0, len(_current_board), 2)]
@@ -207,12 +220,14 @@ def walk_tree(valid_lines=[], turn_cards=[], river_cards=[]):
 def test():
     logger = logging.getLogger()
     logger.setLevel("INFO")
-    turn_cards = ["Ad", "Tc", "4h", "9c"]
-    river_cards = ["Kc", "Jd", "5d"]
-    # valid_lines = [OOP_BET, OOP_BET_BET, OOP_BET_BET_BET,
-    #               IP_vsBET, IP_CALL_vsBET, IP_CALL_CALL_vsBET]
+    turn_cards = ["3h"]
+    river_cards = ["Kc"]
+
+    valid_lines = [OOP_X_X_BET]
+
+    invalid_sequences = [[RAISE,RAISE],[RAISE,CALL]]
     valid_lines = []
-    walk_tree(valid_lines, turn_cards, river_cards)
+    walk_tree(valid_lines, invalid_sequences, turn_cards, river_cards)
 
 
 if (__name__ == '__main__'):

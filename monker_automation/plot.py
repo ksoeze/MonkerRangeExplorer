@@ -21,7 +21,10 @@ def combine_view_with_percent(total_results):
         elif len(cum) == 2:
             cum = " "+cum
         rel = "{0:.{1}f}".format(p, 1)
-        ticks.append(view + " {}".format(rel))
+        if QUIZ:
+            ticks.append(view+"    ")
+        else:
+            ticks.append(view + " {}".format(rel))
     return ticks
 
 
@@ -31,7 +34,10 @@ def combine_action_with_percent(action_results):
     for action in action_results:
         percent = action_results[action]["p"][0]  # total % of this action
         number = "{0:.{1}f}".format(percent, 0)
-        ticks.append("{}% ".format(number) + action)
+        if QUIZ:
+            ticks.append("    " + action)
+        else:
+            ticks.append("{}% ".format(number) + action)
     return ticks
 
 
@@ -66,6 +72,8 @@ def plot_default(total_results, action_results, actions, cumulative=True):
             num_bets += 1
         else:
             color = "b"
+        if QUIZ:
+            color = "#CECECE"
         if index == 0:
             y_axes = np.arange(len(total_results["v_str"][1:]))
             bar = ax2.barh(
@@ -91,8 +99,12 @@ def plot_default(total_results, action_results, actions, cumulative=True):
     ax1.set_yticklabels(yticks)
     # for tick in ax1.get_yticklabels():
     #    tick.set_fontname("DejaVu Sans Mono")
-    yticks = ["{0:.{1}f}".format(i, 0).format(i)
-              for i in total_results["r_cum"][1:]]
+    if QUIZ:
+        yticks = ["   "
+                  for i in total_results["r_cum"][1:]]
+    else:
+        yticks = ["{0:.{1}f}".format(i, 0).format(i)
+                  for i in total_results["r_cum"][1:]]
     ax2.set_yticks(np.arange(len(yticks)))
     ax2.set_yticklabels(yticks)
 
@@ -133,11 +145,13 @@ def plot_range_distribution(total_results, action_results, actions):
     plt.figure(figsize=(8.27, 4.65))
     plt.subplots_adjust(left=0.14, bottom=0.08, right=0.80, top=0.95)
 
-    colors = plt.cm.inferno(np.linspace(0, 1, len(x_ticks)))
-    colors = plt.cm.viridis(np.linspace(0, 1, len(x_ticks)))
+    #colors = plt.cm.inferno(np.linspace(0, 1, len(x_ticks)))
+    #colors = plt.cm.viridis(np.linspace(0, 1, len(x_ticks)))
 
     colors = [(0, 0, 0), (1, 0, 0), (0, 0, 1), (0, 1, 0), (1, 1, 0),
               (0.5, 0.5, 0.5), (0.5, 0, 0), (0, 0, 0.5), (0, 0.5, 0), (0.5, 0.5, 0)]
+    if QUIZ:
+        colors = [(0.75, 0.75, 0.75), (0.75, 0.75, 0.75)]
     colors = LinearSegmentedColormap.from_list("test", colors)
     colors = colors(np.linspace(0, 1, len(x_ticks)))
 

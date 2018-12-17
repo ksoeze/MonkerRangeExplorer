@@ -13,7 +13,7 @@ import os
 import shutil
 
 
-def print_pdf():
+def print_pdf(line=[]):
     pdf = os.path.join(DEFAULT_REPORT_DIRECTORY, VIEW_PDF_NAME)
     c = canvas.Canvas(pdf)
     image = os.path.join(DEFAULT_REPORT_DIRECTORY, RANGE_PNG_NAME)
@@ -24,6 +24,9 @@ def print_pdf():
     c.drawImage(image, 35, 700, 150, 150)
     image = os.path.join(DEFAULT_REPORT_DIRECTORY, RANGE_HEADER_PNG_NAME)
     c.drawImage(image, 225, 755, 300, 40)
+    if line:
+        c.setFont("Helvetica", 8)
+        c.drawString(200,725,"-".join(line))
     c.save()
 
 
