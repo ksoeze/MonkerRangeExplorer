@@ -488,9 +488,8 @@ def test():
 
 if __name__ == '__main__':
     import timeit
-    if DEBUG:
-        test()
-        # print((timeit.timeit("test()", setup="from __main__ import test",number=1000)))
+    test()
+    # print((timeit.timeit("test()", setup="from __main__ import test",number=1000)))
 
 
 #

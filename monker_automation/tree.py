@@ -6,7 +6,7 @@ from monker_automation.gui import click_action, click_back, goto_start
 from monker_automation.gui import read_situation_and_save_ranges
 from monker_automation.views import get_view
 from monker_automation.range import get_view_results
-from monker_automation.pdftest import print_pdf, add_analysis_to_report
+from monker_automation.pdftest import print_pdf, add_analysis_to_report, print_all_views
 from monker_automation.plot import plot_default, plot_range_distribution
 from anytree import Node, RenderTree
 import logging
@@ -18,10 +18,12 @@ _current_card_list = []
 _infos = {}
 _line = []
 _line_list = []
-_invalid_sequences=[]
+_invalid_sequences = []
 
 # TODO change available buttons in gui.py to make this unessasay
 # or move it there...
+
+
 def convert_button_dic(buttons):
     bu_dic = {}
     if buttons[CHECK]:
@@ -52,16 +54,16 @@ def valid_line():
 
 
 def skip_path():
-    #invalid sequences is stronger bind than valide line list
+    # invalid sequences is stronger bind than valide line list
     if _invalid_sequences != []:
-        if len(_line) <2:
+        if len(_line) < 2:
             return False
         else:
             for sequence in _invalid_sequences:
                 if sequence[0] in _line[-2] and sequence[1] in _line[-1]:
                     return True
         return False
-    
+
     if _line_list == []:
         return False
     line_list_long = []
@@ -100,6 +102,8 @@ def print_infos(node_name, total_results, action_results, infos):
     plot_range_distribution(total_results, action_results, infos["actions"])
     print_pdf(_line)
     add_analysis_to_report()
+    #if PRINT_VIEWS: #TODO very inefficient because done multiple times
+    #    print_all_views(infos["board"])
     # TODO add infos to dictionary and save results at the end?
 
 
@@ -183,7 +187,7 @@ def walk_tree(valid_lines=[], invalid_sequences=[], turn_cards=[], river_cards=[
     global _current_board
     global _line_list
     global _invalid_sequences
-    
+
     # last_line = []
     _line.append(LINE_START)
     goto_start()
@@ -200,6 +204,10 @@ def walk_tree(valid_lines=[], invalid_sequences=[], turn_cards=[], river_cards=[
         cards_lvl1 = [
             card for card in river_cards if card not in current_board_list]
         cards_lvl2 = []
+    elif turn_cards != [] and river_cards == []:
+        cards_lvl1 = [
+            card for card in turn_cards if card not in current_board_list]
+        cards_lvl2 = []
     elif turn_cards == [] and river_cards == []:
         cards_lvl1 = []
         cards_lvl2 = []
@@ -213,6 +221,18 @@ def walk_tree(valid_lines=[], invalid_sequences=[], turn_cards=[], river_cards=[
         exit()
 
     root = add_subtrees(None, cards_lvl1, cards_lvl2)
+    board=_current_board
+    # board="Qd3d2d Ks"
+    if PRINT_VIEWS:
+        print_all_views(board)
+        if cards_lvl1:
+            for item in cards_lvl1:
+                print_all_views(board+" "+item)
+        if cards_lvl2:
+            for turn in cards_lvl1:
+                for river in cards_lvl2:
+                    print_all_views(board+" "+turn+" "+river)
+
     for pre, fill, node in RenderTree(root):
         print("%s%s" % (pre, node.name))
 
@@ -220,12 +240,16 @@ def walk_tree(valid_lines=[], invalid_sequences=[], turn_cards=[], river_cards=[
 def test():
     logger = logging.getLogger()
     logger.setLevel("INFO")
-    turn_cards = ["3h"]
-    river_cards = ["Kc"]
+    # turn_cards = ["2c","As","Ks","9c","Ts","7c"]
+    #turn_cards = ["5c", "Ks", "2s", "Ah"]
+    turn_cards = []
+    river_cards =  ["Tc","Ts","3c","7c"]
 
-    valid_lines = [OOP_X_X_BET]
-
-    invalid_sequences = [[RAISE,RAISE],[RAISE,CALL]]
+    invalid_sequences = []
+    #invalid_sequences = [[RAISE, RAISE]]
+    valid_lines = [
+    OOP_BET
+    ]
     valid_lines = []
     walk_tree(valid_lines, invalid_sequences, turn_cards, river_cards)
 

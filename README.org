@@ -1,4 +1,5 @@
 * Logging
+  CLOCK: [2018-12-25 Di 11:21]--[2018-12-25 Di 18:18] =>  6:57
   CLOCK: [2018-12-11 Di 11:25]--[2018-12-11 Di 11:46] =>  0:21
   CLOCK: [2018-12-03 Mo 12:20]--[2018-12-03 Mo 14:37] =>  2:17
   CLOCK: [2018-12-01 Sa 18:53]--[2018-12-01 Sa 22:46] =>  3:53
@@ -333,6 +334,11 @@ total_counts(
 ** [2018-12-01 Sa]
 The A4 size print measures 21.0 x 29.7cm, 8.27 x 11.69 inches
 
+** [2018-12-25 Di]
+- try pycharm
+- write tests :-)
+- debuged KJ5 fd board (checked view results in debugger) -- looks identical || keep as refercence
+- view test included
 * FIXMEs TODOs
 ** View changes
 - on trips board pairs where there is rank on board doesnt get added [2018-12-03 Mo]
@@ -346,6 +352,14 @@ The A4 size print measures 21.0 x 29.7cm, 8.27 x 11.69 inches
 - ON AJ3fdQK is shows T,T,T,T and TT,TT,TT,TT for blocker hands?! [2018-12-09 So]
   (probably because it takes blockers from all nutstriaghts)
 - on Q65Q6 board 6 is not in list...also middle pairs would be usefull? [2018-12-12 Mi]
+- on AQ7AA it has AK AQ AJ in high card range and not KQ KJ KT [2019-01-05 Sa]
+- on AsQd7dAc trips hands with kicker are in wrong order KA, JA, TA instead of AK AJ AT ( ok probably intended and only 
+weird on A high baords) [2019-01-05 Sa]
+- straight flushes are not recognised! [2019-01-11 Fr]
+- 2 trips board low trips
+- middle pairs on paired board (overall more middle / low pairs?)
+
+
 ** Errors
 - baord string is empty when no action has happend (click 2 times on a card which isnt on board) [2018-12-03 Mo]
 - exclude range not working currently (discard it?) [2018-12-03 Mo]
@@ -357,7 +371,7 @@ The A4 size print measures 21.0 x 29.7cm, 8.27 x 11.69 inches
   of very low spr
 - straight categories are wrong on KJ45A board straights[0] is QT but striaghts[1] is empty instead of 23 (which is in striaghts[9]) or so 
 - labeling not correct if bet/raise sizes are not ordered in util file [2018-12-14 Fr]
-- 
+- range composition not working if one range has 0 combos? [2019-02-04 Mo]
 ** Potentional Improvements
 - TODO/IDEA extend gui tool with saving ranges based on previous actions in a tree struktur
   ranges/KhJd5h/OOP/check.bla; bet.bla
@@ -371,3 +385,4 @@ The A4 size print measures 21.0 x 29.7cm, 8.27 x 11.69 inches
 - Equity Graph
 - Interaktives QUIZ...wobei geht eher richtung GUI
 - EV ausgabe hinzufügen?
+- Legende durchsichtig [2019-02-04 Mo]

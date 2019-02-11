@@ -80,23 +80,26 @@ BET = "BET"
 RAISE = "RAISE"
 POSSIBLE_BET_RAISE = ["40", "60", "80", "100", "AllIn"]
 POSSIBLE_BET_RAISE = ["50", "100", "AllIn"]
-POSSIBLE_BET_RAISE = ["50", "60", "70", "80", "100", "AllIn"]
-POSSIBLE_BET_RAISE = ["20", "30", "50", "70", "100", "AllIn"]
+POSSIBLE_BET_RAISE = ["20","30", "40", "50", "100", "AllIn"]
+POSSIBLE_BET_RAISE = ["MIN","10","25","50","75","100","AllIn"]
+#POSSIBLE_BET_RAISE = ["30","50", "70","100", "AllIn"]
+POSSIBLE_BET_RAISE = ["100","AllIn"]
 # POSSIBLE_BET_RAISE = ["30", "40","50", "70", "80","100", "AllIn"]
-BUTTON_FILES = {"CHECK": "check.png", "CALL": "call.png", "MIN": "min.png", "20": "20.png", "30": "30.png",
-                "40": "40.png", "50": "50.png", "60": "60.png", "70": "70.png",
-                "80": "80.png", "100": "100.png", "AllIn": "allin.png"}
+BUTTON_FILES = {"CHECK": "check.png", "CALL": "call.png", "MIN": "min.png", "10":"10.png","20": "20.png",
+                "25":"25.png","30": "30.png",
+                "35": "35.png", "40": "40.png", "50": "50.png", "60": "60.png", "66":"66.png","70": "70.png",
+                "75":"75.png","80": "80.png", "100": "100.png", "AllIn": "allin.png"}
 BUTTON_FILES_FOLDER = "/home/johann/code/monker_automation/monker_automation/buttons/"
 BUTTON_REGION = (3930, 911, 4200, 935)
 CHECK_CALL_REGION = (3930, 911, 4000, 936)  # restrict for performance reasons
 MAX_BETS_RAISES = 1
-
 QUIZ = False
+PRINT_VIEWS = True
 
 # info tree creation
 LINE_START = "|"
-MIN_FREQ = 20
-MIN_RAISE_FREQ = 8
+MIN_FREQ = 10
+MIN_RAISE_FREQ = 5
 
 # standard lines
 
@@ -131,7 +134,17 @@ OOP_X_BET_vsRAISE = OOP_X_BET + [RAISE]
 IP_X_X_BET_vsRAISE = IP_X_X_BET + [RAISE]
 OOP_X_X_BET_vsRAISE = OOP_X_X_BET + [RAISE]
 
+# vs delay bet
+IP_X_vsBET = OOP_X_BET+[BET]
+OOP_X_vsBET = IP_X_BET+[BET]
+IP_X_X_vsBET = OOP_X_X_BET+[BET]
+OOP_X_X_vsBET = IP_X_X_BET+[BET]
 
+# call once and then bet / donk
+IP_CALL_BET=OOP_BET_BET+[CHECK]
+OOP_BET_vsBET=IP_CALL_BET + [BET]
+OOP_CALL_BET=OOP_vsBET+[CALL]
+IP_BET_vsBET=OOP_CALL_BET+[BET]
 # analysis
 
 DEFAULT_VIEW_RESULT_FILENAME = "/home/johann/code/monker_automation/RESULTS.org"

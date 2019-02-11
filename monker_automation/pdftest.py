@@ -22,11 +22,12 @@ def print_pdf(line=[]):
     c.drawImage(image, 10, 320, 560, 380)
     image = os.path.join(DEFAULT_REPORT_DIRECTORY, TABLE_PNG_NAME)
     c.drawImage(image, 35, 700, 150, 150)
-    image = os.path.join(DEFAULT_REPORT_DIRECTORY, RANGE_HEADER_PNG_NAME)
-    c.drawImage(image, 225, 755, 300, 40)
+    if not QUIZ:
+        image = os.path.join(DEFAULT_REPORT_DIRECTORY, RANGE_HEADER_PNG_NAME)
+        c.drawImage(image, 225, 755, 300, 40)
     if line:
         c.setFont("Helvetica", 8)
-        c.drawString(200,725,"-".join(line))
+        c.drawString(200, 725, "-".join(line))
     c.save()
 
 

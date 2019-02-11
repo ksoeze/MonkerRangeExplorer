@@ -266,15 +266,15 @@ def get_view_results(actions, view, exclude=True, exclude_list=[]):
 
     # add percent of view entry regarding total/starting range
     total_results["r"] = calc_percent(all_combos, total_combo_count)
-    # for item in total_results["r"]:
-    #     logging.debug("Total % {}".format(item))
+    for item in total_results["r"]:
+        logging.debug("Total % {}".format(item))
     # same but cummulative_counts (cumulate counts first then recalculate %)
     total_cum_counts = cummulative_counts(all_combos)
     total_results["r_cum"] = (calc_percent(
         total_cum_counts, total_combo_count))
 
-    # for item in total_results["r_cum"]:
-    #     logging.debug("Total CUM% {}".format(item))
+    for item in total_results["r_cum"]:
+        logging.debug("Total CUM% {}".format(item))
 
     action_results = {}
     for a in actions:
