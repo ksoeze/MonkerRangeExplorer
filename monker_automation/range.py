@@ -71,11 +71,16 @@ def hand_in_item(hand, item):
             else:
                 return False
         return False
-    elif len(item) == 4:  # wrap
-        for r in item:
-            if r not in RANKS or r not in ranks:
-                return False
-        return True
+    elif len(item) == 4:  # wrap or str flush
+        if item[0] in RANKS and item[1] in RANKS and item[2] in RANKS and item[3] in RANKS:
+            for r in item:
+                if r not in ranks:
+                    return False
+            return True
+        elif item[0] in RANKS and item[1] in SUITS and item[2] in RANKS and item[3] in SUITS:
+            if item[0:2] in hand_list and item[2:4] in hand_list:
+                return True
+        return False
     return False
 
 

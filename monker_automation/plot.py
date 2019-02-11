@@ -113,7 +113,7 @@ def plot_default(total_results, action_results, actions, cumulative=True):
     legend_texts = list(
         reversed(combine_action_with_percent(action_results)[1:]))
     #ax1.legend(bars, legend_texts)
-    ax2.legend(bars, legend_texts,  loc='upper right')
+    ax2.legend(bars, legend_texts,  fancybox=True,  framealpha=0.5,loc='upper right')
     # ax1.legend(bars, actions)
     ax2.axvline(x=25, color="k", linewidth=1, linestyle="--")
     ax2.axvline(x=50, color="k",  linewidth=1, linestyle="--")

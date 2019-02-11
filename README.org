@@ -1,4 +1,5 @@
 * Logging
+  CLOCK: [2019-02-11 Mo 12:08]
   CLOCK: [2018-12-25 Di 11:21]--[2018-12-25 Di 18:18] =>  6:57
   CLOCK: [2018-12-11 Di 11:25]--[2018-12-11 Di 11:46] =>  0:21
   CLOCK: [2018-12-03 Mo 12:20]--[2018-12-03 Mo 14:37] =>  2:17
@@ -15,6 +16,7 @@
   CLOCK: [2018-11-19 Mo 13:25]--[2018-11-19 Mo 16:08] =>  2:43
   CLOCK: [2018-11-18 So 23:04]--[2018-11-19 Mo 03:01] =>  3:57
   CLOCK: [2018-11-17 Sa 14:15]--[2018-11-17 Sa 18:23] =>  4:08
+
 #+BEGIN: clocktable :maxlevel 2 :scope subtree
 #+CAPTION: Clock summary at [2018-12-03 Mo 23:06]
 | Headline     | Time       |
@@ -40,7 +42,6 @@
 - [overpairs]
 - [middlepairs (<top card > 2nd board card)]
 - [pocketpairs (overall including overpairs, middlepairs etc)]
-- [board pairs]
 - [kickers]
 
 - [flushdraws] (ansich liste top -> bottom aber derzeitige einteilung oft nfd (egal ob 1er oder 2) und rest fd)
@@ -278,9 +279,28 @@ if fd:
 - fd blocker
 - board pair "blocker" [1,1]
 - nutstraightdraw blocker pairs
+*** Custom VIEWS Definitionen [2019-02-11 Mo]
+STRFL
+FULL
+FL
+FLB
+STR
+STRB
+SET
+TOP2
+TOPOTHER2
+OTHER2
+BP
+PP
+K
+
+FD
+FDB
+WRAP
+OESD
+GS
 
 ** INFO TREE Settings:
-
 *** Line Definition:
 X stands for CHECK
 C stands for CALL
@@ -296,7 +316,6 @@ tripplebarrel for IP:
 X-B50-C-5c-X-B50-C-2h-X
 
 so only action before situation is coded...infos about action frequencies is saved with read_situation_and_save_ranges() from gui.py
-
 
 
 
@@ -339,27 +358,19 @@ The A4 size print measures 21.0 x 29.7cm, 8.27 x 11.69 inches
 - write tests :-)
 - debuged KJ5 fd board (checked view results in debugger) -- looks identical || keep as refercence
 - view test included
+
+** [2019-02-11 Mo]
+- many bugfixes of views
+- implemented combined view...not quite workable yet
+- 
+
 * FIXMEs TODOs
 ** View changes
-- on trips board pairs where there is rank on board doesnt get added [2018-12-03 Mo]
-- might be good idea to also fill description list for view file [2018-12-03 Mo]
 - group made hands based on blocker on flush boards?
 - set > straight on flush board
 - clear up empty ranges from view
-- 8627 board oesd includes only 98 instead of 98,97,96 [2018-12-04 Di]
-- middlepairs missing on paired board [2018-12-05 Mi]
-- on Ks6d3s5h5c default view shows 74,74 as nutstraight?! [2018-12-05 Mi]
-- ON AJ3fdQK is shows T,T,T,T and TT,TT,TT,TT for blocker hands?! [2018-12-09 So]
-  (probably because it takes blockers from all nutstriaghts)
-- on Q65Q6 board 6 is not in list...also middle pairs would be usefull? [2018-12-12 Mi]
-- on AQ7AA it has AK AQ AJ in high card range and not KQ KJ KT [2019-01-05 Sa]
-- on AsQd7dAc trips hands with kicker are in wrong order KA, JA, TA instead of AK AJ AT ( ok probably intended and only 
-weird on A high baords) [2019-01-05 Sa]
-- straight flushes are not recognised! [2019-01-11 Fr]
-- 2 trips board low trips
-- middle pairs on paired board (overall more middle / low pairs?)
-
-
+- 8627 board oesd includes only 98 instead of 98,97,96 [2018-12-04 Di] partly solved play around with nuttynes and outs settings in return straightdraws [2019-02-11 Mo]
+- (overall more middle / low pairs?)
 ** Errors
 - baord string is empty when no action has happend (click 2 times on a card which isnt on board) [2018-12-03 Mo]
 - exclude range not working currently (discard it?) [2018-12-03 Mo]
@@ -369,7 +380,6 @@ weird on A high baords) [2019-01-05 Sa]
 - check if range files are equal -> probably sign of wrong gui input
 - when having AI as only option after bet it asumes fold call AI ranges even when there is no call because 
   of very low spr
-- straight categories are wrong on KJ45A board straights[0] is QT but striaghts[1] is empty instead of 23 (which is in striaghts[9]) or so 
 - labeling not correct if bet/raise sizes are not ordered in util file [2018-12-14 Fr]
 - range composition not working if one range has 0 combos? [2019-02-04 Mo]
 ** Potentional Improvements
@@ -378,11 +388,8 @@ weird on A high baords) [2019-01-05 Sa]
   ranges/KhJd/5h/OOP-CHECK-IP/check.bla; bet.bla etc
   add path argument to get_view_results etc
 - pdf merger supports bookmarks (add bookmark with board and line ?)
-- IDEA: print pdf as in quiz style leaving certain information blank/no color
 - SUB-Kategorien VIEWS für bestimmte hände...z.b nur overpairs; nur 2 pairs; nur fd; nur oesd etc
 - Ausgabe in editierbares FORMAT -> ods
 - Ausgabe für schwarz weiß druck andere Farben
-- Equity Graph
 - Interaktives QUIZ...wobei geht eher richtung GUI
 - EV ausgabe hinzufügen?
-- Legende durchsichtig [2019-02-04 Mo]

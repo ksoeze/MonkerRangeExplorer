@@ -4,7 +4,7 @@
 from PyPDF2 import PdfFileMerger, PdfFileReader
 from monker_automation.views import print_view
 from monker_automation.views import get_view
-from monker_automation.analysis import current_view
+#from monker_automation.analysis import current_view
 from monker_automation.utils import *
 from reportlab.pdfgen import canvas
 # from reportlab.lib.units import inch
@@ -63,10 +63,10 @@ def add_analysis_to_report():
     merger.write(report_filename)
 
 
-def do_analysis():
-    results = current_view()
-    board = results["board"]
-    # generate all views:
-    print_all_views(board)
-    print_pdf()
-    add_analysis_to_report()
+# def do_analysis():
+#     results = current_view()
+#     board = results["board"]
+#     # generate all views:
+#     print_all_views(board)
+#     print_pdf()
+#     add_analysis_to_report()

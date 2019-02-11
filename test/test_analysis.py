@@ -1,4 +1,6 @@
 import pytest
+
+from monker_automation.analysis import current_spot
 from monker_automation.gui import read_situation_and_save_ranges
 from monker_automation.views import get_view
 from monker_automation.range import get_view_results
@@ -22,7 +24,7 @@ def read_results():
         yield total_results, action_results
 
 
-def test_KdJh5h_vs_cbet(read_infos,read_results):
+def test_KdJh5h_vs_cbet(read_infos, read_results):
     new_infos = read_situation_and_save_ranges()
     assert read_infos["actions"] == new_infos["actions"]
     assert read_infos["board"] == new_infos["board"]
@@ -36,8 +38,9 @@ def test_KdJh5h_vs_cbet(read_infos,read_results):
     assert read_results[0] == total_results
     assert read_results[1] == action_results
 
-    plot_default(total_results,action_results,actions)
-    plot_range_distribution(total_results,action_results,actions)
+    plot_default(total_results, action_results, actions)
+    plot_range_distribution(total_results, action_results, actions)
+
 
 def test_print_combo_output():
     logger = logging.getLogger()
@@ -51,3 +54,7 @@ def test_print_combo_output():
 
     for item in total_results["r"]:
         print(item)
+
+
+def test_current_spot():
+    current_spot(VIEW_TYPES[4], VIEW_TYPES[5], True, False)

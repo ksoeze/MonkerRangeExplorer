@@ -22,18 +22,22 @@ STRAIGHTS = [list("AKQJT"), list("KQJT9"), list("QJT98"), list("JT987"), list(
 INVALID_CHAR = '#'
 
 # view constants
-QUAD_BOARD_PAIR_GROUPING = [1, 1, 2, 3]
+QUAD_BOARD_PAIR_GROUPING = [1, 1, 2, 2,3]
 PAIRED_BOARD_FULL_OR_BETTER_GROUPING = [2, 2]
 FLUSH_GROUPING = [1, 1, 2]
 OVERPAIR_GROUPING = [1, 2]
 FLUSH_GROUPING = [1, 1, 2]
 SET_GROUPING = [1, 1]
 PAIR_GROUPING = [1, 1]
-VIEW_TYPES = ["DEFAULT", "MADE_HANDS", "DRAWS", "BLOCKERS"]
+MIDDLE_PAIR_GROUPING = [2]
+VIEW_TYPES = ["DEFAULT", "MADE_HANDS", "DRAWS", "BLOCKERS", "CUSTOM", "DRAWS_BLOCKERS"]
 
 VIEW_FOLDER = "/home/johann/monker/Views/"
 DEFAULT_VIEW_NAME = "OVERVIEW"
 TOP_VIEW_LINE = "180\n"
+
+# custom views
+
 
 # range constants
 
@@ -83,7 +87,7 @@ POSSIBLE_BET_RAISE = ["50", "100", "AllIn"]
 POSSIBLE_BET_RAISE = ["20","30", "40", "50", "100", "AllIn"]
 POSSIBLE_BET_RAISE = ["MIN","10","25","50","75","100","AllIn"]
 #POSSIBLE_BET_RAISE = ["30","50", "70","100", "AllIn"]
-POSSIBLE_BET_RAISE = ["100","AllIn"]
+POSSIBLE_BET_RAISE = ["50","100","AllIn"]
 # POSSIBLE_BET_RAISE = ["30", "40","50", "70", "80","100", "AllIn"]
 BUTTON_FILES = {"CHECK": "check.png", "CALL": "call.png", "MIN": "min.png", "10":"10.png","20": "20.png",
                 "25":"25.png","30": "30.png",
@@ -92,7 +96,7 @@ BUTTON_FILES = {"CHECK": "check.png", "CALL": "call.png", "MIN": "min.png", "10"
 BUTTON_FILES_FOLDER = "/home/johann/code/monker_automation/monker_automation/buttons/"
 BUTTON_REGION = (3930, 911, 4200, 935)
 CHECK_CALL_REGION = (3930, 911, 4000, 936)  # restrict for performance reasons
-MAX_BETS_RAISES = 1
+MAX_BETS_RAISES = 2
 QUIZ = False
 PRINT_VIEWS = True
 
@@ -145,11 +149,13 @@ IP_CALL_BET=OOP_BET_BET+[CHECK]
 OOP_BET_vsBET=IP_CALL_BET + [BET]
 OOP_CALL_BET=OOP_vsBET+[CALL]
 IP_BET_vsBET=OOP_CALL_BET+[BET]
+
 # analysis
 
 DEFAULT_VIEW_RESULT_FILENAME = "/home/johann/code/monker_automation/RESULTS.org"
 DEFAULT_REPORT_DIRECTORY = "/home/johann/Documents/poker/monker-documentation/MonkerReports/"
 DEFAULT_REPORT_VIEW_DIR = "/home/johann/Documents/poker/monker-documentation/MonkerReports/views/"
+DEFAULT_REPORT_MATCHER_DIRECTORY ="/home/johann/Documents/poker/monker-documentation/MonkerReports/matcher/"
 STRATEGY_PNG_NAME = "strat.png"
 RANGE_PNG_NAME = "range.png"
 VIEW_PDF_NAME = "view.pdf"

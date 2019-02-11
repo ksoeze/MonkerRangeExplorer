@@ -270,6 +270,7 @@ def return_straights(board):
             RANK_ORDER[x[0]], RANK_ORDER[x[1]]), reverse=True)
         straights += straight_combo
     # print(straights)
+    straights = list(dict.fromkeys(straights))
     straight_categories = [[], [], [], [], [], [], [], [], [], []]
     for item in straights:
         index = straight_rank[item]-straight_rank[straights[0]]
@@ -348,9 +349,9 @@ def return_straight_draws(board):
         nuttynes = sum(hand_straight_nuttynes[hand])
         if outs >= 5 and nuttynes < 5 or outs == 4 and nuttynes < 4 or outs == 3 and nuttynes < 3:
             draws["wraps"].append(hand)
-        elif outs >= 3 and nuttynes < 5 or outs == 2 and nuttynes < 2:
+        elif outs >= 3 and nuttynes < 6 or outs == 2 and nuttynes < 2:
             draws["oesd"].append(hand)
-        elif outs >= 2 and nuttynes < 4 or outs == 1 and nuttynes < 2:
+        elif outs >= 2 and nuttynes < 6 or outs == 1 and nuttynes < 2:
             draws["gs"].append(hand)
     for item in draws:
         draws[item] = compact_range(draws[item])
@@ -367,6 +368,7 @@ def return_straight_blocker_pairs(board):
         for s in straights[0]:
             if p[0] in s:
                 blockers.append(p)
+    blockers = list(dict.fromkeys(blockers))
     return blockers
 
 
@@ -410,6 +412,7 @@ def return_over_pairs(board):
 
 def return_middle_pairs(board):
     ranks = return_ranks(board)
+    ranks = list(dict.fromkeys(ranks))
     mp = []
     for r in RANKS:
         if RANK_ORDER[r] < RANK_ORDER[ranks[0]] and RANK_ORDER[r] > RANK_ORDER[ranks[1]]:
