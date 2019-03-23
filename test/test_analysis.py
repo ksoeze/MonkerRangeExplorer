@@ -57,4 +57,5 @@ def test_print_combo_output():
 
 
 def test_current_spot():
-    current_spot(VIEW_TYPES[4], VIEW_TYPES[5], True, False)
+    current_spot(VIEW_TYPES[1], VIEW_TYPES[4],ig_first_entry=False)
+

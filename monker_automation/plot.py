@@ -4,10 +4,7 @@ from monker_automation.utils import *
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
-from matplotlib.font_manager import FontProperties
 import os
-import io
-from PIL import Image
 
 
 def combine_view_with_percent(total_results):
@@ -17,12 +14,12 @@ def combine_view_with_percent(total_results):
             view = view[:27] + "..."
         cum = "{0:.{1}f}".format(p_cum, 0)
         if len(cum) == 1:
-            cum = "  "+cum
+            cum = "  " + cum
         elif len(cum) == 2:
-            cum = " "+cum
+            cum = " " + cum
         rel = "{0:.{1}f}".format(p, 1)
         if QUIZ:
-            ticks.append(view+"    ")
+            ticks.append(view + "    ")
         else:
             ticks.append(view + " {}".format(rel))
     return ticks
@@ -41,11 +38,11 @@ def combine_action_with_percent(action_results):
     return ticks
 
 
-def plot_default(total_results, action_results, actions, cumulative=True):
+def plot_default(total_results, action_results, actions):
     actions = list(reversed(actions))
     bars = []
     bars2 = []
-    base_value = np.array([0.0]*len(total_results["v_str"][1:]))
+    base_value = np.array([0.0] * len(total_results["v_str"][1:]))
 
     # figure basic settings
     plt.figure(figsize=(8.27, 6))
@@ -83,7 +80,7 @@ def plot_default(total_results, action_results, actions, cumulative=True):
             bars.append(bar)
             bars2.append(bar2)
         else:
-            base_value += np.array(action_results[actions[index-1]]["p"][1:])
+            base_value += np.array(action_results[actions[index - 1]]["p"][1:])
             y_axes = np.arange(len(total_results["v_str"][1:]))
             bar = ax2.barh(
                 y_axes, action_results[actions[index]]["p"][1:], 0.6, left=base_value, color=color)
@@ -112,16 +109,16 @@ def plot_default(total_results, action_results, actions, cumulative=True):
     # FIXMEEEE!! depends on order of actions!
     legend_texts = list(
         reversed(combine_action_with_percent(action_results)[1:]))
-    #ax1.legend(bars, legend_texts)
-    ax2.legend(bars, legend_texts,  fancybox=True,  framealpha=0.5,loc='upper right')
+    # ax1.legend(bars, legend_texts)
+    ax2.legend(bars, legend_texts, fancybox=True, framealpha=0.5, loc='upper right')
     # ax1.legend(bars, actions)
     ax2.axvline(x=25, color="k", linewidth=1, linestyle="--")
-    ax2.axvline(x=50, color="k",  linewidth=1, linestyle="--")
-    ax2.axvline(x=75, color="k",  linewidth=1, linestyle="--")
+    ax2.axvline(x=50, color="k", linewidth=1, linestyle="--")
+    ax2.axvline(x=75, color="k", linewidth=1, linestyle="--")
     filename = os.path.join(DEFAULT_REPORT_DIRECTORY, STRATEGY_PNG_NAME)
     plt.tight_layout()
     plt.savefig(filename, dpi=200, bbox_inches='tight', pad_inches=0)
-    plt.close()
+    plt.close(fig)
     # plt.show()
 
 
@@ -130,7 +127,7 @@ def plot_range_distribution(total_results, action_results, actions):
     y_ticks = combine_action_with_percent(action_results)
     # exclude total
     x_ticks = [
-        i[:27]+"..." if len(i) > 30 else i for i in total_results["v_str"][1:]]
+        i[:27] + "..." if len(i) > 30 else i for i in total_results["v_str"][1:]]
     table = []
     table.append(total_results["r"][1:])  # again exclude total stuff
     for action in action_results:
@@ -139,14 +136,14 @@ def plot_range_distribution(total_results, action_results, actions):
     table = [*zip(*table)]  # transpose
 
     bars = []
-    base_value = np.array([0.0]*len(y_ticks))
+    base_value = np.array([0.0] * len(y_ticks))
 
     # figure basic settings
     plt.figure(figsize=(8.27, 4.65))
     plt.subplots_adjust(left=0.14, bottom=0.08, right=0.80, top=0.95)
 
-    #colors = plt.cm.inferno(np.linspace(0, 1, len(x_ticks)))
-    #colors = plt.cm.viridis(np.linspace(0, 1, len(x_ticks)))
+    # colors = plt.cm.inferno(np.linspace(0, 1, len(x_ticks)))
+    # colors = plt.cm.viridis(np.linspace(0, 1, len(x_ticks)))
 
     colors = [(0, 0, 0), (1, 0, 0), (0, 0, 1), (0, 1, 0), (1, 1, 0),
               (0.5, 0.5, 0.5), (0.5, 0, 0), (0, 0, 0.5), (0, 0.5, 0), (0.5, 0.5, 0)]
@@ -165,7 +162,7 @@ def plot_range_distribution(total_results, action_results, actions):
             bar = plt.barh(y_axes, table[index], 0.6, color=colors[index])
             bars.append(bar)
         else:
-            base_value += np.array(table[index-1])
+            base_value += np.array(table[index - 1])
             y_axes = np.arange(len(y_ticks))
             bar = plt.barh(
                 y_axes, table[index], 0.6, left=base_value, color=colors[index])
@@ -177,11 +174,11 @@ def plot_range_distribution(total_results, action_results, actions):
     plt.legend(bars, x_ticks, loc='upper left',
                fontsize="xx-small", bbox_to_anchor=(1.01, 1))
     plt.axvline(x=25, color="k", linewidth=1, linestyle="--")
-    plt.axvline(x=50, color="k",  linewidth=1, linestyle="--")
-    plt.axvline(x=75, color="k",  linewidth=1, linestyle="--")
+    plt.axvline(x=50, color="k", linewidth=1, linestyle="--")
+    plt.axvline(x=75, color="k", linewidth=1, linestyle="--")
     # plt.axvline(x=100, linestyle="--")
     filename = os.path.join(DEFAULT_REPORT_DIRECTORY, RANGE_PNG_NAME)
     plt.savefig(filename, dpi=200, bbox_inches='tight', pad_inches=0)
-    plt.close()
+    plt.close("all")
     # plt.show()
     # return plt

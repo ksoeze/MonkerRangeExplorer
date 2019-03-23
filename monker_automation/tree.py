@@ -6,7 +6,7 @@ from monker_automation.gui import click_action, click_back, goto_start
 from monker_automation.gui import read_situation_and_save_ranges
 from monker_automation.views import get_view
 from monker_automation.range import get_view_results
-from monker_automation.pdftest import print_pdf, add_analysis_to_report, print_all_views
+from monker_automation.pdf_print import print_pdf, add_analysis_to_report, print_all_views
 from monker_automation.plot import plot_default, plot_range_distribution
 from anytree import Node, RenderTree
 import logging
@@ -97,13 +97,11 @@ def should_visit(action, action_results):
             return True
 
 
-def print_infos(node_name, total_results, action_results, infos):
+def print_infos(node_name, total_results, action_results, infos, report_name=REPORT_PDF_NAME):
     plot_default(total_results, action_results, infos["actions"])
     plot_range_distribution(total_results, action_results, infos["actions"])
     print_pdf(_line)
-    add_analysis_to_report()
-    #if PRINT_VIEWS: #TODO very inefficient because done multiple times
-    #    print_all_views(infos["board"])
+    add_analysis_to_report(report_name,_start_board+"-".join(_line))
     # TODO add infos to dictionary and save results at the end?
 
 
@@ -114,11 +112,10 @@ def add_subtrees(parent, cards_lvl1, cards_lvl2):
 
     if not(_line[-1] == CALL or _line[-2:] == [CHECK, CHECK]):
         infos = read_situation_and_save_ranges()
-        view = get_view(_current_board, VIEW_TYPES[0])  # fix this?
+        view = get_view(_current_board, SCRIPT_VIEW_TYPE[0])
         buttons = convert_button_dic(infos["button_coordinates"])
         actions = infos["actions"]
 
-        node_name = "-".join(_line)
         node_name = _line[-1]
         node = Node(node_name, parent=parent)  # , gui_info=infos,
         # overall_results=total_results, relativ_results=action_results)
@@ -129,7 +126,11 @@ def add_subtrees(parent, cards_lvl1, cards_lvl2):
 
         if valid_line():
             logging.info("VALID LINE: {}".format(_line))
-            print_infos(node_name, total_results, action_results, infos)
+            print_infos(node_name, total_results, action_results, infos,_start_board+"-"+SCRIPT_VIEW_TYPE[0]+"-"+REPORT_PDF_NAME)
+            for view_type in SCRIPT_VIEW_TYPE[1:]:
+                view = get_view(_current_board, view_type)
+                total_results, action_results = get_view_results(actions, view)
+                print_infos(node_name, total_results, action_results, infos,_start_board+"-"+view_type+"-"+REPORT_PDF_NAME)
         for button in buttons:
             if should_visit(button, action_results):
                 _line.append(button)
@@ -237,22 +238,16 @@ def walk_tree(valid_lines=[], invalid_sequences=[], turn_cards=[], river_cards=[
         print("%s%s" % (pre, node.name))
 
 
-def test():
+def start_walker():
     logger = logging.getLogger()
     logger.setLevel("INFO")
-    # turn_cards = ["2c","As","Ks","9c","Ts","7c"]
-    #turn_cards = ["5c", "Ks", "2s", "Ah"]
-    turn_cards = []
-    river_cards =  ["Tc","Ts","3c","7c"]
+    turn_cards = TURN_CARDS
+    river_cards =  RIVER_CARDS
+    invalid_sequences = INVALID_SEQUENCES
+    valid_lines = VALID_LINES
 
-    invalid_sequences = []
-    #invalid_sequences = [[RAISE, RAISE]]
-    valid_lines = [
-    OOP_BET
-    ]
-    valid_lines = []
     walk_tree(valid_lines, invalid_sequences, turn_cards, river_cards)
 
 
 if (__name__ == '__main__'):
-    test()
+    start_walker()

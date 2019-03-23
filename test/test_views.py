@@ -27,19 +27,19 @@ def get_compare_view(board, view_type):
 
 
 @pytest.mark.parametrize("board, viewtype", [
-    # ("KhJd5h", VIEW_TYPES[0]),
-    # ("KhJd5h", VIEW_TYPES[1]),
-    # ("KhJd5h", VIEW_TYPES[2]),
-    # ("KhJd5h", VIEW_TYPES[3]),
-    # ("4c4d4hTcQs", VIEW_TYPES[0]),
-    # ("4c4d4h2c3s", VIEW_TYPES[0]),
-    # ("8s7c2d6h",VIEW_TYPES[0]),
-    # ("6h6d2h2dTc",VIEW_TYPES[0]),
-    # ("6h6d6h2d2c",VIEW_TYPES[0]),
-    # ("QhQd6h2d2c",VIEW_TYPES[0]),
-    # ("AcJc3dQhKd", VIEW_TYPES[0]),
-    # ("Qc6h5cQd6d", VIEW_TYPES[0]),
-    # ("AcQd7sAd", VIEW_TYPES[0]),
+    ("KhJd5h", VIEW_TYPES[0]),
+    ("KhJd5h", VIEW_TYPES[1]),
+    ("KhJd5h", VIEW_TYPES[2]),
+    ("KhJd5h", VIEW_TYPES[3]),
+    ("4c4d4hTcQs", VIEW_TYPES[0]),
+    ("4c4d4h2c3s", VIEW_TYPES[0]),
+    ("8s7c2d6h",VIEW_TYPES[0]),
+    ("6h6d2h2dTc",VIEW_TYPES[0]),
+    ("6h6d6h2d2c",VIEW_TYPES[0]),
+    ("QhQd6h2d2c",VIEW_TYPES[0]),
+    ("AcJc3dQhKd", VIEW_TYPES[0]),
+    ("Qc6h5cQd6d", VIEW_TYPES[0]),
+    ("AcQd7sAd", VIEW_TYPES[0]),
     ("KdJc4s5cAh",VIEW_TYPES[0]),
 ])
 def test_view(board, viewtype):

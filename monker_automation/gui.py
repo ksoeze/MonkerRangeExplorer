@@ -2,7 +2,6 @@
 
 from monker_automation.utils import *
 import pyautogui
-#import sys
 import time
 from tkinter import Tk
 import os
@@ -100,8 +99,6 @@ def enter_sequence_and_save_ranges(sequence, actions, board=""):
 
 def available_buttons():
     buttons = {}
-    #img = os.path.join(BUTTON_FILES_FOLDER, BUTTON_FILES[BACK])
-    #coordinates = pyautogui.locateCenterOnScreen(img, region=BUTTON_REGION)
 
     # BACK is always on screen...take fixed coordinates
     buttons[BACK] = BACK_CO
@@ -121,8 +118,6 @@ def available_buttons():
     last_action = last_action[-8:]
     is_bet = any([CALL in last_action, "FLOP" in last_action,
                   "TURN" in last_action, "RIVER" in last_action])
-    # print(last_action)
-    # print(is_bet)
 
     for size in POSSIBLE_BET_RAISE:
         img = os.path.join(BUTTON_FILES_FOLDER, BUTTON_FILES[size])
@@ -135,8 +130,6 @@ def available_buttons():
                 buttons["BET"].append(["RAISE " + size, coordinates])
         if len(buttons["BET"]) == MAX_BETS_RAISES:
             break
-    # for item in buttons:
-    #    print("{}: {}".format(item, buttons[item]))
     return buttons
 
 # returns list of available ranges based on

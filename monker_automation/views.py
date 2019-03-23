@@ -5,6 +5,7 @@ import monker_automation.board as board_util
 import os
 import logging
 
+
 def regroup_list(hand_list, pattern):
     return_hand_list = []
     for i in pattern:
@@ -52,13 +53,13 @@ def regroup_board_intersections(board):
 def quad_board(board):
     view = []
     rank_count_list = board_util.return_rank_counts(board)
-    pairs = [r*2 for r in RANKS if r not in rank_count_list[3]]
+    pairs = [r * 2 for r in RANKS if r not in rank_count_list[3]]
     view += regroup_list(pairs,
                          QUAD_BOARD_PAIR_GROUPING)
     kicker_board = board_util.parse_board(''.join(rank_count_list[3]))
     kickers = board_util.return_kickers(kicker_board)
-    view.append([kickers[0]+kickers[1], kickers[0] +
-                 kickers[2], kickers[0]+kickers[3]])
+    view.append([kickers[0] + kickers[1], kickers[0] +
+                 kickers[2], kickers[0] + kickers[3]])
     view.append([kickers[0]])
     return view
 
@@ -66,18 +67,18 @@ def quad_board(board):
 def trips_board(board):
     view = []
     rank_count_list = board_util.return_rank_counts(board)
-    #str flushes
+    # str flushes
     view.append(board_util.return_str_flushes(board))
-    #fulls or better
+    # fulls or better
     view.append(board_util.return_fulls_or_better(board))
     overfulls = []
     for card in rank_count_list[0]:
         if RANK_ORDER[card] > RANK_ORDER[rank_count_list[2][0]]:
-            overfulls.append(card*2)
+            overfulls.append(card * 2)
     # overfulls
     view.append(overfulls)
-    #fulls
-    pairs = [r*2 for r in RANKS if r not in rank_count_list[2]]
+    # fulls
+    pairs = [r * 2 for r in RANKS if r not in rank_count_list[2]]
     pairs = [pair for pair in pairs if pair not in overfulls]
     view += regroup_list(pairs,
                          QUAD_BOARD_PAIR_GROUPING)
@@ -88,12 +89,12 @@ def trips_board(board):
         return view
     straights = board_util.return_straights(board)
     if straights[0]:
-        view.append(straights[0]+straights[1])
+        view.append(straights[0] + straights[1])
     if not flushes or not straights:
         kicker_board = board_util.parse_board(''.join(rank_count_list[2]))
         kickers = board_util.return_kickers(kicker_board)
-        view.append([kickers[0]+kickers[1], kickers[0] +
-                     kickers[2], kickers[0]+kickers[3]])
+        view.append([kickers[0] + kickers[1], kickers[0] +
+                     kickers[2], kickers[0] + kickers[3]])
     return view
 
 
@@ -111,7 +112,7 @@ def trips_board_blocker(board):
 
     view.append(overfull_blocker)
     pair_blockers = [p[0] for p in board_util.return_pairs(board)]
-    pair_blockers = pair_blockers[:int(len(pair_blockers)//1.5)]
+    pair_blockers = pair_blockers[:int(len(pair_blockers) // 1.5)]
     view += regroup_list(pair_blockers, QUAD_BOARD_PAIR_GROUPING)
     return view
 
@@ -147,7 +148,7 @@ def paired_board(board):
         view += (regroup_list(flushes, FLUSH_GROUPING))
         if straights[0]:
             # straights
-            view.append(straights[0]+straights[1])
+            view.append(straights[0] + straights[1])
         # nf and 2nd nf blocker
         view.append([flushes[0][:2], flushes[1][:2]])
     elif straights[0]:
@@ -168,14 +169,14 @@ def paired_board(board):
 
     if not flushes and not straights[0]:
         # trips + kickers
-        view.append([kickers[0]+intersections[0]])
-        view.append([kickers[1]+intersections[0],
-                     kickers[2]+intersections[0]])
+        view.append([kickers[0] + intersections[0]])
+        view.append([kickers[1] + intersections[0],
+                     kickers[2] + intersections[0]])
 
     # trips
     view.append([intersections[0]])
 
-    #add undertrips if possible
+    # add undertrips if possible
     if len(rank_count_list[1]) >= 2:
         view.append(rank_count_list[1][1])
 
@@ -183,7 +184,10 @@ def paired_board(board):
     straight_draws = board_util.return_straight_draws(board)
     overpairs = board_util.return_over_pairs(board)
     middlepairs = board_util.return_middle_pairs(board)
-    top_pair = rank_count_list[0][0]
+    if len(rank_count_list[0]) != 0:
+        top_pair = rank_count_list[0][0]
+    else: # turn double paired board
+        top_pair = board_util.return_pairs(board)[0][0] # just use highcard...might give bad results
 
     if fd_1 and len(board_util.return_ranks(board)) != 5:
         nfd = [fd_1[0]]
@@ -192,12 +196,12 @@ def paired_board(board):
             nfd.append(fd_2[0])
             fd.append(fd_2[0][1:])
         # nfd + best 2 overpairs and best pair intersection on board
-        view.append([nfd, overpairs[:2]+[top_pair]])
+        view.append([nfd, overpairs[:2] + [top_pair]])
         # any fd with sd value
-        view.append([fd, overpairs[:2]+[top_pair]])
+        view.append([fd, overpairs[:2] + [top_pair]])
         # any fd with any oesd or better
         if straight_draws["oesd"]:
-            view.append([fd, straight_draws["wraps"]+straight_draws["oesd"]])
+            view.append([fd, straight_draws["wraps"] + straight_draws["oesd"]])
         # nfd no decent sd value
         view.append(nfd)
         # bare fd
@@ -208,13 +212,13 @@ def paired_board(board):
     if straight_draws["gs"] and not flushes:
         if straight_draws["oesd"]:
             # oesd straight draws + op or tp
-            view.append([overpairs[:2]+[top_pair],
-                         straight_draws["wraps"]+straight_draws["oesd"]])
+            view.append([overpairs[:2] + [top_pair],
+                         straight_draws["wraps"] + straight_draws["oesd"]])
             # better straight draws
-            view.append(straight_draws["wraps"]+straight_draws["oesd"])
+            view.append(straight_draws["wraps"] + straight_draws["oesd"])
 
         # gs straight draws + sd value
-        view.append([overpairs[:2]+[top_pair],
+        view.append([overpairs[:2] + [top_pair],
                      straight_draws["gs"]])
 
         # gs draws
@@ -228,10 +232,10 @@ def paired_board(board):
     if RANK_ORDER[top_pair] > RANK_ORDER[rank_count_list[1][0]]:
         view.append([top_pair])
         if middlepairs:
-            view+= regroup_list(middlepairs,MIDDLE_PAIR_GROUPING)
+            view += regroup_list(middlepairs, MIDDLE_PAIR_GROUPING)
     else:
         if middlepairs:
-            view+= regroup_list(middlepairs,MIDDLE_PAIR_GROUPING)
+            view += regroup_list(middlepairs, MIDDLE_PAIR_GROUPING)
         view.append([top_pair])
 
     # other 1 pair intersections
@@ -248,9 +252,9 @@ def paired_board_made(board):
     intersections = board_util.hand_board_intersections(board)
     kickers = board_util.return_kickers(board)
 
-    #str flushes
+    # str flushes
     view.append(board_util.return_str_flushes(board))
-    #full or better
+    # full or better
     view += regroup_list(board_util.return_fulls_or_better(board),
                          PAIRED_BOARD_FULL_OR_BETTER_GROUPING)
 
@@ -260,7 +264,7 @@ def paired_board_made(board):
     if flushes:
         view += (regroup_list(flushes, FLUSH_GROUPING))
         if straights[0]:
-            view.append(straights[0]+straights[1])
+            view.append(straights[0] + straights[1])
     elif straights[0]:
         view.append(straights[0])
         if straights[1]:
@@ -269,19 +273,23 @@ def paired_board_made(board):
             view.append(straights[2])
 
     if not flushes and not straights[0]:
-        view.append([kickers[0]+intersections[0]])
-        view.append([kickers[1]+intersections[0],
-                     kickers[2]+intersections[0]])
+        view.append([kickers[0] + intersections[0]])
+        view.append([kickers[1] + intersections[0],
+                     kickers[2] + intersections[0]])
 
     view.append([intersections[0]])
 
-    #add undertrips if possible
+    # add undertrips if possible
     if len(rank_count_list[1]) >= 2:
         view.append(rank_count_list[1][1])
 
     overpairs = board_util.return_over_pairs(board)
     middlepairs = board_util.return_middle_pairs(board)
-    top_pair = rank_count_list[0][0]
+
+    if len(rank_count_list[0]) != 0:
+        top_pair = rank_count_list[0][0]
+    else: # turn double paired board
+        top_pair = board_util.return_pairs(board)[0][0] # just use highcard :-(...might give bad results
 
     if overpairs:
         view += regroup_list(overpairs, OVERPAIR_GROUPING)
@@ -291,10 +299,10 @@ def paired_board_made(board):
     if RANK_ORDER[top_pair] > RANK_ORDER[rank_count_list[1][0]]:
         view.append([top_pair])
         if middlepairs:
-            view+= regroup_list(middlepairs,MIDDLE_PAIR_GROUPING)
+            view += regroup_list(middlepairs, MIDDLE_PAIR_GROUPING)
     else:
         if middlepairs:
-            view+= regroup_list(middlepairs,MIDDLE_PAIR_GROUPING)
+            view += regroup_list(middlepairs, MIDDLE_PAIR_GROUPING)
         view.append([top_pair])
     # other 1 pair intersections
     if rank_count_list[0][1:]:
@@ -323,7 +331,7 @@ def paired_board_draw(board):
     if straight_draws["gs"]:
         # better straight draws
         if straight_draws["oesd"]:
-            view.append(straight_draws["wraps"]+straight_draws["oesd"])
+            view.append(straight_draws["wraps"] + straight_draws["oesd"])
         # gs draws
         view.append(straight_draws["gs"])
     return view
@@ -402,11 +410,11 @@ def flush_board(board):
 
     # oesd or better
     if str_draws:
-        view.append(str_draws["wraps"]+str_draws["oesd"])
+        view.append(str_draws["wraps"] + str_draws["oesd"])
 
     # op or tp with or without flushblocker
-    view.append([[flushes[0][1]], overpairs[0:2]+[made_hands["pair"][0]]])
-    view.append(overpairs[0:2]+[made_hands["pair"][0]])
+    view.append([[flushes[0][1]], overpairs[0:2] + [made_hands["pair"][0]]])
+    view.append(overpairs[0:2] + [made_hands["pair"][0]])
 
     # random flushblocker
     view.append([flushes[0][1]])
@@ -443,7 +451,7 @@ def flush_board_made(board):
     view.append(made_hands["random2"])
 
     # op or tp
-    view.append(overpairs[0:2]+[made_hands["pair"][0]])
+    view.append(overpairs[0:2] + [made_hands["pair"][0]])
     return view
 
 
@@ -487,13 +495,13 @@ def straight_board(board):
             fd.append(fd_2[0][1:])
 
         # nut or 2nd straight + fd or set
-        view.append([straights[0]+straights[1], fd + made_hands["sets"]])
+        view.append([straights[0] + straights[1], fd + made_hands["sets"]])
         # sets + fd
         view.append([fd, made_hands["sets"]])
     else:
         # nut or 2nd striaght + >top2
-        view.append([straights[0]+straights[1],
-                     made_hands["sets"]+made_hands["top2"]])
+        view.append([straights[0] + straights[1],
+                     made_hands["sets"] + made_hands["top2"]])
 
     # straights bare
     for s in straights:
@@ -507,16 +515,16 @@ def straight_board(board):
     if fd_1 and len(board_util.return_ranks(board)) != 5:
         # 2 pair + fd
         view.append([fd, made_hands["top2"] +
-                     made_hands["topbottom"]+made_hands["random2"]])
+                     made_hands["topbottom"] + made_hands["random2"]])
         # nfd + wrap, oesd and better gs
         view.append([nfd,
                      straight_draws["wraps"] +
                      straight_draws["oesd"] +
-                     straight_draws["gs"][:int(len(straight_draws["gs"])//1.5)]])
+                     straight_draws["gs"][:int(len(straight_draws["gs"]) // 1.5)]])
         # fd + wrap, oesd and better gs draw
         view.append([fd, straight_draws["wraps"] +
                      straight_draws["oesd"] +
-                     straight_draws["gs"][:int(len(straight_draws["gs"])//1.5)]])
+                     straight_draws["gs"][:int(len(straight_draws["gs"]) // 1.5)]])
         # fd + blockerpairs
         view.append([fd, blockerpairs])
         # nfd bare
@@ -525,7 +533,7 @@ def straight_board(board):
         view.append(fd)
 
     # top2 and topbottom + 1 blocker
-    view.append([made_hands["top2"]+made_hands["topbottom"],
+    view.append([made_hands["top2"] + made_hands["topbottom"],
                  [p[0] for p in blockerpairs]])
     view.append(made_hands["top2"])
     view.append(made_hands["topbottom"])
@@ -535,10 +543,10 @@ def straight_board(board):
     view.append(blockerpairs)
 
     # overpairs,tp + gs+ draws
-    view.append([overpairs+[made_hands["pair"][0]],
+    view.append([overpairs + [made_hands["pair"][0]],
                  straight_draws["wraps"] +
                  straight_draws["oesd"] +
-                 straight_draws["gs"][:int(len(straight_draws["gs"])//1.5)]])
+                 straight_draws["gs"][:int(len(straight_draws["gs"]) // 1.5)]])
     # overpairs
     if overpairs:
         view += regroup_list(overpairs, OVERPAIR_GROUPING)
@@ -658,7 +666,7 @@ def std_board(board):
         # sets + fd
         view.append([fd, made_hands["sets"]])
         # top2, topbottom + fd
-        view.append([fd, made_hands["top2"]+made_hands["topbottom"]])
+        view.append([fd, made_hands["top2"] + made_hands["topbottom"]])
 
         # nfd + any 2, tp, nut 2 overpair
         view.append([nfd, made_hands["random2"] +
@@ -667,7 +675,7 @@ def std_board(board):
         if straight_draws["gs"]:
             view.append([nfd, straight_draws["wraps"] +
                          straight_draws["oesd"] +
-                         straight_draws["gs"][:int(len(straight_draws["gs"])//1.5)]])
+                         straight_draws["gs"][:int(len(straight_draws["gs"]) // 1.5)]])
         # nfd
         view.append(nfd)
         # fd + any 2, tp, oesd and better half of gs  draws
@@ -676,7 +684,7 @@ def std_board(board):
                          [made_hands["pair"][0]] +
                          straight_draws["wraps"] +
                          straight_draws["oesd"] +
-                         straight_draws["gs"][:int(len(straight_draws["gs"])//1.5)]])
+                         straight_draws["gs"][:int(len(straight_draws["gs"]) // 1.5)]])
         else:
             view.append([fd, made_hands["random2"] + [made_hands["pair"][0]]])
         # fd + op
@@ -685,10 +693,10 @@ def std_board(board):
         view.append(fd)
     # set, top 2 + str draws
     if straight_draws["gs"]:
-        view.append([made_hands["sets"]+made_hands["top2"],
+        view.append([made_hands["sets"] + made_hands["top2"],
                      straight_draws["wraps"] +
                      straight_draws["oesd"] +
-                     straight_draws["gs"][:int(len(straight_draws["gs"])//1.5)]])
+                     straight_draws["gs"][:int(len(straight_draws["gs"]) // 1.5)]])
     # set
     view += regroup_list(made_hands["sets"], SET_GROUPING)
     # top 2
@@ -700,7 +708,7 @@ def std_board(board):
 
     if fd_1 and len(board_util.return_ranks(board)) != 5:
         # nfd_blocker + sd value
-        view.append([nfd_blocker, overpairs+made_hands["pair"][:1]])
+        view.append([nfd_blocker, overpairs + made_hands["pair"][:1]])
         # nfd_blocker + oesd + str draw
         if straight_draws["gs"]:
             view.append([nfd_blocker,
@@ -713,11 +721,11 @@ def std_board(board):
 
     if straight_draws["gs"]:
         # op, tp + oesd draw
-        view.append([overpairs+made_hands["pair"][:1],
+        view.append([overpairs + made_hands["pair"][:1],
                      straight_draws["wraps"] +
                      straight_draws["oesd"]])
         # op, tp + gs
-        view.append([overpairs+made_hands["pair"][:1],
+        view.append([overpairs + made_hands["pair"][:1],
                      straight_draws["gs"]])
         # str draw bare
         view.append(straight_draws["wraps"])
@@ -729,7 +737,7 @@ def std_board(board):
     view += regroup_list(made_hands["pair"], PAIR_GROUPING)
     # middlepairs
     if board_util.return_middle_pairs(board):
-        view+=regroup_list(board_util.return_middle_pairs(board),MIDDLE_PAIR_GROUPING)
+        view += regroup_list(board_util.return_middle_pairs(board), MIDDLE_PAIR_GROUPING)
     return view
 
 
@@ -752,7 +760,7 @@ def std_board_made(board):
     view += regroup_list(made_hands["pair"], PAIR_GROUPING)
     # middlepairs
     if board_util.return_middle_pairs(board):
-        view+=regroup_list(board_util.return_middle_pairs(board),MIDDLE_PAIR_GROUPING)
+        view += regroup_list(board_util.return_middle_pairs(board), MIDDLE_PAIR_GROUPING)
     return view
 
 
@@ -805,20 +813,22 @@ def std_board_blocker(board):
 
     # str draw blockers
     if straight_draws["wraps"]:
-        str_blockers = [i*2 for i in straight_draws["wraps"][0]]
+        str_blockers = [i * 2 for i in straight_draws["wraps"][0]]
         view.append(str_blockers)
     return view
 
+
 def custom_view(board):
-    #TODO
+    # TODO
     view = []
     made_hands = regroup_board_intersections(board)
-    entry=made_hands["sets"]+made_hands["top2"]+made_hands["topbottom"]+made_hands["random2"]
+    entry = made_hands["sets"] + made_hands["top2"] + made_hands["topbottom"] + made_hands["random2"]
     view.append(entry)
-    overpairs=board_util.return_over_pairs(board)
-    #view+=regroup_list(overpairs,OVERPAIR_GROUPING)
-    view.append(overpairs[1:4])
+    overpairs = board_util.return_over_pairs(board)
+    # view+=regroup_list(overpairs,OVERPAIR_GROUPING)
+    view.append([made_hands["pair"][0]])
     return view
+
 
 def clean(view):
     new_view = []
@@ -831,56 +841,55 @@ def clean(view):
             new_view.append([board_util.compact_range(i) for i in item])
     return new_view
 
-def combine_views(board,view_type_1,view_type_2,ignore_first_entry=True):
-    view_1=get_view(board,view_type_1)
-    if view_type_2 == "DRAWS_BLOCKERS":
-        view_2=get_view(board,"DRAWS")+get_view(board,"BLOCKERS")
-    else:
-        view_2=get_view(board,view_type_2)
 
-    views=[]
-    megaview=[]
+def combine_views(board, view_type_1, view_type_2, ignore_first_entry=True):
+    view_1 = get_view(board, view_type_1)
+    view_2 = get_view(board, view_type_2)
+
+    views = []
+    megaview = []
 
     # test if there are no combined entries
     for item in view_1:
         for entry in item:
             if type(entry) == list:
                 logging.error("Combine VIEW doesnt support views with : entries")
-                return views.append(view_1) #just return 1 view (the first one)
+                return views.append(view_1)  # just return 1 view (the first one)
     for item in view_2:
         for entry in item:
             if type(entry) == list:
                 logging.error("Combine VIEW doesnt support views with : entries")
-                return views.append(view_1) #just return 1 view (the first one)
+                return views.append(view_1)  # just return 1 view (the first one)
 
-    top_entry=[]
+    top_entry = []
     if ignore_first_entry:
-        #views.append(view_1[0])
+        # views.append(view_1[0])
         megaview.append(view_1[0])
         top_entry += view_1[0]
         view_1 = view_1[1:]
 
     for view_1_entry in view_1:
-        view=[top_entry]
+        view = [top_entry]
         for view_2_entry in view_2:
-            view.append([view_1_entry,view_2_entry])
-            megaview.append([view_1_entry,view_2_entry])
+            view.append([view_1_entry, view_2_entry])
+            megaview.append([view_1_entry, view_2_entry])
         view.append(view_1_entry)
         megaview.append(view_1_entry)
-        view=clean(view)
+        view = clean(view)
         views.append(view)
-        top_entry+=view_1_entry
-    view=[top_entry]
+        top_entry += view_1_entry
+    view = [top_entry]
     for view_2_entry in view_2:
         view.append(view_2_entry)
         megaview.append(view_2_entry)
-    view=clean(view)
+    view = clean(view)
     views.append(view)
-    megaview=clean(megaview)
+    megaview = clean(megaview)
     return views, megaview
 
-def get_view(board, view_type):
-    board = board_util.parse_board(board)
+
+def get_view(board_str, view_type):
+    board = board_util.parse_board(board_str)
     rank_count_list = board_util.return_rank_counts(board)
 
     if view_type == "DEFAULT":
@@ -932,7 +941,9 @@ def get_view(board, view_type):
             return clean(straight_board_blocker(board))
         return clean(std_board_blocker(board))
     elif view_type == "CUSTOM":
-        return(clean(custom_view(board)))
+        return clean(custom_view(board))
+    elif view_type == "DRAWS_BLOCKERS":
+        return clean(get_view(board_str, "DRAWS") + get_view(board_str, "BLOCKERS"))
     print("Unsupported VIEW TYPE")
     return []
 
@@ -945,32 +956,32 @@ def view_item_to_str(item):
     string = ""
     if type(item[0]) == str:
         for i in item:
-            string += i+","
+            string += i + ","
         string = string[:-1]
     elif type(item[0]) == list and len(item) == 2:
         string1 = ""
         for i in item[0]:
-            string1 += i+","
-        string1 = "("+string1[:-1]+"):"
+            string1 += i + ","
+        string1 = "(" + string1[:-1] + "):"
         string2 = ""
         for i in item[1]:
-            string2 += i+","
-        string2 = "("+string2[:-1]+")"
+            string2 += i + ","
+        string2 = "(" + string2[:-1] + ")"
         string = string1 + string2
     return string
 
 
 def print_view(view, view_type=VIEW_TYPES[0], view_folder=VIEW_FOLDER, filename=DEFAULT_VIEW_NAME):
     if filename:
-        filename = filename+"-"+view_type+".txt"
+        filename = filename + "-" + view_type + ".txt"
     else:
-        filename = view_type+".txt"
+        filename = view_type + ".txt"
     filename = os.path.join(view_folder, filename)
     with open(filename, "w") as f:
         f.write(TOP_VIEW_LINE)
         f.write("\n")
         for item in view:
-            string = view_item_to_str(item)+"\n"
+            string = view_item_to_str(item) + "\n"
             f.write(string)
             f.write(string)
             f.write("\n")
