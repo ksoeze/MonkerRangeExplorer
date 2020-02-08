@@ -7,7 +7,7 @@ from matplotlib.colors import LinearSegmentedColormap
 import os
 
 
-def combine_view_with_percent(total_results):
+def combine_view_with_percent(total_results,quiz):
     ticks = []
     for view, p_cum, p in zip(total_results["v_str"], total_results["r_cum"], total_results["r"]):
         if len(view) > 30:  # TODO with variable // cut long description
@@ -18,27 +18,27 @@ def combine_view_with_percent(total_results):
         elif len(cum) == 2:
             cum = " " + cum
         rel = "{0:.{1}f}".format(p, 1)
-        if QUIZ:
+        if quiz:
             ticks.append(view + "    ")
         else:
             ticks.append(view + " {}".format(rel))
     return ticks
 
 
-def combine_action_with_percent(action_results):
+def combine_action_with_percent(action_results,quiz):
     ticks = []
     ticks.append("Total")
     for action in action_results:
         percent = action_results[action]["p"][0]  # total % of this action
         number = "{0:.{1}f}".format(percent, 0)
-        if QUIZ:
+        if quiz:
             ticks.append("    " + action)
         else:
             ticks.append("{}% ".format(number) + action)
     return ticks
 
 
-def plot_default(total_results, action_results, actions):
+def plot_default(total_results, action_results, actions,quiz=QUIZ):
     actions = list(reversed(actions))
     bars = []
     bars2 = []
@@ -69,7 +69,7 @@ def plot_default(total_results, action_results, actions):
             num_bets += 1
         else:
             color = "b"
-        if QUIZ:
+        if quiz:
             color = "#CECECE"
         if index == 0:
             y_axes = np.arange(len(total_results["v_str"][1:]))
@@ -91,12 +91,12 @@ def plot_default(total_results, action_results, actions):
 
     # ax1.ylabel('')
     # ax1.title(titel)
-    yticks = combine_view_with_percent(total_results)[1:]
+    yticks = combine_view_with_percent(total_results,quiz)[1:]
     ax1.set_yticks(np.arange(len(yticks)))
     ax1.set_yticklabels(yticks)
     # for tick in ax1.get_yticklabels():
     #    tick.set_fontname("DejaVu Sans Mono")
-    if QUIZ:
+    if quiz:
         yticks = ["   "
                   for i in total_results["r_cum"][1:]]
     else:
@@ -108,7 +108,7 @@ def plot_default(total_results, action_results, actions):
     ax1.set_xticks(np.arange(0, 100, 10))
     # FIXMEEEE!! depends on order of actions!
     legend_texts = list(
-        reversed(combine_action_with_percent(action_results)[1:]))
+        reversed(combine_action_with_percent(action_results,quiz)[1:]))
     # ax1.legend(bars, legend_texts)
     ax2.legend(bars, legend_texts, fancybox=True, framealpha=0.5, loc='upper right')
     # ax1.legend(bars, actions)
@@ -122,9 +122,9 @@ def plot_default(total_results, action_results, actions):
     # plt.show()
 
 
-def plot_range_distribution(total_results, action_results, actions):
+def plot_range_distribution(total_results, action_results, actions,quiz=QUIZ):
     actions = list(reversed(actions))
-    y_ticks = combine_action_with_percent(action_results)
+    y_ticks = combine_action_with_percent(action_results,quiz)
     # exclude total
     x_ticks = [
         i[:27] + "..." if len(i) > 30 else i for i in total_results["v_str"][1:]]
@@ -147,7 +147,7 @@ def plot_range_distribution(total_results, action_results, actions):
 
     colors = [(0, 0, 0), (1, 0, 0), (0, 0, 1), (0, 1, 0), (1, 1, 0),
               (0.5, 0.5, 0.5), (0.5, 0, 0), (0, 0, 0.5), (0, 0.5, 0), (0.5, 0.5, 0)]
-    if QUIZ:
+    if quiz:
         colors = [(0.75, 0.75, 0.75), (0.75, 0.75, 0.75)]
     colors = LinearSegmentedColormap.from_list("test", colors)
     colors = colors(np.linspace(0, 1, len(x_ticks)))

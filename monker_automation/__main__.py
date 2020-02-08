@@ -5,11 +5,11 @@
 #from monker_automation.gui import test
 #from monker_automation.analysis import test
 #from monker_automation.board import test
-from monker_automation.tree import test
+from monker_automation.tree import start_walker
 
 
 def main():
-    test()
+    start_walker()
 
 
 if __name__ == '__main__':

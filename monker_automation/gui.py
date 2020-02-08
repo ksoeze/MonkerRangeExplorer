@@ -58,6 +58,8 @@ def enter_sequence(sequence, reset=True, move_delay=MOUSE_MOVEMENT_DEL, click_de
 def save_range(position, filename, move_delay=MOUSE_MOVEMENT_DEL, click_delay=CLICK_DELAY, type_delay=TYPE_DELAY):
     move_click(position, move_delay, click_delay)
     move_click(CSV_SELECT, move_delay, click_delay)
+    if HAND_QUIZ:
+        move_click(ZERO_HANDS_SELECT, move_delay, click_delay)
     move_click(FILE_TEXT, move_delay, click_delay)
     pyautogui.typewrite(filename, interval=type_delay)
     move_click(SAVE_OK, move_delay, click_delay)

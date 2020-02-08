@@ -6,6 +6,7 @@ from monker_automation.views import view_item_to_str
 import os
 from itertools import accumulate
 import logging
+import pickle
 
 
 def read_range_file(filename):
@@ -131,6 +132,8 @@ def process_view(range_list, view, exclude, exclude_list=[]):
     results.append([["Other"], 0, 0])
     for hand_line in range_list:
         match = False
+        if hand_line[1] < MIN_WEIGHT: # dont check hands with very low weight
+            continue
         results[0][1] += hand_line[1]
         results[0][2] += hand_line[2]
         for i in range(len(view)):
@@ -239,6 +242,14 @@ def get_view_results(actions, view, exclude=True, exclude_list=[]):
         percent_cumulativ = calc_percent(
             cumulative_counts(counts), counts[0])
         action_results[action]["r_cum"] = percent_cumulativ
+
+    if HAND_QUIZ:
+        filename = os.path.join(
+            DEFAULT_REPORT_DIRECTORY, PICKLE_INFOS)
+        with open(filename,"wb") as f:
+            pickle.dump(hand_lists,f)
+            pickle.dump(total_results, f)
+            pickle.dump(action_results, f)
 
     return (total_results, action_results)
 

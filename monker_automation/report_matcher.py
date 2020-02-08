@@ -9,6 +9,7 @@ import os
 def all_pdf_files():
     files = [f for f in os.listdir(DEFAULT_REPORT_MATCHER_DIRECTORY)]
     files = [f for f in files if f.endswith((".pdf", ".PDF"))]
+    files.sort(key=lambda x: os.path.getmtime(os.path.join(DEFAULT_REPORT_MATCHER_DIRECTORY,x)))
     return files
 
 

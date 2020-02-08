@@ -36,6 +36,11 @@ def current_spot(view_type1=VIEW_TYPES[0], view_type2=None, ig_first_entry=True,
         plot_range_distribution(total_results, action_results, infos["actions"])
         print_pdf()
         add_analysis_to_report(bookmark=bookmark_str)
+        if QUIZ == True: # UGLY HACK prints solution to report ...NOT FOR SCRIPT RUN FOR NOW JUST STANDALONE
+            plot_default(total_results, action_results, infos["actions"],False)
+            plot_range_distribution(total_results, action_results, infos["actions"],False)
+            print_pdf()
+            add_analysis_to_report(bookmark=bookmark_str,quiz=False)
         return
 
     views, megaview = combine_views(board,view_type1, view_type2,ig_first_entry)

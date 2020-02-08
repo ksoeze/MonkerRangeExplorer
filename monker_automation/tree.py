@@ -6,10 +6,11 @@ from monker_automation.gui import click_action, click_back, goto_start
 from monker_automation.gui import read_situation_and_save_ranges
 from monker_automation.views import get_view
 from monker_automation.range import get_view_results
-from monker_automation.pdf_print import print_pdf, add_analysis_to_report, print_all_views
+from monker_automation.pdf_print import print_pdf, add_analysis_to_report, print_all_views, move_analysis_to_report_folder,combine_views_to_report
 from monker_automation.plot import plot_default, plot_range_distribution
 from anytree import Node, RenderTree
 import logging
+import pyautogui
 
 _current_card_lvl = 0
 _start_board = ""
@@ -97,11 +98,12 @@ def should_visit(action, action_results):
             return True
 
 
-def print_infos(node_name, total_results, action_results, infos, report_name=REPORT_PDF_NAME):
+def print_infos(node_name, total_results, action_results, infos, report_name):
     plot_default(total_results, action_results, infos["actions"])
     plot_range_distribution(total_results, action_results, infos["actions"])
     print_pdf(_line)
-    add_analysis_to_report(report_name,_start_board+"-".join(_line))
+    #add_analysis_to_report(report_name, _start_board + "-".join(_line))
+    move_analysis_to_report_folder(report_name, _start_board + "-".join(_line))
     # TODO add infos to dictionary and save results at the end?
 
 
@@ -126,11 +128,11 @@ def add_subtrees(parent, cards_lvl1, cards_lvl2):
 
         if valid_line():
             logging.info("VALID LINE: {}".format(_line))
-            print_infos(node_name, total_results, action_results, infos,_start_board+"-"+SCRIPT_VIEW_TYPE[0]+"-"+REPORT_PDF_NAME)
+            print_infos(node_name, total_results, action_results, infos,_start_board+"-"+SCRIPT_VIEW_TYPE[0])
             for view_type in SCRIPT_VIEW_TYPE[1:]:
                 view = get_view(_current_board, view_type)
                 total_results, action_results = get_view_results(actions, view)
-                print_infos(node_name, total_results, action_results, infos,_start_board+"-"+view_type+"-"+REPORT_PDF_NAME)
+                print_infos(node_name, total_results, action_results, infos,_start_board+"-"+view_type)
         for button in buttons:
             if should_visit(button, action_results):
                 _line.append(button)
@@ -224,6 +226,8 @@ def walk_tree(valid_lines=[], invalid_sequences=[], turn_cards=[], river_cards=[
     root = add_subtrees(None, cards_lvl1, cards_lvl2)
     board=_current_board
     # board="Qd3d2d Ks"
+    for view in SCRIPT_VIEW_TYPE:
+        combine_views_to_report(board+"-"+view)
     if PRINT_VIEWS:
         print_all_views(board)
         if cards_lvl1:
@@ -251,3 +255,8 @@ def start_walker():
 
 if (__name__ == '__main__'):
     start_walker()
+    if SHUTDOWN:
+        import subprocess
+        subprocess.call("systemctl poweroff",shell=True)
+    else:
+        pyautogui.hotkey('ctrl', 'alt', 'delete')

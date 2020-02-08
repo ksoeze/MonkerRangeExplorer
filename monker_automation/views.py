@@ -801,11 +801,14 @@ def std_board_blocker(board):
     # fd blockers
     if fd_1 and len(board_util.return_ranks(board)) != 5:
         nfd_blocker = [fd_1[0][:2]]
+        secnd_blocker = [fd_1[1][:2]]
         fd_blocker = [fd_1[0][1]]
         if fd_2:
             nfd_blocker.append(fd_2[0][:2])
+            secnd_blocker = [fd_2[1][:2]]
             fd_blocker.append(fd_2[0][1])
         view.append(nfd_blocker)
+        view.append(secnd_blocker)
         view.append(fd_blocker)
 
     # pair blockers

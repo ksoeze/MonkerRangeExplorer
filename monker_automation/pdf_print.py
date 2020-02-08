@@ -7,7 +7,9 @@ from monker_automation.views import get_view
 from monker_automation.utils import *
 from reportlab.pdfgen import canvas
 import os
+import logging
 import shutil
+import sys
 
 
 def print_pdf(line=[]):
@@ -25,8 +27,8 @@ def print_pdf(line=[]):
     if line:
         c.setFont("Helvetica", 8)
         c.drawString(200, 725, "-".join(line))
-        #c.bookmarkPage("-".join(line))
-        #c.addOutlineEntry("-".join(line),"-".join(line), 0, 0)
+        # c.bookmarkPage("-".join(line))
+        # c.addOutlineEntry("-".join(line),"-".join(line), 0, 0)
     c.save()
 
 
@@ -41,40 +43,103 @@ def print_all_views(board):
                    board.replace(" ", "-"))
 
 
-def add_analysis_to_report(report_name=REPORT_PDF_NAME,bookmark=DEFAULT_BOOKMARK):
-
+def add_analysis_to_report(report_name=REPORT_PDF_NAME, bookmark=DEFAULT_BOOKMARK, quiz=QUIZ):
     merger = PdfFileMerger()
-    #writer = PdfFileWriter()
+    # writer = PdfFileWriter()
+    report_name = "quiz-" + report_name if quiz==True else report_name
     report_filename = os.path.join(
         DEFAULT_REPORT_DIRECTORY, report_name)
     analysis_filename = os.path.join(
         DEFAULT_REPORT_DIRECTORY, VIEW_PDF_NAME)
 
-    bookmark=bookmark.replace("CHECK","X")
-    bookmark=bookmark.replace("CALL","C")
-    bookmark=bookmark.replace("BET ","B")
-    bookmark=bookmark.replace("RAISE ", "R")
+    bookmark = bookmark.replace("CHECK", "X")
+    bookmark = bookmark.replace("CALL", "C")
+    bookmark = bookmark.replace("BET ", "B")
+    bookmark = bookmark.replace("RAISE ", "R")
 
     try:
         with open(report_filename, 'rb') as f:
             pdf = PdfFileReader(f)
-            num_pages=pdf.getNumPages()
-            outline=pdf.getOutlines()
-            merger.append(pdf,import_bookmarks=False)
+            num_pages = pdf.getNumPages()
+            outline = pdf.getOutlines()
+            merger.append(pdf, import_bookmarks=False)
     except IOError:  # seems to be first page of the report
         with open(analysis_filename, 'rb') as f:
-            writer=PdfFileWriter()
+            writer = PdfFileWriter()
             writer.appendPagesFromReader(PdfFileReader(f))
-            writer.addBookmark(bookmark,0)
+            writer.addBookmark(bookmark, 0)
             with open(report_filename, 'wb') as o:
                 writer.write(o)
-        #shutil.copy(analysis_filename, report_filename)
+        # shutil.copy(analysis_filename, report_filename)
         return
 
-    for page in range(0,len(outline)):
-        merger.addBookmark(outline[page].title,page)
+    for page in range(0, len(outline)):
+        merger.addBookmark(outline[page].title, page)
 
     with open(analysis_filename, 'rb') as f:
-        merger.append(PdfFileReader(f),bookmark)
+        merger.append(PdfFileReader(f), bookmark)
 
     merger.write(report_filename)
+
+
+def move_analysis_to_report_folder(folder_name, bookmark):
+    bookmark = bookmark.replace("CHECK", "X")
+    bookmark = bookmark.replace("CALL", "C")
+    bookmark = bookmark.replace("BET ", "B")
+    bookmark = bookmark.replace("RAISE ", "R")
+
+    folder_directory = os.path.join(
+        DEFAULT_REPORT_DIRECTORY, folder_name)
+    if not os.path.exists(folder_directory):
+        try:
+            os.mkdir(folder_directory)
+        except OSError:
+            logging.error("Could not create Directory: {}".format(folder_directory))
+            exit()
+    file_name = os.path.join(
+        folder_directory, bookmark)
+    if os.path.isfile(file_name):
+        logging.error("File already exists: {}".format(file_name))
+        return
+    analysis_filename = os.path.join(
+        DEFAULT_REPORT_DIRECTORY, VIEW_PDF_NAME)
+    if not os.path.isfile(analysis_filename):
+        logging.error("Missing analysis filename: {}".format(analysis_filename))
+        return
+    os.rename(analysis_filename, file_name)
+    return
+
+def combine_views_to_report(folder_name):
+    sys.setrecursionlimit(4000)
+    folder_directory = os.path.join(
+        DEFAULT_REPORT_DIRECTORY, folder_name)
+    files = [f for f in os.listdir(folder_directory)]
+    if files == []:
+        logging.error("No Files in Directory: {}".format(folder_directory))
+        return
+    files.sort(key=lambda x: os.path.getmtime(os.path.join(folder_directory,x)))
+    #files.sort()
+    open_files = []
+    output = PdfFileWriter()
+
+    for item in files:
+        f = open(os.path.join(folder_directory,item), "rb")
+        open_files.append(f)
+        output.addPage(PdfFileReader(f).getPage(0))
+        output.addBookmark(item,-1)
+
+    output_file=os.path.join(DEFAULT_REPORT_DIRECTORY,folder_name+".pdf")
+    if os.path.isfile(output_file):
+        logging.error("Report already exists: {}".format(output_file))
+        return
+    with open(output_file,"wb") as f:
+        output.write(f)
+
+    for f in open_files:
+        f.close()
+
+    shutil.rmtree(folder_directory)
+    return
+
+if __name__=='__main__':
+    combine_views_to_report("6s3d2s-MADE_HANDS")
