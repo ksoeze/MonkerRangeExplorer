@@ -177,6 +177,11 @@ def read_situation_and_save_ranges():
     results["range_img"] = pyautogui.screenshot(region=RANGE_SCREEN_REGION)
     results["range_img"].save(file_name)
 
+    if FILTER:
+        file_name = os.path.join(DEFAULT_REPORT_DIRECTORY, FILTER_PNG_NAME)
+        results["filter_img"] = pyautogui.screenshot(region=FILTER_SCREEN_REGION)
+        results["filter_img"].save(file_name)
+
     save_ranges(actions)
     return results
 

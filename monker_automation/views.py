@@ -832,6 +832,12 @@ def custom_view(board):
     view.append([made_hands["pair"][0]])
     return view
 
+def flush_suits(board):
+    suits=[s for s in board if s in SUITS]
+    suit_count=board_util.return_suits(board)
+    flop_suits=suits[:2]
+    pass
+
 
 def clean(view):
     new_view = []
@@ -947,6 +953,8 @@ def get_view(board_str, view_type):
         return clean(custom_view(board))
     elif view_type == "DRAWS_BLOCKERS":
         return clean(get_view(board_str, "DRAWS") + get_view(board_str, "BLOCKERS"))
+    elif view_type == "FLUSH_SUITS":
+        return clean(get_view(board_str,flush_suits(board)))
     print("Unsupported VIEW TYPE")
     return []
 
@@ -996,6 +1004,7 @@ def test():
     view_made = get_view(board_string, VIEW_TYPES[1])
     view_draws = get_view(board_string, VIEW_TYPES[2])
     view_blockers = get_view(board_string, VIEW_TYPES[3])
+    view_suits=get_view(board_string,"FLUSH_SUITS")
 
     print("DEFAULT_VIEW FOR BOARD:{}".format(board_string))
     for item in view_default:

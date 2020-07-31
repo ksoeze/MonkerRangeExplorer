@@ -15,7 +15,7 @@ def read_range_file(filename):
         f.readline()  # skip first line
         for line in f:
             result_list = line.split(",")
-            result_list[1] = float(result_list[1])
+            result_list[1] = float(result_list[1]) if result_list[1] != "NaN" else 0.0
             result_list[2] = float(result_list[2])
             range_list.append(result_list)
     return range_list
@@ -250,6 +250,7 @@ def get_view_results(actions, view, exclude=True, exclude_list=[]):
             pickle.dump(hand_lists,f)
             pickle.dump(total_results, f)
             pickle.dump(action_results, f)
+            pickle.dump(actions, f)
 
     return (total_results, action_results)
 

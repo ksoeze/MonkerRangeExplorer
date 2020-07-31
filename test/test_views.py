@@ -1,8 +1,11 @@
 import os
 import pickle
+import re
 import pytest
 from monker_automation.utils import *
 from monker_automation.views import get_view, combine_views
+from monker_automation.range import hand_in_range
+from monker_automation.range_analysis import create_regex_from_view, read_data
 
 VIEW_DATA_DIR="./view_data/"
 
@@ -66,3 +69,35 @@ def test_combine_view(board,viewtype1,viewtype2):
     for item in megaview:
         print(item)
     print("\n\n")
+
+
+def test_new_matching_method():
+    filename = os.path.join(
+    DEFAULT_REPORT_DIRECTORY, PICKLE_INFOS)
+    with open(filename, "rb") as f:
+        hand_lists = pickle.load(f)
+        total_results = pickle.load(f)
+        action_results = pickle.load(f)
+        actions = pickle.load(f)
+        board = pickle.load(f)
+    for view in VIEW_TYPES:
+        view_list = get_view(board,view)
+        for view_item in view_list:
+            if type(view_item[0]) != str:
+                pattern1 = create_regex_from_view(view_item[0])
+                pattern2 = create_regex_from_view(view_item[1])
+            else:
+                pattern1 = create_regex_from_view(view_item)
+                pattern2 = ".*"
+            for hand in hand_lists[0][1]:
+                old_match = hand_in_range(hand[0],view_item)
+                new_match = bool(re.search(pattern1,hand[0])) and bool(re.search(pattern2,hand[0]))
+                if old_match != new_match:
+                    print("-------------------------------------------------------------------------")
+                    print(hand)
+                    print(view_item)
+                    print(pattern1)
+                    print(pattern2)
+                    print(old_match)
+                    print(new_match)
+                    assert old_match == new_match

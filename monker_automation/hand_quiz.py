@@ -5,19 +5,20 @@ import os
 import pickle
 from random import randint
 import logging
+import itertools
 
 import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
-
+#from monker_automation.range_analysis import process_hand_list
 
 class SpotData:
 
     def __init__(self):
         self.overall_data = []
         self.actions = []
-        hand_lists, total_results, action_results = self.read_infos()
-        self.cleanup_data(hand_lists, total_results, action_results)
+        hand_lists, self.total_results, self.action_results = self.read_infos()
+        self.cleanup_data(hand_lists)
 
     def read_infos(self):
         filename = os.path.join(
@@ -28,7 +29,7 @@ class SpotData:
             action_results = pickle.load(f)
         return hand_lists, total_results, action_results
 
-    def cleanup_data(self, hand_lists, total_results, action_results):
+    def cleanup_data(self, hand_lists):
         for item in hand_lists:
             self.actions.append(item[0])
             item[1].sort(key=lambda x: x[0])
@@ -118,6 +119,32 @@ class SpotData:
         print(output_text)
         return output_text
 
+    def print_ev_differences(self):
+        action_combinations = itertools.combinations([i for i in range(len(self.actions))],2)
+        action_combinations = list(action_combinations)
+        delim=";"
+        header_line="Hand"+delim
+        for action in self.actions:
+            header_line+=action + delim
+            header_line+="EV " + action + delim
+        for combo in action_combinations:
+            header_line+="EV diff " + self.actions[combo[0]] + " " + self.actions[combo[1]] + delim
+        hand_list=[]
+        for hand in self.overall_data:
+            hand_line=hand["hand"]+delim
+            for action in hand["actions"]:
+                hand_line+="{0:.0f}%".format(action[0]/hand["total_weight"]*100)+delim
+                hand_line+="{0:.2f}".format(action[1]/1000)+delim
+            for combo in action_combinations:
+                hand_line+="{0:.3f}".format((hand["actions"][combo[0]][1]-hand["actions"][combo[1]][1])/1000)+delim
+            hand_list.append(hand_line)
+        filename = os.path.join(
+            DEFAULT_REPORT_DIRECTORY, EV_CVS)
+        with open(filename, "w") as f:
+            f.write(header_line+"\n")
+            f.write("\n".join(hand_list))
+
+
 
 class ResultLabel(tk.Frame):
     def __init__(self, root, column, width=10):
@@ -146,7 +173,10 @@ class ResultLabel(tk.Frame):
     def set_values(self, hand_info, index):
         self.frequency.set("{0:.0f}%".format(hand_info["actions"][index][0] / hand_info["total_weight"] * 100))
         if hand_info["actions"][index][1] != float("-inf"):
-            self.ev.set("{0:.2f}".format(hand_info["actions"][index][1] / 1000))
+            if hand_info["actions"][index][1]/1000 > 90 or hand_info["actions"][index][1]/1000 < -90:
+                self.ev.set("{0:.1f}".format(hand_info["actions"][index][1] / 1000))
+            else:
+                self.ev.set("{0:.2f}".format(hand_info["actions"][index][1] / 1000))
         self.freq_label.config(background=self.default_bg)
 
         if index == hand_info["action_chosen"] and index != hand_info["main_action"][1]:
@@ -156,10 +186,11 @@ class ResultLabel(tk.Frame):
 
 
 class InputFrame(tk.Frame):
-    def __init__(self, root, actions, update_output):
+    def __init__(self, root, actions, update_output, print_ev_diff):
         self.root = root
         self.actions = actions
         self.update_output = update_output
+        self.print_ev_diff = print_ev_diff
 
         self.card_frame = tk.Frame(root, padx=15, pady=15)
         self.result_frame = tk.Frame(root, padx=15, pady=15)
@@ -320,12 +351,13 @@ class InputFrame(tk.Frame):
         print("-" * 60)
         print("-" * 60)
 
-        if SHOW_SOLUTION:
+        if SHOW_STRATEGY:
             filename = os.path.join(
               DEFAULT_REPORT_DIRECTORY, STRATEGY_PNG_NAME )
             load = Image.open(filename)
             Image._show(load)
-
+        if EV_RESULTS:
+            self.print_ev_diff()
         return
 
 if (__name__ == '__main__'):
@@ -340,9 +372,8 @@ if (__name__ == '__main__'):
         input_frame.set_card_label(hand)
         return
 
-
     root = tk.Tk()
     root.title("Hand Quiz")
-    input_frame = InputFrame(root, spot_data.actions, update_output)
+    input_frame = InputFrame(root, spot_data.actions, update_output, spot_data.print_ev_differences)
     input_frame.set_card_label(hand)
     root.mainloop()

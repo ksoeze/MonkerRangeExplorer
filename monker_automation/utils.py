@@ -66,9 +66,11 @@ SAVE_OK = (4648, 637)
 CSV_SELECT = (4577, 534)
 FILE_TEXT = (4592, 602)
 ZERO_HANDS_SELECT = (4664, 575)
+FILTER_Y_OFFSET = 10
 
 BOARD_SCREEN_REGION = (3842, 578, 450, 450)
 RANGE_SCREEN_REGION = (4298, 2, 1185, 98)
+FILTER_SCREEN_REGION = (4963,967,500,80)
 
 NUM_BACK = 10
 DELETE_BOARD = 7
@@ -170,11 +172,13 @@ DEFAULT_REPORT_MATCHER_DIRECTORY = "/home/johann/Documents/poker/monker-document
 STRATEGY_PNG_NAME = "strat.png"
 RANGE_PNG_NAME = "range.png"
 VIEW_PDF_NAME = "view.pdf"
+FILTER_PNG_NAME="filter.png"
 # STRATEGY_PDF_NAME = "strategy.pdf"
 REPORT_PDF_NAME = "report.pdf"
 TABLE_PNG_NAME = "table.png"
 RANGE_HEADER_PNG_NAME = "range_header.png"
 PICKLE_INFOS = "spot_infos"
+EV_CVS = "hand_ev.cvs"
 DEFAULT_BOOKMARK = "NO DESCRIPTION"
 
 INFO_FONT = ("Helvetica", 22)
@@ -184,6 +188,10 @@ RESULT_FONT = ("Helvetica", 14)
 SUIT_COLORS = {"h": "red", "d": "blue",
                "c": "green", "s": "black"}
 SUIT_SIGN_DIC = {"h": "\u2665", "c": "\u2663", "s": "\u2660", "d": "\u2666"}
+
+ANALYSIS_FONT = ("Arial", 12)
+MAX_LABEL_LENGTH = 20
+
 
 # SCRIPT SETTINGS
 
@@ -203,9 +211,9 @@ SCRIPT_VIEW_TYPE = ["DEFAULT", "MADE_HANDS"]
 # TURN_CARDS = ["5h","5c", "Qc", "Th", "7s", "9h", "As", "Kh", "Jc","6d"]
 # TURN_CARDS = ["8h","8c", "6c", "Ah", "7s", "3h", "2h", "Kh", "Jc","6d","Qs"]
 # ["As","Ks","5s","Ts","9c","9s"]
-TURN_CARDS = []
+TURN_CARDS = ["Ah","As","Kd","Jc","9s","9h","9s","4d","4h","4d"]
 # TURN_CARDS = ["Ac","Kc","Qc","Jc","Tc","9c","8c","7c","6c","5c","4c","3c","2c"]
-
+TURN_CARDS = []
 # RIVER_CARDS = ["2h","Kd","Ah","7h", "Qd", "Kc"]
 # RIVER_CARDS = ["4h","Ah","Kh","Qh","Jd","3d","Ad","Qd","7h","6h"]
 # RIVER_CARDS = ["4h","Ah","Qh","Th","3d","Ad","Qd","3s","As","Ts"]
@@ -232,11 +240,15 @@ TURN_CARDS = []
 # RIVER_CARDS = ["Ac","Kc","Qc","Jc","Tc","9c","8c","7c","6c","5s","4c","3c","2c"]
 # RIVER_CARDS = ["2c","Ac","Ts","Ks","7s","Jc","Qh","2h","Ah","Jh","Kh"]
 # RIVER_CARDS = ["3c", "Ac", "Kc", "Jc", "9d", "8c", "6c", "Qc", "Tc", "7d", "5d", "Ad", "Td"]
-RIVER_CARDS = ["Ah", "Kh", "Qh", "Jh", "Th", "8h", "7d", "4h", "2d"]# "Ad", "Jd", "7d", "2d"]
+# RIVER_CARDS = ["Ah", "Kh", "Qh", "Jh", "Th", "8h", "7d", "4h", "Ad", "7d", "4d"]
+# RIVER_CARDS = ["2c", "Ad", "Th","Kd","Jh"]
+RIVER_CARDS = ["Ac","Ah","Ks","Qs","Qh","Jc","Jh","Tc","7c","5c","3h"]
+RIVER_CARDS = ["Jd"]
+#RIVER_CARDS = ["9h", "9d", "Qc", "Tc", "Ac", "Ad"]
 # z.b. [[RAISE,RAISE]] für bet, vs bet und vs raise lines only
 INVALID_SEQUENCES = [[BET, RAISE]]
-INVALID_SEQUENCES = [[RAISE, RAISE]]
-# INVALID_SEQUENCES = []
+#INVALID_SEQUENCES = [[RAISE, RAISE]]
+#INVALID_SEQUENCES = []
 
 # siehe lines.txt
 VALID_LINES = [
@@ -254,28 +266,46 @@ VALID_LINES = [
 ]
 VALID_LINES = []
 # auswahl: ["10","20","25","30","35","40","50","60","66","70","75","80","100","AllIn"]
-POSSIBLE_BET_RAISE = ["33", "40", "66", "100", "AllIn"]
-#POSSIBLE_BET_RAISE = ["80","100"]
-# POSSIBLE_BET_RAISE = ["MIN","30","40","50","100", "AllIn"]
-# POSSIBLE_BET_RAISE = ["30","50","70","100", "AllIn"]
-# POSSIBLE_BET_RAISE = ["40","50","100","AllIn"]
-# POSSIBLE_BET_RAISE = ["MIN","50","100", "AllIn"]
+POSSIBLE_BET_RAISE = ["25", "33", "50", "66", "100", "AllIn"]
+#POSSIBLE_BET_RAISE = ["50","100","AllIn"]
+POSSIBLE_BET_RAISE = ["MIN","33","40","66","100", "AllIn"]
+#POSSIBLE_BET_RAISE = ["30","50","70","100", "AllIn"]
+#POSSIBLE_BET_RAISE = ["33","50","100","AllIn"]
+#POSSIBLE_BET_RAISE = ["50","100", "AllIn"]
 
 MAX_BETS_RAISES = 3
 QUIZ = False
 PRINT_VIEWS = False
 
-MIN_FREQ = 10
+MIN_FREQ = 15
 MIN_RAISE_FREQ = 5
 
 # Shutsdown Computer if not needed after finishing the job // locks screen otherwise
-SHUTDOWN = True
+SHUTDOWN = False
+#SHUTDOWN = True
+FILTER = False
+#FILTER = True
 
 # HAND QUIZZ0R
 HAND_QUIZ = True #IMPORTANT set back to False if doing normal report generation because it enables save 0% hands and impacts speed alot
-MIN_QUIZ_WEIGHT = 0.9  #minimal combocount of hand in range...low weight combos often have weird/off strategy & dont effect ev much
-MIN_ACTION_FREQ = 0.75 #minimal frequency with which "best" action is taken
-MIN_EV_DIFF = 0.02 #minimal EV differnce between best and 2nd best desition (in monker chips) use 0 if no idea
-MAX_EV_DIFF = 2 #maximal EV difference between best and 2nd best desition (in monker chips) use 100 if no idea
+#HAND_QUIZ = True
+MIN_QUIZ_WEIGHT = 0.5  #minimal combocount of hand in range...low weight combos often have weird/off strategy & dont effect ev much
+MIN_ACTION_FREQ = 0.5 #minimal frequency with which "best" action is taken
+MIN_EV_DIFF = 0 #minimal EV differnce between best and 2nd best desition (in monker chips) use 0 if no idea
+MAX_EV_DIFF = 100 #maximal EV difference between best and 2nd best desition (in monker chips) use 100 if no idea
 PRINT_EV_ERROR = 0.1 #prints summary of hands where error is bigger than this (in monker chips)
-SHOW_SOLUTION=True
+SHOW_SOLUTION=True # show / dont show solution
+SHOW_STRATEGY=True # show / dont show spot startegy when hitting summary
+EV_RESULTS=True # prints some infos regarding EV differences and also a cvs file with all ev differences for analysis
+EV_NUM_HANDS=10 # prints top hand which prefer most frequent action over 2nd frequent action
+EV_TRESHOLD=0.5 # top x percent of hands which get shown for high / low ev action decitions
+
+RANGE_ANALYSIS_VIEW_TYPES = ["MADE_HANDS", "DRAWS", "BLOCKERS", "DRAWS_BLOCKERS","RANKS","SUITS"]
+EXCLUDE_DEFAULT = True
+EV_FILTER_CONDITION=[10,100,1000]
+
+if FILTER:
+    CSV_SELECT=(CSV_SELECT[0],CSV_SELECT[1]+FILTER_Y_OFFSET)
+    ZERO_HANDS_SELECT=(ZERO_HANDS_SELECT[0],ZERO_HANDS_SELECT[1]+FILTER_Y_OFFSET)
+    FILE_TEXT=(FILE_TEXT[0],FILE_TEXT[1]+FILTER_Y_OFFSET)
+    SAVE_OK=(SAVE_OK[0],SAVE_OK[1]+FILTER_Y_OFFSET)

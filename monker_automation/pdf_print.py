@@ -24,6 +24,9 @@ def print_pdf(line=[]):
     if not QUIZ:
         image = os.path.join(DEFAULT_REPORT_DIRECTORY, RANGE_HEADER_PNG_NAME)
         c.drawImage(image, 225, 755, 300, 40)
+    if FILTER:
+        image = os.path.join(DEFAULT_REPORT_DIRECTORY, FILTER_PNG_NAME)
+        c.drawImage(image, 300, 710, 150, 40)
     if line:
         c.setFont("Helvetica", 8)
         c.drawString(200, 725, "-".join(line))

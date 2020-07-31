@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+import os
+import pickle
+
 from monker_automation.pdf_print import print_pdf, add_analysis_to_report, print_all_views
 from monker_automation.utils import *
 from monker_automation.gui import read_situation_and_save_ranges
@@ -41,6 +44,11 @@ def current_spot(view_type1=VIEW_TYPES[0], view_type2=None, ig_first_entry=True,
             plot_range_distribution(total_results, action_results, infos["actions"],False)
             print_pdf()
             add_analysis_to_report(bookmark=bookmark_str,quiz=False)
+        if HAND_QUIZ:
+            filename = os.path.join(
+                DEFAULT_REPORT_DIRECTORY, PICKLE_INFOS)
+            with open(filename,"ab") as f:
+                pickle.dump(board,f)
         return
 
     views, megaview = combine_views(board,view_type1, view_type2,ig_first_entry)
