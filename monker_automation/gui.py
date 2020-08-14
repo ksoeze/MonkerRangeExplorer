@@ -105,14 +105,14 @@ def available_buttons():
     # BACK is always on screen...take fixed coordinates
     buttons[BACK] = BACK_CO
     img = os.path.join(BUTTON_FILES_FOLDER, BUTTON_FILES[CHECK])
-    coordinates = pyautogui.locateCenterOnScreen(img, region=CHECK_CALL_REGION)
+    coordinates = pyautogui.locateCenterOnScreen(img, region=CHECK_CALL_REGION,grayscale=True)
     buttons[CHECK] = coordinates
     if buttons[CHECK]:  # there cant be call option
         buttons[CALL] = None
     else:
         img = os.path.join(BUTTON_FILES_FOLDER, BUTTON_FILES[CALL])
         coordinates = pyautogui.locateCenterOnScreen(
-            img, region=CHECK_CALL_REGION)
+            img, region=CHECK_CALL_REGION,grayscale=True)
         buttons[CALL] = coordinates
 
     buttons["BET"] = []
@@ -123,7 +123,7 @@ def available_buttons():
 
     for size in POSSIBLE_BET_RAISE:
         img = os.path.join(BUTTON_FILES_FOLDER, BUTTON_FILES[size])
-        coordinates = pyautogui.locateCenterOnScreen(img, region=BUTTON_REGION)
+        coordinates = pyautogui.locateCenterOnScreen(img, region=BUTTON_REGION,grayscale=True)
         if coordinates:
             # last letters of line text -> call or flop, turn, river
             if is_bet:
@@ -176,11 +176,6 @@ def read_situation_and_save_ranges():
     file_name = os.path.join(DEFAULT_REPORT_DIRECTORY, RANGE_HEADER_PNG_NAME)
     results["range_img"] = pyautogui.screenshot(region=RANGE_SCREEN_REGION)
     results["range_img"].save(file_name)
-
-    if FILTER:
-        file_name = os.path.join(DEFAULT_REPORT_DIRECTORY, FILTER_PNG_NAME)
-        results["filter_img"] = pyautogui.screenshot(region=FILTER_SCREEN_REGION)
-        results["filter_img"].save(file_name)
 
     save_ranges(actions)
     return results

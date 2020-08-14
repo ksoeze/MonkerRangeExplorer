@@ -192,10 +192,10 @@ class InputFrame(tk.Frame):
         self.update_output = update_output
         self.print_ev_diff = print_ev_diff
 
-        self.card_frame = tk.Frame(root, padx=15, pady=15)
-        self.result_frame = tk.Frame(root, padx=15, pady=15)
-        self.action_button_frame = tk.Frame(root, padx=15, pady=15)
-        self.image_frame = tk.Frame(root, padx=15, pady=15)
+        self.card_frame = tk.Frame(root, padx=15, pady=10)
+        self.result_frame = tk.Frame(root, padx=15, pady=10)
+        self.action_button_frame = tk.Frame(root, padx=10, pady=10)
+        self.image_frame = tk.Frame(root, padx=10, pady=10)
 
         self.card_str_list = [tk.StringVar() for i in range(4)]
         self.card_labels = [tk.Label(self.card_frame,
@@ -207,7 +207,7 @@ class InputFrame(tk.Frame):
             self.card_labels[i].grid(row=0, column=i)
 
         self.result_card_str_list = [tk.StringVar() for i in range(4)]
-        self.result_card_frame = tk.Frame(root, padx=15, pady=15)
+        self.result_card_frame = tk.Frame(root, padx=10, pady=10)
         self.result_card_labels = [tk.Label(self.result_card_frame,
                                             textvariable=self.result_card_str_list[i],
                                             padx=2,
@@ -227,7 +227,7 @@ class InputFrame(tk.Frame):
         self.result_card_frame.grid(row=4, column=0)
         self.action_button_frame.grid(row=1, column=1)
 
-        self.result_label_frame = tk.Frame(root, padx=15, pady=15)
+        self.result_label_frame = tk.Frame(root, padx=10, pady=10)
         self.result_label_frame.grid(row=4, column=1)
         self.result_label_list = [ResultLabel(self.result_label_frame, i, len(self.actions[i])) for i in
                                   range(len(self.actions))]
@@ -284,6 +284,7 @@ class InputFrame(tk.Frame):
         filename = os.path.join(
             DEFAULT_REPORT_DIRECTORY, TABLE_PNG_NAME)
         load = Image.open(filename)
+        load = load.resize((400,400))
         render = ImageTk.PhotoImage(load)
         img = tk.Label(self.image_frame, image=render)
         img.image = render

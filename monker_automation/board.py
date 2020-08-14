@@ -31,7 +31,6 @@ from monker_automation.utils import *
 from itertools import combinations
 from itertools import chain
 
-
 def parse_board(board=''):
     current_board = []
     parsing_board = board
@@ -430,7 +429,6 @@ def return_lows(board):
                                                                     LOW_RANK_ORDER[low_hands[x][1]],
                                                                     LOW_RANK_ORDER[low_hands[x][0]])))
     return [''.join(sorted(low, key=lambda x: LOW_RANK_ORDER[x])) for low in low_hands_sorted]
-
 
 def test():
     board_string = "5s6d5c7dTc"

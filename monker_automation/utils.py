@@ -24,13 +24,18 @@ INVALID_CHAR = '#'
 # view constants
 QUAD_BOARD_PAIR_GROUPING = [1, 1, 2, 2, 3]
 PAIRED_BOARD_FULL_OR_BETTER_GROUPING = [2, 2]
-FLUSH_GROUPING = [1, 1, 2]
+FLUSH_GROUPING = [1, 1, 2,2]
 OVERPAIR_GROUPING = [1, 2]
-FLUSH_GROUPING = [1, 1, 2]
+FD_GROUPING = [1, 2,2]
+FD_BLOCKER_GROUPING = [1,3]
+BD_FD_GROUPING = [1]
+STR_DRAW_GROUPING = [3,3]
 SET_GROUPING = [1, 1]
 PAIR_GROUPING = [1, 1]
+POCKET_PAIR_GROUPING = [1,1,1,1,1,1,2,2,2,2]
 MIDDLE_PAIR_GROUPING = [2]
-VIEW_TYPES = ["DEFAULT", "MADE_HANDS", "DRAWS", "BLOCKERS", "DRAWS_BLOCKERS", "CUSTOM"]
+BOARD_INTERACTION_GROUPING = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+VIEW_TYPES = ["DEFAULT", "MADE_HANDS", "DRAWS", "BLOCKERS", "DRAWS_BLOCKERS", "FLUSH_SUITS", "STR_DRAWS", "BOARD_RANK_INTERACTION", "PAIRS","CUSTOM"]
 
 VIEW_FOLDER = "/media/johann/MONKER/monker/Views/"
 DEFAULT_VIEW_NAME = "OVERVIEW"
@@ -283,29 +288,21 @@ MIN_RAISE_FREQ = 5
 # Shutsdown Computer if not needed after finishing the job // locks screen otherwise
 SHUTDOWN = False
 #SHUTDOWN = True
-FILTER = False
-#FILTER = True
 
 # HAND QUIZZ0R
 HAND_QUIZ = True #IMPORTANT set back to False if doing normal report generation because it enables save 0% hands and impacts speed alot
-#HAND_QUIZ = True
 MIN_QUIZ_WEIGHT = 0.5  #minimal combocount of hand in range...low weight combos often have weird/off strategy & dont effect ev much
 MIN_ACTION_FREQ = 0.5 #minimal frequency with which "best" action is taken
 MIN_EV_DIFF = 0 #minimal EV differnce between best and 2nd best desition (in monker chips) use 0 if no idea
 MAX_EV_DIFF = 100 #maximal EV difference between best and 2nd best desition (in monker chips) use 100 if no idea
 PRINT_EV_ERROR = 0.1 #prints summary of hands where error is bigger than this (in monker chips)
 SHOW_SOLUTION=True # show / dont show solution
-SHOW_STRATEGY=True # show / dont show spot startegy when hitting summary
-EV_RESULTS=True # prints some infos regarding EV differences and also a cvs file with all ev differences for analysis
+SHOW_STRATEGY=False #MAKES NO SENSE FOR NOW # show / dont show spot startegy when hitting summary
+EV_RESULTS=False #NOT WORKING FOR NOW # prints some infos regarding EV differences and also a cvs file with all ev differences for analysis
 EV_NUM_HANDS=10 # prints top hand which prefer most frequent action over 2nd frequent action
 EV_TRESHOLD=0.5 # top x percent of hands which get shown for high / low ev action decitions
 
-RANGE_ANALYSIS_VIEW_TYPES = ["MADE_HANDS", "DRAWS", "BLOCKERS", "DRAWS_BLOCKERS","RANKS","SUITS"]
+#Range Analysis
+RANGE_ANALYSIS_VIEW_TYPES = ["MADE_HANDS", "DRAWS", "BLOCKERS", "DRAWS_BLOCKERS","FLUSH_SUITS","STR_DRAWS","PAIRS", "BOARD_RANK_INTERACTION", "RANKS","SUITS"]
 EXCLUDE_DEFAULT = True
-EV_FILTER_CONDITION=[10,100,1000]
-
-if FILTER:
-    CSV_SELECT=(CSV_SELECT[0],CSV_SELECT[1]+FILTER_Y_OFFSET)
-    ZERO_HANDS_SELECT=(ZERO_HANDS_SELECT[0],ZERO_HANDS_SELECT[1]+FILTER_Y_OFFSET)
-    FILE_TEXT=(FILE_TEXT[0],FILE_TEXT[1]+FILTER_Y_OFFSET)
-    SAVE_OK=(SAVE_OK[0],SAVE_OK[1]+FILTER_Y_OFFSET)
+EV_FILTER_CONDITION=[10,50,100,300,600,1000]

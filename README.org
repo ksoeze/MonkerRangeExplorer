@@ -362,7 +362,42 @@ The A4 size print measures 21.0 x 29.7cm, 8.27 x 11.69 inches
 ** [2019-02-11 Mo]
 - many bugfixes of views
 - implemented combined view...not quite workable yet
-- 
+-
+
+** range analysis [2020-08-11 Di]
+*** speedup server
+    pip install opencv-python
+    
+*** TODO 
+    - improve speed
+    - replace slow screenshot time by pyautogui with mss and opencv template matching
+    - finegrain grouping in suit view
+    - add and sscc etc combos [2020-08-12 Mi] for filter
+    - remove data dump if handquiz standalone is not needed anymore? [2020-08-14 Fr]
+    - 
+
+*** filter ideas / improvements / changes
+    - fabian: quads / boats mehr differenzieren
+    - vlt seperate hand / board interaction view?
+    - 
+
+*** Time Logging
+
+    7s3d2s7h after COvsBU after x/c 2nd barrel for BU script turnrun as reference:
+
+    add_view_info took 338.87ms
+    add_view_info took 97.17ms
+    heatmap took 696.25ms
+    plot took 575.43ms
+    plot_bar took 533.33ms
+    update_output took 2.351sec
+
+    add_view_info took 290.59ms
+    add_view_info took 92.43ms
+    heatmap took 637.37ms
+    plot took 385.53ms
+    plot_bar took 379.99ms
+    update_output took 1.928sec
 
 * FIXMEs TODOs
 ** View changes

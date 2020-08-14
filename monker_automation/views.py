@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import re
 
 from monker_automation.utils import *
 import monker_automation.board as board_util
@@ -18,6 +19,15 @@ def regroup_list(hand_list, pattern):
         hand_list = hand_list[i:]
     if hand_list != []:
         return_hand_list.append(hand_list)
+    if return_hand_list: # when last item contains RANK+SUIT or RANK SUIT SUIT add SUIT bzw SUIT SUIT to last item # fd "hack"
+        if return_hand_list[-1][-1]:
+            if len(return_hand_list[-1][-1]) == 2 and return_hand_list[-1][-1][0] in RANKS and return_hand_list[-1][-1][1] in SUITS:
+                return_hand_list[-1].append(return_hand_list[-1][-1][1])
+            elif (len(return_hand_list[-1][-1]) == 3
+                  and return_hand_list[-1][-1][0] in RANKS
+                  and return_hand_list[-1][-1][1] in SUITS
+                  and return_hand_list[-1][-1][2] in SUITS) :
+                return_hand_list[-1].append(return_hand_list[-1][-1][1:3])
     return return_hand_list
 
 
@@ -833,10 +843,82 @@ def custom_view(board):
     return view
 
 def flush_suits(board):
-    suits=[s for s in board if s in SUITS]
-    suit_count=board_util.return_suits(board)
-    flop_suits=suits[:2]
-    pass
+    view = []
+
+    flop_board = board[0:3]+[RANDOM_CARD,RANDOM_CARD]
+    turn_board = board[0:4]+[RANDOM_CARD]
+    flop_flushes = board_util.return_flushes(flop_board)
+    flop_fd, _ = board_util.return_flushdraws(flop_board)
+    flop_fd_blocker = [x[0:2] for x in flop_fd]
+    flop_bd_suits = [s for c,s in board_util.return_suits(flop_board) if c == 1]
+    flop_bd_fd = [[],[],[]]
+    for i in range(0,len(flop_bd_suits)):
+      flop_bd_fd[i]=[r + flop_bd_suits[i] * 2 for r in board_util.possible_flush_or_fd_ranks(flop_board, flop_bd_suits[i])]
+    turn_flushes = board_util.return_flushes(turn_board)
+    turn_fds = board_util.return_flushdraws(turn_board)
+    turn_fd = []
+    for fd in turn_fds:
+        if fd:
+            if flop_fd:
+                if fd[0][1] != flop_fd[0][1]:
+                    turn_fd = fd
+            else:
+                turn_fd = fd
+    turn_fd_blocker = [x[0:2] for x in turn_fd]
+    river_flushes = board_util.return_flushes(board)
+
+    # start @ river and go from there back:
+    if river_flushes and not turn_flushes:
+        view+=regroup_list(river_flushes,FLUSH_GROUPING)
+        view+=regroup_list(board_util.return_flush_blockers(board),FLUSH_GROUPING)
+        for fd in turn_fd:
+            if fd and fd[0][1] != river_flushes[0][1]:
+                view+=regroup_list(fd,FD_GROUPING)
+        return view
+    if turn_flushes:
+        view+=regroup_list(turn_flushes,FLUSH_GROUPING)
+        view+=regroup_list(board_util.return_flush_blockers(turn_board),FLUSH_GROUPING)
+        for bd_fd in flop_bd_fd:
+            if bd_fd and bd_fd[0][1] != turn_flushes[0][1]:
+                view+=regroup_list(bd_fd, BD_FD_GROUPING)
+        return view
+    if flop_fd:
+        view+=regroup_list(flop_fd,FD_GROUPING)
+    if turn_fd:
+        view+=regroup_list(turn_fd,FD_GROUPING)
+    if flop_fd_blocker:
+        view+=regroup_list(flop_fd_blocker,FD_BLOCKER_GROUPING)
+    if turn_fd_blocker:
+        view+=regroup_list(turn_fd_blocker,FD_BLOCKER_GROUPING)
+    for bd_fd in flop_bd_fd:
+        if bd_fd:
+            if turn_fd:
+                if bd_fd[0][1] != turn_fd[0][1]:
+                    view+=regroup_list(bd_fd,BD_FD_GROUPING)
+            else:
+                view+=regroup_list(bd_fd,BD_FD_GROUPING)
+    return view
+
+def straight_draw_view(board):
+    turn_board = board[0:4]+[RANDOM_CARD]
+    view = []
+    draws = board_util.return_straight_draws(turn_board)
+    view+=regroup_list(draws["wraps"],STR_DRAW_GROUPING)
+    view+=regroup_list(draws["oesd"],STR_DRAW_GROUPING)
+    view+=regroup_list(draws["gs"],STR_DRAW_GROUPING)
+    return view
+
+def pair_view(board):
+    pairs = board_util.return_pairs(board)
+    view = regroup_list(pairs, POCKET_PAIR_GROUPING)
+    return view
+
+def board_interaction_view(board):
+    fulls = board_util.return_fulls_or_better(board)
+    intersections = board_util.hand_board_intersections(board)
+    all_combos = fulls + intersections
+    view = regroup_list(all_combos,BOARD_INTERACTION_GROUPING)
+    return view
 
 
 def clean(view):
@@ -954,7 +1036,13 @@ def get_view(board_str, view_type):
     elif view_type == "DRAWS_BLOCKERS":
         return clean(get_view(board_str, "DRAWS") + get_view(board_str, "BLOCKERS"))
     elif view_type == "FLUSH_SUITS":
-        return clean(get_view(board_str,flush_suits(board)))
+        return clean(flush_suits(board))
+    elif view_type == "STR_DRAWS":
+        return clean(straight_draw_view(board))
+    elif view_type == "PAIRS":
+        return clean(pair_view(board))
+    elif view_type == "BOARD_RANK_INTERACTION":
+        return clean(board_interaction_view(board))
     print("Unsupported VIEW TYPE")
     return []
 
@@ -981,6 +1069,127 @@ def view_item_to_str(item):
         string = string1 + string2
     return string
 
+def expand_range(hand,board_str):
+    """
+    returns string with all + expressions replaced
+    """
+    board = board_util.parse_board(board_str)
+    ranks=board_util.return_ranks(board)
+    flushes=board_util.return_flushes(board)
+    straights=board_util.return_straights(board)
+    straights=[j for i in straights for j in i]
+    fulls_or_better=board_util.return_fulls_or_better(board)
+    hand_board_int=board_util.hand_board_intersections(board)
+    str_draw_classes=board_util.return_straight_draws(board)
+    str_draws = str_draw_classes["wraps"]+str_draw_classes["oesd"]+str_draw_classes["gs"]
+    kickers=board_util.return_kickers(board)
+    pairs=board_util.return_pairs(board)
+
+    flush_suit=[]
+    if flushes:
+        flush_suit= flush_suit + [flushes[0][1:]]
+    str_flush=board_util.return_str_flushes(board)
+
+    match_expr=re.compile('['+''.join(RANKS)+']'+'{3,4}'+'\+') #start with longest possible expressions == 3, 4 card wraps
+    hand_sections=match_expr.findall(hand)
+
+    if hand_sections:
+        for x in hand_sections:
+            compare_x = ''.join(sorted(x[:-1], key=lambda x:RANK_ORDER[x], reverse=True))
+            if compare_x in str_draws:
+                replace_hands=str_draws[0:str_draws.index(compare_x)+1] # all better draws including written hand
+                replace_hands=board_util.compact_range(replace_hands)
+                hand=hand.replace(x,view_item_to_str(replace_hands))
+
+    match_expr=re.compile('['+''.join(RANKS)+']'+'['+''.join(SUITS)+']'+'{1,2}'+'\+') #flush flushdraw or blocker
+    hand_sections=match_expr.findall(hand)
+
+    if hand_sections:
+       for x in hand_sections:
+           compare_x=x[0:-1]
+           if len(compare_x) == 2: # can only be blocker...todo exclude flushes? add !suit suit
+               flush_blocker=board_util.return_flush_blockers(board)
+               if compare_x in flush_blocker:
+                   replace_hands=flush_blocker[0:flush_blocker.index(compare_x)+1]
+                   replace_hands=board_util.compact_range(replace_hands)
+                   hand=hand.replace(x,view_item_to_str(replace_hands))
+           else: # flush or flushdraw
+               if flushes:
+                   flushes=board_util.return_flushes(board)
+                   if compare_x in flushes:
+                       replace_hands=fulls_or_better + flushes[0:flushes.index(compare_x)+1]
+                       replace_hands=board_util.compact_range(replace_hands)
+                       hand=hand.replace(x,view_item_to_str(replace_hands))
+                   else:
+                       flush_drw=board_util.return_flushdraws(board,compare_x[-1])
+                       if flush_drw:
+                           replace_hands=flush_drw[0:flush_drw.index(compare_x)+1]
+                           replace_hands=board_util.compact_range(replace_hands)
+                           hand=hand.replace(x,view_item_to_str(replace_hands))
+
+    match_expr=re.compile('['+''.join(RANKS)+']'+'{2}'+'\+') #straights, str draws or hand board intersections
+    hand_sections=match_expr.findall(hand)
+
+    if hand_sections:
+        for x in hand_sections:
+            compare_x=''.join(sorted(x[:-1], key=lambda x:RANK_ORDER[x], reverse=True))
+
+            if compare_x in fulls_or_better:
+                replace_hands=str_flush+fulls_or_better[0:fulls_or_better.index(compare_x)+1]
+                replace_hands=board_util.compact_range(replace_hands)
+                hand=hand.replace(x,view_item_to_str(replace_hands))
+            elif compare_x in straights:
+                replace_hands=str_flush+fulls_or_better+flush_suit+straights[0:straights.index(compare_x)+1]
+                replace_hands=board_util.compact_range(replace_hands)
+                hand=hand.replace(x,view_item_to_str(replace_hands))
+            elif compare_x in str_draws:
+                replace_hands=str_draws[0:str_draws.index(compare_x)+1]
+                replace_hands=board_util.compact_range(replace_hands)
+                hand=hand.replace(x,view_item_to_str(replace_hands))
+            elif compare_x in hand_board_int:
+                replace_hands=str_flush+fulls_or_better+flush_suit+straights+hand_board_int[0:hand_board_int.index(compare_x)+1]
+                replace_hands=board_util.compact_range(replace_hands)
+                hand=hand.replace(x,view_item_to_str(replace_hands))
+            elif x[1] in hand_board_int: # pair + kicker?
+                replace_hands=hand_board_int[0:hand_board_int.index(x[1])]
+                better_kickers=kickers[0:kickers.index(x[0])+1]
+                replace_hands=str_flush+fulls_or_better+flush_suit+straights+replace_hands+[k+x[1] for k in better_kickers]
+                replace_hands=board_util.compact_range(replace_hands)
+                hand=hand.replace(x,view_item_to_str(replace_hands))
+            elif compare_x in pairs: # pocket pairs...only add pair or better
+                replace_hands=pairs[0:pairs.index(compare_x)+1]
+                replace_hands=board_util.compact_range(replace_hands)
+                hand=hand.replace(x,view_item_to_str(replace_hands))
+
+    match_expr=re.compile('['+''.join(RANKS)+']'+'{1}'+'\+') #one pair or better
+    hand_sections=match_expr.findall(hand)
+
+    if hand_sections:
+        for x in hand_sections:
+            compare_x=x[:-1]
+            if compare_x in hand_board_int:
+                replace_hands=str_flush+fulls_or_better+flush_suit+straights+hand_board_int[0:hand_board_int.index(compare_x)+1]
+                replace_hands=board_util.compact_range(replace_hands)
+                hand=hand.replace(x,view_item_to_str(replace_hands))
+
+    match_expr=re.compile('['+''.join(LOW_CARDS)+']'+'{2}'+'\<') #find HILO hand with < at the end
+    hand_sections=match_expr.findall(hand)
+
+    if hand_sections:
+        low_hands=board_util.return_lows(ranks)
+        for x in hand_sections:
+            compare_x=x[:-1]
+            if compare_x in low_hands:
+                replace_hands=low_hands[0:low_hands.index(compare_x)+1]
+                replace_hands=board_util.compact_range(replace_hands)
+                hand=hand.replace(x,view_item_to_str(replace_hands))
+    if '+' in hand:
+        logging.error("Could not resolve one or more + expressions in hand:\n{0}".format(hand))
+        return ""
+    if '<' in hand:
+        logging.error("Could not resolve one or more < expressions in hand:\n{0}".format(hand))
+        return ""
+    return hand
 
 def print_view(view, view_type=VIEW_TYPES[0], view_folder=VIEW_FOLDER, filename=DEFAULT_VIEW_NAME):
     if filename:
@@ -999,7 +1208,8 @@ def print_view(view, view_type=VIEW_TYPES[0], view_folder=VIEW_FOLDER, filename=
 
 
 def test():
-    board_string = "7d8c6c5s4d"
+    board_string = "7d8c6c5s5c"
+    board = board_util.parse_board(board_string)
     view_default = get_view(board_string, VIEW_TYPES[0])
     view_made = get_view(board_string, VIEW_TYPES[1])
     view_draws = get_view(board_string, VIEW_TYPES[2])
@@ -1018,7 +1228,14 @@ def test():
     print("BLOCKER_VIEW FOR BOARD:{}".format(board_string))
     for item in view_blockers:
         print(item)
+    print("FLUSH_SUIT_VIEW FOR BOARD:{}".format(board_string))
+    for item in view_suits:
+        print(item)
 
+    #print(replace_strings("8+",board))
+    #print(replace_strings("5+",board))
+    #print(replace_strings("cc+",board))
+    #print(replace_strings("99+",board))
     # print_view(view)
 
 

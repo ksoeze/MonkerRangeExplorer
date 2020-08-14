@@ -2,10 +2,11 @@
 
 from monker_automation.utils import *
 import numpy as np
+import matplotlib
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 import os
-
 
 def combine_view_with_percent(total_results,quiz):
     ticks = []
@@ -116,7 +117,7 @@ def plot_default(total_results, action_results, actions,quiz=QUIZ):
     ax2.axvline(x=50, color="k", linewidth=1, linestyle="--")
     ax2.axvline(x=75, color="k", linewidth=1, linestyle="--")
     filename = os.path.join(DEFAULT_REPORT_DIRECTORY, STRATEGY_PNG_NAME)
-    plt.tight_layout()
+    #plt.tight_layout()
     plt.savefig(filename, dpi=200, bbox_inches='tight', pad_inches=0)
     plt.close(fig)
     # plt.show()
