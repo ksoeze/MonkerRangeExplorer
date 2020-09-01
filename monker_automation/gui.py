@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+import datetime
+import subprocess
+
+from PIL import Image
 
 from monker_automation.utils import *
 import pyautogui
@@ -6,6 +10,8 @@ import time
 from tkinter import Tk
 import os
 import logging
+
+from timebudget import timebudget
 
 
 def goto_start(position=BACK_CO, click_delay=CLICK_DELAY, move_delay=MOUSE_MOVEMENT_DEL, num_back=NUM_BACK):
@@ -98,21 +104,34 @@ def enter_sequence_and_save_ranges(sequence, actions, board=""):
     time.sleep(SLEEP_AFTER_FINISH)
     return results
 
-
+@timebudget
 def available_buttons():
     buttons = {}
 
     # BACK is always on screen...take fixed coordinates
+
+    tmp_screen = '.screenshot%s.png' % (datetime.datetime.now().strftime('%Y-%m%d_%H-%M-%S-%f'))
+    subprocess.call(['scrot', tmp_screen])
+    tmp = Image.open(tmp_screen)
     buttons[BACK] = BACK_CO
     img = os.path.join(BUTTON_FILES_FOLDER, BUTTON_FILES[CHECK])
-    coordinates = pyautogui.locateCenterOnScreen(img, region=CHECK_CALL_REGION,grayscale=True)
+    #coordinates = pyautogui.locateCenterOnScreen(img, region=CHECK_CALL_REGION,grayscale=True)
+
+    coordinates = pyautogui.locate(img,tmp,region=CHECK_CALL_REGION,grayscale=True)
+    if coordinates:
+        coordinates = pyautogui.center(coordinates)
+    #assert(coordinates == new_coordinates)
+
     buttons[CHECK] = coordinates
     if buttons[CHECK]:  # there cant be call option
         buttons[CALL] = None
     else:
         img = os.path.join(BUTTON_FILES_FOLDER, BUTTON_FILES[CALL])
-        coordinates = pyautogui.locateCenterOnScreen(
-            img, region=CHECK_CALL_REGION,grayscale=True)
+        #coordinates = pyautogui.locateCenterOnScreen(
+        #    img, region=CHECK_CALL_REGION,grayscale=True)
+        coordinates = pyautogui.locate(img,tmp,region=CHECK_CALL_REGION,grayscale=True)
+        if coordinates:
+            coordinates = pyautogui.center(coordinates)
         buttons[CALL] = coordinates
 
     buttons["BET"] = []
@@ -123,7 +142,10 @@ def available_buttons():
 
     for size in POSSIBLE_BET_RAISE:
         img = os.path.join(BUTTON_FILES_FOLDER, BUTTON_FILES[size])
-        coordinates = pyautogui.locateCenterOnScreen(img, region=BUTTON_REGION,grayscale=True)
+        #coordinates = pyautogui.locateCenterOnScreen(img, region=BUTTON_REGION,grayscale=True)
+        coordinates = pyautogui.locate(img,tmp,region=CHECK_CALL_REGION,grayscale=True)
+        if coordinates:
+            coordinates = pyautogui.center(coordinates)
         if coordinates:
             # last letters of line text -> call or flop, turn, river
             if is_bet:
@@ -132,6 +154,7 @@ def available_buttons():
                 buttons["BET"].append(["RAISE " + size, coordinates])
         if len(buttons["BET"]) == MAX_BETS_RAISES:
             break
+    os.unlink(tmp_screen)
     return buttons
 
 # returns list of available ranges based on

@@ -1043,7 +1043,7 @@ def get_view(board_str, view_type):
         return clean(pair_view(board))
     elif view_type == "BOARD_RANK_INTERACTION":
         return clean(board_interaction_view(board))
-    print("Unsupported VIEW TYPE")
+    print("Unsupported VIEW TYPE: {}".format(view_type))
     return []
 
 

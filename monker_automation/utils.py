@@ -40,7 +40,7 @@ VIEW_TYPES = ["DEFAULT", "MADE_HANDS", "DRAWS", "BLOCKERS", "DRAWS_BLOCKERS", "F
 VIEW_FOLDER = "/media/johann/MONKER/monker/Views/"
 DEFAULT_VIEW_NAME = "OVERVIEW"
 TOP_VIEW_LINE = "180\n"
-MIN_WEIGHT = 0.001
+MIN_WEIGHT = 0.000001 #0.001
 
 # custom views
 
@@ -197,7 +197,6 @@ SUIT_SIGN_DIC = {"h": "\u2665", "c": "\u2663", "s": "\u2660", "d": "\u2666"}
 ANALYSIS_FONT = ("Arial", 12)
 MAX_LABEL_LENGTH = 20
 
-
 # SCRIPT SETTINGS
 
 # ZEILEN mit # sind nur Kommentare
@@ -277,6 +276,7 @@ POSSIBLE_BET_RAISE = ["MIN","33","40","66","100", "AllIn"]
 #POSSIBLE_BET_RAISE = ["30","50","70","100", "AllIn"]
 #POSSIBLE_BET_RAISE = ["33","50","100","AllIn"]
 #POSSIBLE_BET_RAISE = ["50","100", "AllIn"]
+#POSSIBLE_BET_RAISE = ["MIN","10","20","25","30","35","40","50","60","66","70","75","80","100","AllIn"]
 
 MAX_BETS_RAISES = 3
 QUIZ = False
@@ -291,6 +291,7 @@ SHUTDOWN = False
 
 # HAND QUIZZ0R
 HAND_QUIZ = True #IMPORTANT set back to False if doing normal report generation because it enables save 0% hands and impacts speed alot
+HAND_QUIZ = False
 MIN_QUIZ_WEIGHT = 0.5  #minimal combocount of hand in range...low weight combos often have weird/off strategy & dont effect ev much
 MIN_ACTION_FREQ = 0.5 #minimal frequency with which "best" action is taken
 MIN_EV_DIFF = 0 #minimal EV differnce between best and 2nd best desition (in monker chips) use 0 if no idea
@@ -298,9 +299,6 @@ MAX_EV_DIFF = 100 #maximal EV difference between best and 2nd best desition (in 
 PRINT_EV_ERROR = 0.1 #prints summary of hands where error is bigger than this (in monker chips)
 SHOW_SOLUTION=True # show / dont show solution
 SHOW_STRATEGY=False #MAKES NO SENSE FOR NOW # show / dont show spot startegy when hitting summary
-EV_RESULTS=False #NOT WORKING FOR NOW # prints some infos regarding EV differences and also a cvs file with all ev differences for analysis
-EV_NUM_HANDS=10 # prints top hand which prefer most frequent action over 2nd frequent action
-EV_TRESHOLD=0.5 # top x percent of hands which get shown for high / low ev action decitions
 
 #Range Analysis
 RANGE_ANALYSIS_VIEW_TYPES = ["MADE_HANDS", "DRAWS", "BLOCKERS", "DRAWS_BLOCKERS","FLUSH_SUITS","STR_DRAWS","PAIRS", "BOARD_RANK_INTERACTION", "RANKS","SUITS"]

@@ -431,7 +431,7 @@ def return_lows(board):
     return [''.join(sorted(low, key=lambda x: LOW_RANK_ORDER[x])) for low in low_hands_sorted]
 
 def test():
-    board_string = "5s6d5c7dTc"
+    board_string = "7s6c7cQs"
     sample_board = parse_board(board_string)
     # ranks = return_ranks(sample_board)
 
@@ -446,7 +446,7 @@ def test():
     # print(return_string(sample_board,"river"))
     # print(return_straights(sample_board))
 
-    # print(return_straight_draws(sample_board))
+    print(return_straight_draws(sample_board))
     # print(return_straight_blocker_pairs(sample_board))
     # print(return_straight_draws_categories(sample_board))
     # print(return_str_flushes(sample_board))

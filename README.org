@@ -366,20 +366,17 @@ The A4 size print measures 21.0 x 29.7cm, 8.27 x 11.69 inches
 
 ** range analysis [2020-08-11 Di]
 *** speedup server
-    pip install opencv-python
-    
+    - spotanalysis vor range analysis starten...    
 *** TODO 
-    - improve speed
+    - improve speed (multiprocessing!)
     - replace slow screenshot time by pyautogui with mss and opencv template matching
     - finegrain grouping in suit view
     - add and sscc etc combos [2020-08-12 Mi] for filter
-    - remove data dump if handquiz standalone is not needed anymore? [2020-08-14 Fr]
-    - 
+    - flushdraw smart syntax
+    - use pandas match regex instead of bool(re.match)?
 
 *** filter ideas / improvements / changes
     - fabian: quads / boats mehr differenzieren
-    - vlt seperate hand / board interaction view?
-    - 
 
 *** Time Logging
 

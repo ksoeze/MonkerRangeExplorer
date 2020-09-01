@@ -52,15 +52,24 @@ class InputLine(tk.Frame):
             self.checkbox = ttk.Checkbutton(self, text='Exclude', variable=self.checkboxvar)
             self.checkboxvar.set(EXCLUDE_DEFAULT)
             self.checkbox.grid(row=0, column=2)
+
+            self.invboxvar = tk.BooleanVar()
+            self.invbox = ttk.Checkbutton(self, text='Invert', variable=self.invboxvar)
+            self.invboxvar.set(False)
+            self.invbox.grid(row=0, column=3)
+
+
         for element in self.winfo_children(): element.grid_configure(padx=5, pady=5)
 
     def get_current_state(self):
         combobox = self.comboboxvar.get()
         if self.is_checkbox:
             checkbox = self.checkboxvar.get()
+            invbox = self.invboxvar.get()
         else:
             checkbox = EXCLUDE_DEFAULT
-        return (combobox, checkbox)
+            invbox = False
+        return (combobox, checkbox, invbox)
 
 
 class InputLineFilter(tk.Frame):
@@ -111,10 +120,10 @@ class InputFrame(tk.Frame):
         self.infos.grid(row=8, column=0, padx=1, pady=2, sticky="W")
 
         self.strat_frame = tk.Frame(root, padx=5, pady=2)
-        self.load_image(self.strat_frame, STRATEGY_PNG_NAME)
+        #self.load_image(self.strat_frame, STRATEGY_PNG_NAME)
         self.strat_frame.grid(row=9, column=0, columnspan=1, sticky="W")
         self.range_frame = tk.Frame(root, padx=5, pady=2)
-        self.load_image(self.range_frame, RANGE_PNG_NAME)
+        #self.load_image(self.range_frame, RANGE_PNG_NAME)
         self.range_frame.grid(row=10, column=0, columnspan=1, sticky="W")
 
     def set_info_text(self, infos):
@@ -170,18 +179,19 @@ class InputFrame(tk.Frame):
         img.grid(row=0, column=0, sticky="W")
 
 
-if (__name__ == '__main__'):
+def start_gui(actions=[],board=""):
 
     logger = logging.getLogger()
     logger.setLevel("INFO")
-    filename = os.path.join(
-        DEFAULT_REPORT_DIRECTORY, PICKLE_INFOS)
-    with open(filename, "rb") as f:
-        hand_lists = pickle.load(f)
-        total_results = pickle.load(f)
-        action_results = pickle.load(f)
-        actions = pickle.load(f)
-        board = pickle.load(f)
+    if actions == []:
+        filename = os.path.join(
+            DEFAULT_REPORT_DIRECTORY, PICKLE_INFOS)
+        with open(filename, "rb") as f:
+            hand_lists = pickle.load(f)
+            total_results = pickle.load(f)
+            action_results = pickle.load(f)
+            actions = pickle.load(f)
+            board = pickle.load(f)
 
     data, made_hand_filter, ev_filter = read_data(actions, board, "MADE_HANDS")
 
@@ -194,10 +204,12 @@ if (__name__ == '__main__'):
         column = get_view_list(infos["column"][0], board)
         row_exclude = infos["row"][1]
         column_exclude = infos["column"][1]
+        row_invert = infos["row"][2]
+        column_invert = infos["column"][2]
         hand_filter = infos["filter"]
         hand_filter_exclude = infos["filter_exclude"]
         figure, infos = update_plot(data, actions, board, hand_filter, hand_filter_exclude, filter_item, filter_by_ev,
-                                    filter_ev_condition, rows, column, row_exclude, column_exclude)
+                                    filter_ev_condition, rows, column, row_exclude, column_exclude,row_invert,column_invert)
         return figure, infos
 
 
@@ -240,6 +252,8 @@ if (__name__ == '__main__'):
     output_frame = tk.Frame(root)
     fig, infos = get_fig(input.get_infos())
     input.set_info_text(infos)
+    input.load_image(input.strat_frame, STRATEGY_PNG_NAME)
+    input.load_image(input.range_frame, RANGE_PNG_NAME)
     output = OutputFrame(output_frame, fig)
     output_frame.grid(row=0, column=2, rowspan=2)
 
@@ -251,3 +265,6 @@ if (__name__ == '__main__'):
 
     root.protocol("WM_DELETE_WINDOW", on_closing)
     root.mainloop()
+
+if (__name__ == '__main__'):
+    start_gui()

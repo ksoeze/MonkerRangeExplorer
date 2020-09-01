@@ -357,11 +357,11 @@ class InputFrame(tk.Frame):
               DEFAULT_REPORT_DIRECTORY, STRATEGY_PNG_NAME )
             load = Image.open(filename)
             Image._show(load)
-        if EV_RESULTS:
-            self.print_ev_diff()
+#        if EV_RESULTS:
+#            self.print_ev_diff()
         return
 
-if (__name__ == '__main__'):
+def start_quiz():
     logger = logging.getLogger()
     logger.setLevel("INFO")
     spot_data = SpotData()
@@ -378,3 +378,6 @@ if (__name__ == '__main__'):
     input_frame = InputFrame(root, spot_data.actions, update_output, spot_data.print_ev_differences)
     input_frame.set_card_label(hand)
     root.mainloop()
+
+if (__name__ == '__main__'):
+    start_quiz()

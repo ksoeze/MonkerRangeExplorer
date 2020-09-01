@@ -7,6 +7,7 @@ if __name__ == '__main__':
     #current_spot("DRAWS_BLOCKERS")
     #current_spot("MADE_HANDS", "DRAWS_BLOCKERS", False)
     #current_spot("MADE_HANDS","BLOCKERS", False)
+    #current_spot("MADE_HANDS","FLUSH_SUITS", False)
     #current_spot("DRAWS", "MADE_HANDS", False)
     #current_spot("DRAWS", "BLOCKERS", False)
     #current_spot("BLOCKERS", "MADE_HANDS", False)

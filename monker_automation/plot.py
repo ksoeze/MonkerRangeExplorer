@@ -3,7 +3,7 @@
 from monker_automation.utils import *
 import numpy as np
 import matplotlib
-matplotlib.use('agg')
+matplotlib.use('svg')
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 import os

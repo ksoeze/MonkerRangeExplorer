@@ -20,7 +20,6 @@ from monker_automation.range import view_item_to_str
 from monker_automation.plot import plot_default, plot_range_distribution
 from timebudget import timebudget
 
-
 def create_regex_from_item(item):
     if len(item) == 1:
         pattern = item
@@ -50,6 +49,7 @@ def create_regex_from_view(view_list):
         print("Only simple views supported for now")
         return re.compile("XXXX")
     pattern = "|".join([create_regex_from_item(x) for x in view_list])
+    return pattern
     return re.compile(pattern)
 
 
@@ -65,29 +65,38 @@ def get_conditional_sum(data, action, prefix_row, prefix_column, item_row, item_
                     data[prefix_column + item_column] == True), action + " Weight"].sum()
     return sum
 
+def action_heatmap(temp_data, action, row_index, column_index, heat_map):
+    heat_map[action] = pd.DataFrame(index=row_index, columns=column_index)
+    for row in row_index:
+        for col in column_index:
+            heat_map[action][col][row] = get_conditional_sum(temp_data, action, "ROW", "COLUMN", row, col)
 
-#@timebudget
-def heatmap(actions, data, row_list, column_list, exclude_row=True, exclude_column=True):
+@timebudget
+def heatmap(actions, data, row_list, column_list, exclude_row=True, exclude_column=True, invert_row=False, invert_column=False):
     # create axes and fill data list with view infos
-    if exclude_row:
-        row_index = ["total"] + [view_item_to_str(x) for x in row_list] + ["other"]
-        temp_data = add_view_info(data, row_list, "ROW", True)
-    else:
-        row_index = ["total"] + [view_item_to_str(x) for x in row_list]
-        temp_data = add_view_info(data, row_list, "ROW", False)
-    if exclude_column:
-        column_index = ["total"] + [view_item_to_str(x) for x in column_list] + ["other"]
-        temp_data = add_view_info(temp_data, column_list, "COLUMN", True)
-    else:
-        column_index = ["total"] + [view_item_to_str(x) for x in column_list]
-        temp_data = add_view_info(temp_data, column_list, "COLUMN", False)
+    row_index = ["total"] + [view_item_to_str(x) for x in row_list] + ["other"]
+    temp_data = add_view_info(data, row_list, "ROW", exclude_row,invert_row)
+    # else:
+    #     row_index = ["total"] + [view_item_to_str(x) for x in row_list]
+    #     temp_data = add_view_info(data, row_list, "ROW", False)
+    column_index = ["total"] + [view_item_to_str(x) for x in column_list] + ["other"]
+    temp_data = add_view_info(temp_data, column_list, "COLUMN", exclude_column,invert_column)
+    # else:
+    #     column_index = ["total"] + [view_item_to_str(x) for x in column_list]
+    #     temp_data = add_view_info(temp_data, column_list, "COLUMN", False)
     # one heatmap for every action
+
     heat_map = {}
     for action in actions:
         heat_map[action] = pd.DataFrame(index=row_index, columns=column_index)
         for row in row_index:
             for col in column_index:
                 heat_map[action][col][row] = get_conditional_sum(temp_data, action, "ROW", "COLUMN", row, col)
+    #
+    # result_manager = Manager()
+    # heat_map = result_manager.dict()
+    # with Pool(len(actions)) as p:
+    #     p.starmap(action_heatmap, [(temp_data,action, row_index, column_index, heat_map) for action in actions])
     return heat_map
 
 
@@ -128,7 +137,7 @@ def plot_action(axs, heat_map, action, title="", subplot_row=0):
     g.set_xticklabels([cut_lable(x) for x in g.get_xticklabels()], rotation=80)
 
 
-#@timebudget
+@timebudget
 def plot(heat_map, actions, subtitle_infos):
     fig, axs = plt.subplots(nrows=len(actions), ncols=2, figsize=(21, 21))
     fig.subplots_adjust(top=0.98, bottom=0.05, left=0.15, right=1, hspace=0.4,
@@ -140,7 +149,7 @@ def plot(heat_map, actions, subtitle_infos):
     return fig, axs
 
 
-#@timebudget
+@timebudget
 def plot_bar(heat_map, actions):
     # hack data and print it with old method from plot.py
     heat_map_total = sum(heat_map.values())
@@ -164,24 +173,35 @@ def plot_bar(heat_map, actions):
     plot_default(total_results, action_results, actions, False)
     plot_range_distribution(total_results, action_results, actions, False)
 
-
-#@timebudget
-def add_view_info(data, view_list, prefix, exclude=True):
-    if exclude:
-        data[prefix] = False
-        for view in view_list:
-            pattern = create_regex_from_view(view)
-            data[prefix + view_item_to_str(view)] = data["Hand"].apply(lambda row: bool(re.search(pattern, row)))
-            # remove true values from this column if it has been matched before...probably possible in one step above?
-            data[prefix + view_item_to_str(view)] = data[prefix + view_item_to_str(view)] & ~data[prefix]
-            # propagate new matches to total match column
-            data[prefix] = data[prefix] | data[prefix + view_item_to_str(view)]
-        data[prefix + "other"] = ~data[prefix]  # other hands are all hands not matched so far
+@timebudget
+def add_view_info(data, view_list, prefix, exclude=True,invert=False):
+    data[prefix] = False
+    for view in view_list:
+        pattern = create_regex_from_view(view)
+        data[prefix + view_item_to_str(view)] = data["Hand"].apply(lambda row: bool(re.search(pattern, row)))
+        #data[prefix + view_item_to_str(view)] = data["Hand"].str.contains(pat=pattern)
+        # remove true values from this column if it has been matched before...probably possible in one step above?
+        if exclude:
+            if invert:
+                data[prefix + view_item_to_str(view)] = data[prefix + view_item_to_str(view)] | data[prefix]
+            else:
+                data[prefix + view_item_to_str(view)] = data[prefix + view_item_to_str(view)] & ~data[prefix]
+        # propagate new matches to total match column
+        data[prefix] = data[prefix] | data[prefix + view_item_to_str(view)]
+        # invert TODO debug
+        if invert:
+            data[prefix + view_item_to_str(view)] = ~data[prefix + view_item_to_str(view)]
+    if invert:
+        data[prefix + "other"] = data[prefix]
     else:
-        for view in view_list:
-            pattern = create_regex_from_view(view)
-            data[prefix + view_item_to_str(view)] = data["Hand"].apply(lambda row: bool(re.search(pattern, row)))
+        data[prefix + "other"] = ~data[prefix]  # other hands are all hands not matched so far
     return data
+
+    # else:
+    #     for view in view_list:
+    #         pattern = create_regex_from_view(view)
+    #         data[prefix + view_item_to_str(view)] = data["Hand"].apply(lambda row: bool(re.search(pattern, row)))
+    # return data
 
 
 def get_view_list(view_type, board):
@@ -220,7 +240,7 @@ def read_data(actions, board, filter_view):
     return hand_infos, view, action_combinations
 
 
-#@timebudget
+@timebudget
 def get_ev_filtered_data(data, actions, filter_by_ev, ev_condition):
     if pd.isnull(data.loc[data.index[0], filter_by_ev]):
         logging.warning("Ranges dont contain EV informations...SKIP FILTER!")
@@ -233,9 +253,10 @@ def get_ev_filtered_data(data, actions, filter_by_ev, ev_condition):
         logging.info("Too little hands in range...cut by half")
         ev_condition = ev_condition // 2
     if data.loc[data.index[ev_condition], filter_by_ev] < 0:
-        logging.info("Restrict EV condition to less hands {}".format(data.loc[data.index[ev_condition], filter_by_ev]))
+        logging.info("Restrict EV condition to less hands since there are too little hands with EV {} > {}".format(filtered_actions[0], filtered_actions[1]))
     if data.loc[data.index[-ev_condition], filter_by_ev] > 0:
-        logging.info("Restrict EV condition to less hands {}".format(data.loc[data.index[ev_condition], filter_by_ev]))
+        logging.info("Restrict EV condition to less hands since there are too little hands with EV {} < {}".format(filtered_actions[0], filtered_actions[1]))
+        #logging.info("Restrict EV condition to less hands {}".format(data.loc[data.index[ev_condition], filter_by_ev]))
     new_data = data.tail(ev_condition)
     new_data = new_data.append(data.head(ev_condition))
     return filtered_actions, new_data
@@ -322,9 +343,9 @@ def filter_hands(data, actions, board, hand_filter, hand_filter_exclude, filter_
 
     return actions, data, combo_count
 
-
+#@timebudget
 def update_plot(data, actions, board, hand_filter, hand_filter_exclude, filter_item, filter_by_ev, ev_condition,
-                row_view, column_view, row_exclude=True, column_exclude=True):
+                row_view, column_view, row_exclude=True, column_exclude=True,row_invert=False, column_invert=False):
     # TODO get total weights and relative weights and show info somehow
     # TODO implement filter
     # TODO implement filter by ev -- DONE but hand condition often not suitable
@@ -333,12 +354,13 @@ def update_plot(data, actions, board, hand_filter, hand_filter_exclude, filter_i
                                                filter_by_ev, ev_condition)
 
     sns.set()
-    heat = heatmap(actions, data, row_view, column_view, row_exclude, column_exclude)
+    heat = heatmap(actions, data, row_view, column_view, row_exclude, column_exclude,row_invert,column_invert)
     subtitle_infos = {}
     for action in actions:
         subtitle_infos[action] = " (total combos: {:.0f} ({:.0f}%))".format(heat[action]["total"]["total"],
                                                                             heat[action]["total"]["total"] /
                                                                             combo_counts["final"] * 100)
+
     fig, axs = plot(heat, actions, subtitle_infos)
     plot_bar(heat, actions)
     return fig, combo_counts
