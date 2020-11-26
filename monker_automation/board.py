@@ -222,8 +222,12 @@ def return_str_flushes(board):
     for straight in STRAIGHTS:
         str_flush_cards = [c for c in straight if c + flush_suit[0] not in board]
         if len(str_flush_cards) == 2:
-            str_flush.append(
+            if RANK_ORDER[str_flush_cards[0]] >= RANK_ORDER[str_flush_cards[1]]:
+                str_flush.append(
                 str_flush_cards[0] + flush_suit[0] + str_flush_cards[1] + flush_suit[0])
+            else:
+                str_flush.append(
+                str_flush_cards[1] + flush_suit[0] + str_flush_cards[0] + flush_suit[0])
     return str_flush
 
 

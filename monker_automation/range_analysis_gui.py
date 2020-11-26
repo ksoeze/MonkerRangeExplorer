@@ -142,11 +142,17 @@ class InputFrame(tk.Frame):
         self.info_text.set(text)
 
     def set_defaults(self, hand_category_list, filter_by_ev_list):
-        self.row_view.combobox.set(RANGE_ANALYSIS_VIEW_TYPES[0])
-        self.column_view.combobox.set(RANGE_ANALYSIS_VIEW_TYPES[2])
+        if PREFLOP:
+            self.row_view.combobox.set(RANGE_ANALYSIS_VIEW_TYPES[11])
+        else:
+            self.row_view.combobox.set(RANGE_ANALYSIS_VIEW_TYPES[0])
+        if PREFLOP:
+            self.column_view.combobox.set(RANGE_ANALYSIS_VIEW_TYPES[12])
+        else:
+            self.column_view.combobox.set(RANGE_ANALYSIS_VIEW_TYPES[3])
         self.hand_category.combobox.set(hand_category_list[0])
         self.filter_by_ev.combobox.set(filter_by_ev_list[0])
-        self.filter_by_ev_condition.combobox.set(EV_FILTER_CONDITION[0])
+        self.filter_by_ev_condition.combobox.set(EV_FILTER_CONDITION[3])
 
     def get_infos(self):
         hand_category = self.hand_category.get_current_state()
@@ -193,7 +199,12 @@ def start_gui(actions=[],board=""):
             actions = pickle.load(f)
             board = pickle.load(f)
 
-    data, made_hand_filter, ev_filter = read_data(actions, board, "MADE_HANDS")
+    if PREFLOP:
+        board="2s2c2d2h"
+        data, made_hand_filter, ev_filter = read_data(actions, board, "PREFLOP_PAIRS_HIGH_CARD")
+    else:
+        data, made_hand_filter, ev_filter = read_data(actions, board, "MADE_HANDS")
+
 
 
     def get_fig(infos):
@@ -213,7 +224,7 @@ def start_gui(actions=[],board=""):
         return figure, infos
 
 
-    @timebudget
+    #@timebudget
     def update_output(infos):
         fig, infos = get_fig(infos)
         output.update_figure(fig)

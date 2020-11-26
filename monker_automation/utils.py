@@ -35,12 +35,13 @@ PAIR_GROUPING = [1, 1]
 POCKET_PAIR_GROUPING = [1,1,1,1,1,1,2,2,2,2]
 MIDDLE_PAIR_GROUPING = [2]
 BOARD_INTERACTION_GROUPING = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-VIEW_TYPES = ["DEFAULT", "MADE_HANDS", "DRAWS", "BLOCKERS", "DRAWS_BLOCKERS", "FLUSH_SUITS", "STR_DRAWS", "BOARD_RANK_INTERACTION", "PAIRS","CUSTOM"]
+VIEW_TYPES = ["DEFAULT", "MADE_HANDS", "DRAWS", "BLOCKERS", "DRAWS_BLOCKERS", "FLUSH","STRAIGHT",
+    "BOARD_RANKS", "KEY_CARDS","POCKET_PAIRS","CUSTOM"]
 
 VIEW_FOLDER = "/media/johann/MONKER/monker/Views/"
 DEFAULT_VIEW_NAME = "OVERVIEW"
 TOP_VIEW_LINE = "180\n"
-MIN_WEIGHT = 0.000001 #0.001
+MIN_WEIGHT = 0.001 #0.001
 
 # custom views
 
@@ -80,7 +81,7 @@ FILTER_SCREEN_REGION = (4963,967,500,80)
 NUM_BACK = 10
 DELETE_BOARD = 7
 MOUSE_MOVEMENT_DEL = 0.1
-CLICK_DELAY = 0.01
+CLICK_DELAY = 0.1
 TYPE_DELAY = 0.01
 SLEEP_AFTER_SAVE = 0.5
 SLEEP_AFTER_FINISH = 1
@@ -91,8 +92,8 @@ CHECK = "CHECK"
 CALL = "CALL"
 BET = "BET"
 RAISE = "RAISE"
-BUTTON_FILES = {"CHECK": "check.png", "CALL": "call.png", "MIN": "min.png",
-                "10": "10.png", "20": "20.png", "25": "25.png", "30": "30.png", "33": "33.png",
+BUTTON_FILES = {"CHECK": "check.png", "FOLD": "fold.png", "CALL": "call.png", "MIN": "min.png",
+                "10": "10.png", "15": "15.png", "20": "20.png", "25": "25.png", "30": "30.png", "33": "33.png",
                 "35": "35.png", "40": "40.png", "50": "50.png", "60": "60.png",
                 "66": "66.png", "70": "70.png", "75": "75.png", "80": "80.png",
                 "90": "90.png", "100": "100.png", "AllIn": "allin.png"}
@@ -215,9 +216,10 @@ SCRIPT_VIEW_TYPE = ["DEFAULT", "MADE_HANDS"]
 # TURN_CARDS = ["5h","5c", "Qc", "Th", "7s", "9h", "As", "Kh", "Jc","6d"]
 # TURN_CARDS = ["8h","8c", "6c", "Ah", "7s", "3h", "2h", "Kh", "Jc","6d","Qs"]
 # ["As","Ks","5s","Ts","9c","9s"]
-TURN_CARDS = ["Ah","As","Kd","Jc","9s","9h","9s","4d","4h","4d"]
+TURN_CARDS = ["Ah","Kc","Jh","Tc","7c","6d","4d","2c"]
+TURN_CARDS = ["Ac","Ks","Kc","Qh","Qd","Jc","Js","Tc","9d","7h","6c","4d","2c"]
 # TURN_CARDS = ["Ac","Kc","Qc","Jc","Tc","9c","8c","7c","6c","5c","4c","3c","2c"]
-TURN_CARDS = []
+# TURN_CARDS = []
 # RIVER_CARDS = ["2h","Kd","Ah","7h", "Qd", "Kc"]
 # RIVER_CARDS = ["4h","Ah","Kh","Qh","Jd","3d","Ad","Qd","7h","6h"]
 # RIVER_CARDS = ["4h","Ah","Qh","Th","3d","Ad","Qd","3s","As","Ts"]
@@ -246,12 +248,12 @@ TURN_CARDS = []
 # RIVER_CARDS = ["3c", "Ac", "Kc", "Jc", "9d", "8c", "6c", "Qc", "Tc", "7d", "5d", "Ad", "Td"]
 # RIVER_CARDS = ["Ah", "Kh", "Qh", "Jh", "Th", "8h", "7d", "4h", "Ad", "7d", "4d"]
 # RIVER_CARDS = ["2c", "Ad", "Th","Kd","Jh"]
-RIVER_CARDS = ["Ac","Ah","Ks","Qs","Qh","Jc","Jh","Tc","7c","5c","3h"]
-RIVER_CARDS = ["Jd"]
+RIVER_CARDS = ["Ac","Ks","Kc","Qh","Qd","Jc","Tc","9d","7c","6c","6d"]
+RIVER_CARDS = []
 #RIVER_CARDS = ["9h", "9d", "Qc", "Tc", "Ac", "Ad"]
 # z.b. [[RAISE,RAISE]] für bet, vs bet und vs raise lines only
 INVALID_SEQUENCES = [[BET, RAISE]]
-#INVALID_SEQUENCES = [[RAISE, RAISE]]
+INVALID_SEQUENCES = [[RAISE, RAISE]]
 #INVALID_SEQUENCES = []
 
 # siehe lines.txt
@@ -276,22 +278,35 @@ POSSIBLE_BET_RAISE = ["MIN","33","40","66","100", "AllIn"]
 #POSSIBLE_BET_RAISE = ["30","50","70","100", "AllIn"]
 #POSSIBLE_BET_RAISE = ["33","50","100","AllIn"]
 #POSSIBLE_BET_RAISE = ["50","100", "AllIn"]
-#POSSIBLE_BET_RAISE = ["MIN","10","20","25","30","35","40","50","60","66","70","75","80","100","AllIn"]
+POSSIBLE_BET_RAISE = ["MIN","10","25","30","33","40","50","66","70","75","100","AllIn"]
 
-MAX_BETS_RAISES = 3
+MAX_BETS_RAISES = 4
 QUIZ = False
 PRINT_VIEWS = False
 
-MIN_FREQ = 15
+MIN_FREQ = 10
 MIN_RAISE_FREQ = 5
 
 # Shutsdown Computer if not needed after finishing the job // locks screen otherwise
 SHUTDOWN = False
 #SHUTDOWN = True
 
+# NEW RANGE DETECTION (only works for range analysis and not report generation)
+# asumes all ranges are available as buttons -> so for end of line ranges you have to set it to the old system
+# or add the missing CHECK FOLD CALL options to MISSING_BUTTONS (use right order)
+NEW_RANGE_DETECTION=True
+NEW_RANGE_DETECTION=False
+#MISSING_RANGES=[CHECK,FOLD,CALL] this way but only the ones that dont have buttons but are actual ranges
+#MISSING_RANGES=[CALL]
+#MISSING_RANGES=[FOLD]
+MISSING_RANGES=[]
+
+PREFLOP = False
+#PREFLOP = True
+
 # HAND QUIZZ0R
 HAND_QUIZ = True #IMPORTANT set back to False if doing normal report generation because it enables save 0% hands and impacts speed alot
-HAND_QUIZ = False
+#HAND_QUIZ = False
 MIN_QUIZ_WEIGHT = 0.5  #minimal combocount of hand in range...low weight combos often have weird/off strategy & dont effect ev much
 MIN_ACTION_FREQ = 0.5 #minimal frequency with which "best" action is taken
 MIN_EV_DIFF = 0 #minimal EV differnce between best and 2nd best desition (in monker chips) use 0 if no idea
@@ -301,6 +316,9 @@ SHOW_SOLUTION=True # show / dont show solution
 SHOW_STRATEGY=False #MAKES NO SENSE FOR NOW # show / dont show spot startegy when hitting summary
 
 #Range Analysis
-RANGE_ANALYSIS_VIEW_TYPES = ["MADE_HANDS", "DRAWS", "BLOCKERS", "DRAWS_BLOCKERS","FLUSH_SUITS","STR_DRAWS","PAIRS", "BOARD_RANK_INTERACTION", "RANKS","SUITS"]
+RANGE_ANALYSIS_VIEW_TYPES = ["MADE_HANDS", "DRAWS", "BLOCKERS", "DRAWS_BLOCKERS","FLUSH","STRAIGHT",
+                             "BOARD_RANKS", "KEY_CARDS","POCKET_PAIRS","RANKS","SUITS",
+                             "PREFLOP_PAIRS_HIGH_CARD","PREFLOP_SUITS","PREFLOP_HIGH_CARD"]
 EXCLUDE_DEFAULT = True
-EV_FILTER_CONDITION=[10,50,100,300,600,1000]
+PRINT_TOTAL_WEIGHTS = True
+EV_FILTER_CONDITION=[10,50,100,300,600,1000,2000]

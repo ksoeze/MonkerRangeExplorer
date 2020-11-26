@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
+import random
 import re
 
 from monker_automation.utils import *
 import monker_automation.board as board_util
 import os
 import logging
-
+import pprint
+import itertools
 
 def regroup_list(hand_list, pattern):
     return_hand_list = []
@@ -29,7 +31,6 @@ def regroup_list(hand_list, pattern):
                   and return_hand_list[-1][-1][2] in SUITS) :
                 return_hand_list[-1].append(return_hand_list[-1][-1][1:3])
     return return_hand_list
-
 
 def regroup_board_intersections(board):
     ranks = board_util.return_ranks(board)
@@ -353,7 +354,13 @@ def paired_board_blocker(board):
 
     # str flush blockers
     if board_util.return_str_flushes(board) != []:
-        view.append(board_util.return_str_flushes(board))
+        str_flushes = board_util.return_str_flushes(board)
+        str_flush_blockers = []
+        for str_flush in str_flushes:
+            str_flush_blockers.append(str_flush[0:2])
+            str_flush_blockers.append(str_flush[2:4])
+            str_flush_blockers=list(set(str_flush_blockers))
+        view += regroup_list(str_flush_blockers,[1,1,1])
 
     # 2 baord pair blockers
     view.append([hand for hand in blockers if len(hand) == 2])
@@ -871,9 +878,8 @@ def flush_suits(board):
     if river_flushes and not turn_flushes:
         view+=regroup_list(river_flushes,FLUSH_GROUPING)
         view+=regroup_list(board_util.return_flush_blockers(board),FLUSH_GROUPING)
-        for fd in turn_fd:
-            if fd and fd[0][1] != river_flushes[0][1]:
-                view+=regroup_list(fd,FD_GROUPING)
+        if fd and fd[0][1] != river_flushes[0][1]:
+            view+=regroup_list(fd,FD_GROUPING)
         return view
     if turn_flushes:
         view+=regroup_list(turn_flushes,FLUSH_GROUPING)
@@ -900,18 +906,49 @@ def flush_suits(board):
     return view
 
 def straight_draw_view(board):
-    turn_board = board[0:4]+[RANDOM_CARD]
+    straights = board_util.return_straights(board)
+    str_blocker_pairs = board_util.return_straight_blocker_pairs(board)
+    str_blockers = [x[0] for x in str_blocker_pairs]
+
     view = []
+
+    if straights[0]:
+        for str in straights:
+            if str:
+                view.append(str)
+        view+=regroup_list(str_blocker_pairs,[1,1,1,1])
+        view+=regroup_list(str_blockers,[1,1,1,1])
+
+    turn_board = board[0:4]+[RANDOM_CARD]
     draws = board_util.return_straight_draws(turn_board)
     view+=regroup_list(draws["wraps"],STR_DRAW_GROUPING)
     view+=regroup_list(draws["oesd"],STR_DRAW_GROUPING)
     view+=regroup_list(draws["gs"],STR_DRAW_GROUPING)
-    return view
+
+    if not straights[0]:
+        str_draws = draws
+        if str_draws["gs"]:
+            str_draws = clean([str_draws["wraps"]+str_draws["oesd"]+str_draws["gs"]])[0]
+            str_draws = list("".join(str_draws))
+            str_draw_counts = [[], [], [], [], []]
+            for i in range(0, 5):
+                str_draw_counts[i] = list(set(r for r in str_draws if str_draws.count(r) == (i + 1)))
+            for i in str_draw_counts:
+                i.sort(key=lambda x: RANK_ORDER[x], reverse=True)
+            for i in range(4,1,-1):
+                view+=regroup_list(str_draw_counts[i],[1,1,1,1])
+
+    view = clean(view)
+    ret_view = []
+    [ret_view.append(x) for x in view if x not in ret_view]
+    return ret_view
+
 
 def pair_view(board):
     pairs = board_util.return_pairs(board)
     view = regroup_list(pairs, POCKET_PAIR_GROUPING)
     return view
+
 
 def board_interaction_view(board):
     fulls = board_util.return_fulls_or_better(board)
@@ -920,11 +957,88 @@ def board_interaction_view(board):
     view = regroup_list(all_combos,BOARD_INTERACTION_GROUPING)
     return view
 
+def relevant_hole_cards(board):
+    flop_board = board[0:3]+[RANDOM_CARD,RANDOM_CARD]
+    turn_board = board[0:4]+[RANDOM_CARD]
+    flop_fd, _ = board_util.return_flushdraws(flop_board)
+    flop_fd_blocker = [x[0:2] for x in flop_fd]
+    turn_fds = board_util.return_flushdraws(turn_board)
+    turn_fd = []
+    for fd in turn_fds:
+        if fd:
+            if flop_fd:
+                if fd[0][1] != flop_fd[0][1]:
+                    turn_fd = fd
+            else:
+                turn_fd = fd
+    turn_fd_blocker = [x[0:2] for x in turn_fd]
+
+    # board interactions
+    rank_count = board_util.return_rank_counts(board)
+    rank_view = []
+    for i in range(2,-1,-1):
+        if rank_count[i]:
+            rank_view += [[x] for x in rank_count[i]]
+
+    # flush blockers
+    flush_blockers = board_util.return_flush_blockers(board)
+    flush_view=regroup_list(flush_blockers,[1,1,1,1])
+
+    # straight blockers
+    blockerpairs = board_util.return_straight_blocker_pairs(board)
+    straight_view=regroup_list([b[0] for b in blockerpairs], [1,1,1,1])
+
+    if rank_count[3] != [] or rank_count[2] != [] or rank_count[1] != []:
+        view = rank_view+flush_view+straight_view
+    else:
+        view = flush_view+straight_view+rank_view
+
+    # flop fd blockers
+    if flop_fd_blocker:
+        if flush_blockers:
+            if flush_blockers[0][1] != flop_fd_blocker[0][1]:
+                view+=regroup_list(flop_fd_blocker,[1,1,1,1])
+        else:
+            view+=regroup_list(flop_fd_blocker,[1,1,1,1])
+
+    # turn fd blockers
+    if turn_fd_blocker:
+        if flush_blockers:
+            if flush_blockers[0][1] != turn_fd_blocker[0][1]:
+                view+=regroup_list(turn_fd_blocker,[1,1,1,1])
+        else:
+            view+=regroup_list(turn_fd_blocker,[1,1,1,1])
+
+    # straight draw blockers
+
+    str_draws = board_util.return_straight_draws(turn_board)
+    if str_draws["gs"]:
+        str_draws = clean([str_draws["wraps"]+str_draws["oesd"]+str_draws["gs"]])[0]
+        str_draws = list("".join(str_draws))
+        str_draw_counts = [[], [], [], [], []]
+        for i in range(0, 5):
+            str_draw_counts[i] = list(set(r for r in str_draws if str_draws.count(r) == (i + 1)))
+        for i in str_draw_counts:
+            i.sort(key=lambda x: RANK_ORDER[x], reverse=True)
+        for i in range(4,1,-1):
+            view+=regroup_list(str_draw_counts[i],[1,1,1,1])
+    # kickers
+    if len(view) < 10:
+        kickers = board_util.return_kickers(board)
+        kickers = kickers[:4]
+        view+= regroup_list(kickers,[1,1,1,1])
+
+    view = clean(view)
+    ret_view = []
+    [ret_view.append(x) for x in view if x not in ret_view]
+    return ret_view
 
 def clean(view):
     new_view = []
     for item in view:
         if len(item) == 0:  # discard empty view entry
+            continue
+        if item in new_view:
             continue
         if type(item[0]) != list:  # standard view entry -> list of strings
             new_view.append(board_util.compact_range(item))
@@ -981,6 +1095,8 @@ def combine_views(board, view_type_1, view_type_2, ignore_first_entry=True):
 
 def get_view(board_str, view_type):
     board = board_util.parse_board(board_str)
+    if view_type == "DRAWS": # if river return turn draw view
+        board = board[0:4]+[RANDOM_CARD]
     rank_count_list = board_util.return_rank_counts(board)
 
     if view_type == "DEFAULT":
@@ -1035,14 +1151,16 @@ def get_view(board_str, view_type):
         return clean(custom_view(board))
     elif view_type == "DRAWS_BLOCKERS":
         return clean(get_view(board_str, "DRAWS") + get_view(board_str, "BLOCKERS"))
-    elif view_type == "FLUSH_SUITS":
+    elif view_type == "FLUSH":
         return clean(flush_suits(board))
-    elif view_type == "STR_DRAWS":
+    elif view_type == "STRAIGHT":
         return clean(straight_draw_view(board))
-    elif view_type == "PAIRS":
+    elif view_type == "POCKET_PAIRS":
         return clean(pair_view(board))
-    elif view_type == "BOARD_RANK_INTERACTION":
+    elif view_type == "BOARD_RANKS":
         return clean(board_interaction_view(board))
+    elif view_type == "KEY_CARDS":
+        return clean(relevant_hole_cards(board))
     print("Unsupported VIEW TYPE: {}".format(view_type))
     return []
 
@@ -1207,30 +1325,53 @@ def print_view(view, view_type=VIEW_TYPES[0], view_folder=VIEW_FOLDER, filename=
             f.write("\n")
 
 
-def test():
-    board_string = "7d8c6c5s5c"
-    board = board_util.parse_board(board_string)
-    view_default = get_view(board_string, VIEW_TYPES[0])
-    view_made = get_view(board_string, VIEW_TYPES[1])
-    view_draws = get_view(board_string, VIEW_TYPES[2])
-    view_blockers = get_view(board_string, VIEW_TYPES[3])
-    view_suits=get_view(board_string,"FLUSH_SUITS")
+def try_it():
+    board_string = "2d4c8d5cKc"
+    for iterations in range(0,1000):
+        num_cards = random.randint(3,5)
+        board_string = "".join(random.sample(CARDS,num_cards))
+        board = board_util.parse_board(board_string)
+        view_default = get_view(board_string, VIEW_TYPES[0])
+        view_made = get_view(board_string, VIEW_TYPES[1])
+        view_draws = get_view(board_string, VIEW_TYPES[2])
+        view_blockers = get_view(board_string, VIEW_TYPES[3])
+        view_draws_blockers=get_view(board_string,VIEW_TYPES[4])
+        view_flush = get_view(board_string,VIEW_TYPES[5])
+        view_straight = get_view(board_string, VIEW_TYPES[6])
+        view_board_rank = get_view(board_string, VIEW_TYPES[7])
+        view_key_cards = get_view(board_string, VIEW_TYPES[8])
+        view_pocket = get_view(board_string, VIEW_TYPES[9])
 
-    print("DEFAULT_VIEW FOR BOARD:{}".format(board_string))
-    for item in view_default:
-        print(item)
-    print("MADE_VIEW FOR BOARD:{}".format(board_string))
-    for item in view_made:
-        print(item)
-    print("DRAW_VIEW FOR BOARD:{}".format(board_string))
-    for item in view_draws:
-        print(item)
-    print("BLOCKER_VIEW FOR BOARD:{}".format(board_string))
-    for item in view_blockers:
-        print(item)
-    print("FLUSH_SUIT_VIEW FOR BOARD:{}".format(board_string))
-    for item in view_suits:
-        print(item)
+        print("DEFAULT_VIEW FOR BOARD:{}".format(board_string))
+        for item in view_default:
+            print(item)
+        print("MADE_VIEW FOR BOARD:{}".format(board_string))
+        for item in view_made:
+            print(item)
+        print("DRAW_VIEW FOR BOARD:{}".format(board_string))
+        for item in view_draws:
+            print(item)
+        print("BLOCKER_VIEW FOR BOARD:{}".format(board_string))
+        for item in view_blockers:
+            print(item)
+        print("DRAW_BLOCKER_VIEW FOR BOARD:{}".format(board_string))
+        for item in view_draws_blockers:
+            print(item)
+        print("FLUSH_SUIT_VIEW FOR BOARD:{}".format(board_string))
+        for item in view_flush:
+            print(item)
+        print("STR_DRAW_VIEW FOR BOARD:{}".format(board_string))
+        for item in view_straight:
+            print(item)
+        print("BOARD RANK FOR BOARD:{}".format(board_string))
+        for item in view_board_rank:
+            print(item)
+        print("KEY CARDS FOR BOARD:{}".format(board_string))
+        for item in view_key_cards:
+            print(item)
+        print("POCKETS FOR BOARD:{}".format(board_string))
+        for item in view_pocket:
+            print(item)
 
     #print(replace_strings("8+",board))
     #print(replace_strings("5+",board))
@@ -1238,6 +1379,362 @@ def test():
     #print(replace_strings("99+",board))
     # print_view(view)
 
+def flop_generation():
+    boards=[]
+    all_flops = itertools.combinations(CARDS,3)
+    # for iterations in range(0,1000):
+    #     board_string = "".join(random.sample(CARDS,3))
+    #     boards.append(board_string)
+    for flop in all_flops:
+        boards.append("".join(flop))
+
+    boards_min = [
+        "KsTs5s",
+        "7s7d6h",
+        "Js9s9d",
+        "Qs9s8d",
+        "Td8s7s",
+        "9s8d5h",
+        "AsJd4h",
+        "AdTs8s",
+        "AsKd6s",
+        "Ks8s3d",
+        "QsJd7h",
+        "Jd4s2s",
+        "8d6s3h"
+    ]
+
+    boards_25pio = [
+        "3s3dKs",
+        "7s7d6s",
+        "QsQd7s",
+        "2d3sAs",
+        "2s4d8c",
+        "2s5dQc",
+        "2s6dQc",
+        "2d9sKs",
+        "2sQsKd",
+        "3s5d8c",
+        "3sTdJc",
+        "3sJsAd",
+        "4s6sJd",
+        "4s9dTc",
+        "4sTsJd",
+        "4dTsKs",
+        "5s6dTc",
+        "5s6dAc",
+        "5d7s9s",
+        "5s9sKd",
+        "7d8sTs",
+        "7d8sJs",
+        "7sQsAs",
+        "7sKsAd",
+        "8s9dAc"
+    ]
+
+    boards_49pio =[
+        "3s3d2c",
+        "4s4d5s",
+        "6s6dAs",
+        "7s7d6s",
+        "8s8dJs",
+        "TsTdKs",
+        "JsJd9s",
+        "QsQdJc",
+        "KsKd7s",
+        "AsAd7s",
+        "2s3d7c",
+        "2d3s9s",
+        "2s4dQc",
+        "2s4dAc",
+        "2s5dTc",
+        "2s5sAd",
+        "2d6s9s",
+        "2s8dJs",
+        "2dQsKs",
+        "3s4s6s",
+        "3s5s9d",
+        "3d6sKs",
+        "3s7dQc",
+        "3d8s9s",
+        "3s8sQs",
+        "3s9dAc",
+        "3dKsAs",
+        "4s5dJc",
+        "4s6dTc",
+        "4s7s8d",
+        "4s8dKc",
+        "4sJsKd",
+        "5s6d8c",
+        "5s7s9s",
+        "5s7dTc",
+        "5dQsAs",
+        "6s7dTc",
+        "6s7dQc",
+        "6dJsAs",
+        "7s9dKc",
+        "7sJdAs",
+        "8s9dQc",
+        "8sTsQs",
+        "8sTdKc",
+        "8sTdAs",
+        "9sTdQc",
+        "9dTsKs",
+        "TsJdQc",
+        "TsJsAd"
+    ]
+
+    boards_184pio=[
+        "TsTdTc",
+        "AsAdAc",
+        "2s2d6c",
+        "2s2dTc",
+        "3s3d8s",
+        "3s3dJc",
+        "4s4d3c",
+        "4s4dKc",
+        "5s5d7c",
+        "6s6d8s",
+        "6s6d9s",
+        "6s6d9c",
+        "6s6dJs",
+        "7s7dTs",
+        "7s7dQc",
+        "8s8d3s",
+        "8s8dTc",
+        "9s9d3s",
+        "9s9d3c",
+        "9s9dAc",
+        "TsTd5c",
+        "JsJd4c",
+        "JsJd5c",
+        "JsJd7c",
+        "QsQd3c",
+        "QsQd8s",
+        "KsKd4s",
+        "KsKd6c",
+        "KsKd9c",
+        "KsKdTc",
+        "KsKdAs",
+        "AsAd5c",
+        "AsAdJs",
+        "2s3s4s",
+        "2s3d5c",
+        "2s3d6c",
+        "2s3d7c",
+        "2s3d7s",
+        "2s3s9d",
+        "2s3dQc",
+        "2s3dKs",
+        "2d3sAs",
+        "2s4d5c",
+        "2s4s7d",
+        "2d4s8s",
+        "2s4d9c",
+        "2d4sAs",
+        "2s5d6s",
+        "2d5s6s",
+        "2s5dTc",
+        "2s5dJs",
+        "2d5sJs",
+        "2s6s8d",
+        "2s6dJc",
+        "2s6sQd",
+        "2s7d9s",
+        "2s7dTc",
+        "2d7sTs",
+        "2s7dAs",
+        "2s8dTc",
+        "2s8sTs",
+        "2d8sQs",
+        "2s8dKc",
+        "2d8sKs",
+        "2s8dAc",
+        "2sTdQc",
+        "2dTsQs",
+        "2dTsAs",
+        "2sJdQs",
+        "2sQsKd",
+        "3d4s5s",
+        "3s4s6s",
+        "3s4dJc",
+        "3s4dKs",
+        "3s4dAc",
+        "3d5s8s",
+        "3s5sJd",
+        "3s5dAc",
+        "3s6s9d",
+        "3s6dKc",
+        "3d6sAs",
+        "3s7d8c",
+        "3s7d8s",
+        "3s7sJs",
+        "3s7dQc",
+        "3s7dAc",
+        "3s7sAd",
+        "3s8d9c",
+        "3d8sJs",
+        "3s9dTc",
+        "3s9sQs",
+        "3sTsKd",
+        "3sTdAc",
+        "3dJsAs",
+        "3dQsKs",
+        "3sQsAs",
+        "4d5sTs",
+        "4s5dKc",
+        "4s5sKd",
+        "4s5dKs",
+        "4d5sAs",
+        "4s6d7s",
+        "4d6s8s",
+        "4s6d9c",
+        "4s6sJs",
+        "4s6dQc",
+        "4s6dKc",
+        "4s6dAc",
+        "4s7d8c",
+        "4s7sTd",
+        "4d7sQs",
+        "4d8s9s",
+        "4s8dJc",
+        "4s8dQc",
+        "4d9sJs",
+        "4s9sJs",
+        "4s9dQc",
+        "4sTdJc",
+        "4sTsAd",
+        "4sJdQc",
+        "5d6s7s",
+        "5s6d8s",
+        "5d6s8s",
+        "5s6dJc",
+        "5s6sKs",
+        "5s6dAc",
+        "5d7s8s",
+        "5s7d9s",
+        "5d7s9s",
+        "5s7sQd",
+        "5s7sAs",
+        "5s8d9c",
+        "5s8sAs",
+        "5s9sTd",
+        "5s9sQd",
+        "5s9dQs",
+        "5s9dKc",
+        "5sTdQc",
+        "5sTsQd",
+        "5sTdKs",
+        "5sTdAc",
+        "5dJsQs",
+        "5sJsAd",
+        "6s7dTc",
+        "6s7sKd",
+        "6s7dAc",
+        "6s8d9c",
+        "6s8dTs",
+        "6s8dQs",
+        "6s9dTs",
+        "6s9sAs",
+        "6sTdJc",
+        "6dTsAs",
+        "6sJdKs",
+        "6sQsKs",
+        "6sQdAc",
+        "7s8sTd",
+        "7s8dJc",
+        "7s9dJc",
+        "7s9sKs",
+        "7sTdAc",
+        "7sQsKd",
+        "7dQsKs",
+        "7sQsAd",
+        "7sQdAs",
+        "7dKsAs",
+        "8s9dTs",
+        "8s9sAd",
+        "8sTdJs",
+        "8sJdKc",
+        "8sKsAd",
+        "8dKsAs",
+        "9dTsJs",
+        "9sTsAd",
+        "9sJdQc",
+        "9sQsKd",
+        "9sQsAd",
+        "9sKdAs",
+        "TdJsQs",
+        "TsJsKs",
+        "JsQdKc",
+        "JdQsAs",
+        "JsKsAd",
+        "QsKdAs"
+    ]
+
+    cath={"TwoTone":0,
+                 "Rainbow":0,
+                 "Monotone":0,
+                 "Straight":0,
+                 "1 Straight":0,
+                 "2 Straights":0,
+                 "3 Straights":0,
+                 "Trip":0,
+                 "Paired":0,
+                 "Unpaired":0,
+                 "A":0,
+                 "K":0,
+                 "Q":0,
+                 "J":0,
+                 "T":0,
+                 "9":0,
+                 "8":0,
+                 "7":0,
+                 "6":0,
+                 "5":0,
+                 "4":0,
+                 "3":0,
+                 "2":0}
+    boards = boards_25pio
+    boards = boards_min
+    count_total=len(boards)
+    for board in boards:
+        board = board_util.parse_board(board)
+        fd = board_util.return_flushdraws(board)
+        if board_util.return_flushes(board):
+            cath["Monotone"]+=1
+        elif board_util.return_flushdraws(board)[0]:
+            cath["TwoTone"]+=1
+        else:
+            cath["Rainbow"]+=1
+        straights=board_util.return_straights(board)
+        straights = list(itertools.chain.from_iterable(straights))
+        if straights:
+            cath["Straight"]+=1
+            if len(straights) == 1:
+                cath["1 Straight"]+=1
+            elif len(straights)==2:
+                cath["2 Straights"]+=1
+            elif len(straights) == 3:
+                cath["3 Straights"]+=1
+        rank_count = board_util.return_rank_counts(board)
+        if rank_count[2] != []:
+            cath["Trip"]+=1
+        elif rank_count[1] != []:
+            cath["Paired"]+=1
+        else:
+            cath["Unpaired"]+=1
+        rank_matched = False
+        for rank in RANKS:
+            if rank_matched:
+                break
+            for card in board:
+                if rank in card:
+                    cath[rank]+=1
+                    rank_matched=True
+                    break
+    cath_percent = {k: round(v/count_total*100,2) for k, v in cath.items()}
+    print(cath_percent)
 
 if (__name__ == '__main__'):
-    test()
+    #flop_generation()
+    try_it()

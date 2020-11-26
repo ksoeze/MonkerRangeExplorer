@@ -40,7 +40,17 @@ def create_regex_from_item(item):
         if item[0] in RANKS and item[1] in RANKS and item[2] in RANKS and item[3] in RANKS:
             pattern = item[0] + ".+" + item[1] + ".+" + item[2] + ".+" + item[3]
         elif item[0] in RANKS and item[1] in SUITS and item[2] in RANKS and item[3] in SUITS:
-            pattern = item[0] + item[1] + ".+" + item[2] + item[3]
+            pattern = item[0] + item[1] + ".*" + item[2] + item[3]
+        elif item[0] == "A" and item[1] in SUITS and item[2] in SUITS and item[3] in SUITS: # for preflop only A high tripple suited
+            pattern = item[0] + item[1] + ".+" + item[2] + ".+" + item[3]
+        elif item[0] in SUITS and item[1] in SUITS and item[2] in SUITS and item[3] in SUITS:
+            if item[0] == item[2]: # quad flush for now only
+                pattern = item[0] + ".+" + item[1] + ".+" + item[2] + ".+" + item[3]
+            elif item[0] != item[2]: # double suited only xxyy syntax
+                pattern = "(?=.+" + item[0] + ".+" + item[1] + ")(.+" +item[2] + ".+" + item[3] + ")"
+    elif len(item) == 5: # for preflop only Ahhdd
+        if item[0] == "A" and item[1] in SUITS and item[2] in SUITS and item[3] in SUITS and item[4] in SUITS:
+          pattern = "(?=.*" + item[0] + item[1] + ".+" + item[2] + ")(.+" +item[3] + ".+" + item[4] + ")"
     return "(" + pattern + ")"
 
 
@@ -71,7 +81,7 @@ def action_heatmap(temp_data, action, row_index, column_index, heat_map):
         for col in column_index:
             heat_map[action][col][row] = get_conditional_sum(temp_data, action, "ROW", "COLUMN", row, col)
 
-@timebudget
+#@timebudget
 def heatmap(actions, data, row_list, column_list, exclude_row=True, exclude_column=True, invert_row=False, invert_column=False):
     # create axes and fill data list with view infos
     row_index = ["total"] + [view_item_to_str(x) for x in row_list] + ["other"]
@@ -137,7 +147,8 @@ def plot_action(axs, heat_map, action, title="", subplot_row=0):
     g.set_xticklabels([cut_lable(x) for x in g.get_xticklabels()], rotation=80)
 
 
-@timebudget
+
+#@timebudget
 def plot(heat_map, actions, subtitle_infos):
     fig, axs = plt.subplots(nrows=len(actions), ncols=2, figsize=(21, 21))
     fig.subplots_adjust(top=0.98, bottom=0.05, left=0.15, right=1, hspace=0.4,
@@ -149,7 +160,7 @@ def plot(heat_map, actions, subtitle_infos):
     return fig, axs
 
 
-@timebudget
+#@timebudget
 def plot_bar(heat_map, actions):
     # hack data and print it with old method from plot.py
     heat_map_total = sum(heat_map.values())
@@ -157,7 +168,7 @@ def plot_bar(heat_map, actions):
     total_results = {}
     total_results["v_str"] = heat_map_total.index.tolist()
     total_results["r"] = heat_map_total.values.tolist()
-    total_results["r"] = [x / total_results["r"][0] * 100 for x in total_results["r"]]
+    total_results["r"] = [x / total_results["r"][0] * 100 if total_results["r"][0] else 0 for x in total_results["r"]]
     total_results["r_cum"] = [total_results["r"][0]] + np.cumsum(total_results["r"][1:-1]).tolist()  # +[100]
     total_results["r_cum"] += [total_results["r_cum"][-1] + total_results["r"][-1]]
     action_results = {}
@@ -173,7 +184,7 @@ def plot_bar(heat_map, actions):
     plot_default(total_results, action_results, actions, False)
     plot_range_distribution(total_results, action_results, actions, False)
 
-@timebudget
+#@timebudget
 def add_view_info(data, view_list, prefix, exclude=True,invert=False):
     data[prefix] = False
     for view in view_list:
@@ -208,9 +219,42 @@ def get_view_list(view_type, board):
     if view_type in VIEW_TYPES:
         return get_view(board, view_type)
     if view_type == "RANKS":
-        return RANKS
+        return [[x] for x in RANKS]
     if view_type == "SUITS":
-        return SUITS
+        return [[x] for x in SUITS]
+    if view_type == "PREFLOP_PAIRS_HIGH_CARD":
+        view = [[x+x] for x in RANKS]
+        view.append(["AK","AQ","AJ"])
+        view.append(["A"])
+        view.append(["KQ","KJ"])
+        view.append(["K"])
+        view.append(["Q"])
+        view.append(["J","T"])
+        return view
+    if view_type == "PREFLOP_SUITS":
+        view=[]
+        view.append(["Ahhcc","Ahhdd","Ahhss","Acchh","Accdd","Accss","Addhh","Addss","Addcc","Asshh","Asscc","Assdd"])
+        view.append(["hhcc","hhdd","hhss","ccdd","ccss","ddss"])
+        view.append(["hhhh","dddd","cccc","ssss"])
+        view.append(["Ahhh","Addd","Accc","Asss"])
+        view.append(["hhh","ddd","ccc","sss"])
+        view.append(["Ahh","Add","Acc","Ass"])
+        view.append(["hh","dd","cc","ss"])
+        return view
+    if view_type == "PREFLOP_HIGH_CARD":
+        view=[]
+        view.append(["AKQ","AKJ","AKT","AQJ","AQT","AJT"])
+        view.append(["AK","AQ","AJ","AT"])
+        view.append(["A"])
+        view.append(["KQ","KJ","KT"])
+        view.append(["K"])
+        view.append(["QJ","QT"])
+        view.append(["Q"])
+        view.append(["JT"])
+        view.append(["J"])
+        view.append(["T9"])
+        view.append(["T"])
+        return view
     logging.error("View Type not supported ({})".format(view_type))
     return []
 
@@ -223,6 +267,8 @@ def read_data(actions, board, filter_view):
         file_name = os.path.join(RANGE_FOLDER, action + ".csv")
         action_info = pd.read_csv(file_name)
         action_info.columns = ['Hand', action + ' Weight', action + ' EV']
+        values={action + ' Weight': 0}
+        action_info.fillna(value=values,inplace=True)
         if hand_infos.empty:
             hand_infos = action_info
         else:
@@ -240,14 +286,36 @@ def read_data(actions, board, filter_view):
     return hand_infos, view, action_combinations
 
 
-@timebudget
+#@timebudget
 def get_ev_filtered_data(data, actions, filter_by_ev, ev_condition):
     if pd.isnull(data.loc[data.index[0], filter_by_ev]):
         logging.warning("Ranges dont contain EV informations...SKIP FILTER!")
         return actions, data
+
+    # EV regret
+    data['Total EV'] = sum([data[x + " EV"]*data[x + " Weight"] for x in actions])
+    total_weight = data["Total Weight"].sum()
+    total_ev = data["Total EV"].sum()/total_weight
+    print("-"*50)
+    print("Overall EV: {:.0f}".format(total_ev))
+    for action in actions:
+        total_action_ev = (data["Total Weight"]*data[action+" EV"]).sum()/total_weight
+        regret = (total_ev - total_action_ev)/abs(total_ev)
+        print("EV taking only Action {}: {:.0f} (Regret = {:.2f}%)".format(action,total_action_ev,regret*100))
+    print("-"*50)
+
     filtered_actions = filter_by_ev.split(" vs ")
     data = data.drop(data[(data[filtered_actions[0] + ' Weight'] < MIN_QUIZ_WEIGHT) & (
                 data[filtered_actions[1] + ' Weight'] < MIN_QUIZ_WEIGHT)].index)
+     # EV regret only regarding filtered actions
+    total_weight = data["Total Weight"].sum()
+    total_ev = data["Total EV"].sum()/total_weight
+    print("Overall EV for only {}: {:.0f}".format(filter_by_ev,total_ev))
+    for action in filtered_actions:
+        total_action_ev = (data["Total Weight"]*data[action+" EV"]).sum()/total_weight
+        regret = (total_ev - total_action_ev)/abs(total_ev)
+        print("EV taking only Action {}: {:.0f} (Regret = {:.2f}%)".format(action,total_action_ev,regret*100))
+    print("-"*50)
     data = data.sort_values(by=filter_by_ev, ascending=False)
     while len(data) < ev_condition * 2:
         logging.info("Too little hands in range...cut by half")
@@ -281,25 +349,35 @@ def create_filter_view(range, board):
         elif len(item) == 2:
             if item[0] in RANKS and item[1] in SUITS:  # flushblocker
                 checked_item = item
-            elif item[0] in SUITS and item[1] in SUITS:  # flush
+            elif item[0] in SUITS and item[1] == item[0]:  # flush
                 checked_item = item
             elif item[0] in RANKS and item[1] in RANKS:  # 2 ranks
                 checked_item = "".join(sorted(item, key=lambda x: RANK_ORDER[x], reverse=True))
         elif len(item) == 3:
-            if item[0] in RANKS and item[1] in SUITS and item[2] in SUITS:  # specific flush
+            if item[0] in RANKS and item[1] in SUITS and item[2] == item[1]:  # specific flush
                 checked_item = item
             elif item[0] in RANKS and item[1] in RANKS and item[2] in RANKS:  # oesd/wrap stuff
                 checked_item = "".join(sorted(item, key=lambda x: RANK_ORDER[x], reverse=True))
-            elif item[0] in SUITS and item[1] in SUITS and item[2] in SUITS:  # suits
+            elif item[0] in SUITS and item[1]  == item[0] and item[2] in item[0]:  # 3 of 1 suit
                 checked_item = item
         elif len(item) == 4:  # wrap or str flush
             if item[0] in RANKS and item[1] in RANKS and item[2] in RANKS and item[3] in RANKS:
                 checked_item = "".join(sorted(item, key=lambda x: RANK_ORDER[x], reverse=True))
             elif item[0] in RANKS and item[1] in SUITS and item[2] in RANKS and item[3] in SUITS:
-                if RANK_ORDER[item[0]] > RANK_ORDER[item[2]]:
+                if RANK_ORDER[item[0]] >= RANK_ORDER[item[2]]:
                     checked_item = item
                 elif RANK_ORDER[item[0]] < RANK_ORDER[item[2]]:
                     checked_item = item[2:4] + item[0:2]
+            elif item[0] == "A" and item[1] in SUITS and item[2] == item[1] and item[3] == item[1]: # for preflop only A high tripple suited
+                checked_item = item
+            elif item[0] in SUITS and item[1] in SUITS and item[2] in SUITS and item[3] in SUITS: #only double suited and quad suited for now
+                if item[0] == item[1] and item[2] == item[3]:
+                    checked_item = item
+                elif item[0] == item[1] == item[2] == item[3]:
+                    checked_item = item
+        elif len(item) == 5: # for preflop only Axxyy
+            if item[0] == "A" and item[1] in SUITS and item[1] == item[2] and item[3] in SUITS and item[3] == item[4] and item[1] != item[3]:
+                checked_item = item
         if checked_item:
             range_list.append(checked_item)
         else:
@@ -355,11 +433,29 @@ def update_plot(data, actions, board, hand_filter, hand_filter_exclude, filter_i
 
     sns.set()
     heat = heatmap(actions, data, row_view, column_view, row_exclude, column_exclude,row_invert,column_invert)
+
+    # Print total weights just for infos
+    print("Total Weights:")
+    heat_map_total = sum(heat.values())
+    heat_map_total_weight = heat_map_total.div(heat_map_total["total"]["total"])*100
+    heat_map_total_weight=heat_map_total_weight.iloc[::-1]
+
+    if PRINT_TOTAL_WEIGHTS:
+        heat_map_total_weight_ = heat_map_total_weight.copy()
+        heat_map_total_weight_.columns = [x[:15]+"..." if len(x)>18 else x for x in heat_map_total_weight.columns]
+        with pd.option_context('display.max_rows', None,
+                               'display.max_columns', None,
+                               'display.float_format', '{:,.1f}'.format,
+                               'display.width', None,
+                               'display.max_colwidth', 18):
+            print(heat_map_total_weight_)
+
     subtitle_infos = {}
     for action in actions:
         subtitle_infos[action] = " (total combos: {:.0f} ({:.0f}%))".format(heat[action]["total"]["total"],
                                                                             heat[action]["total"]["total"] /
-                                                                            combo_counts["final"] * 100)
+                                                                            combo_counts["final"] * 100
+                                                                            if combo_counts["final"] else 0)
 
     fig, axs = plot(heat, actions, subtitle_infos)
     plot_bar(heat, actions)

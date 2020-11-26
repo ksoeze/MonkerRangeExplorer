@@ -225,7 +225,7 @@ def walk_tree(valid_lines=[], invalid_sequences=[], turn_cards=[], river_cards=[
 
     root = add_subtrees(None, cards_lvl1, cards_lvl2)
     board=_current_board
-    # board="Qd3d2d Ks"
+    # board="Qd3d2d Ks"CALL
     for view in SCRIPT_VIEW_TYPE:
         combine_views_to_report(board+"-"+view)
     if PRINT_VIEWS:
@@ -249,6 +249,12 @@ def start_walker():
     river_cards =  RIVER_CARDS
     invalid_sequences = INVALID_SEQUENCES
     valid_lines = VALID_LINES
+    if HAND_QUIZ:
+        logger.error("Plz set HAND_QUIZ to false...exiting")
+        exit()
+    if NEW_RANGE_DETECTION:
+         logger.error("Plz set NEW_RANGE_DETECTION to false...exiting")
+         exit()
 
     walk_tree(valid_lines, invalid_sequences, turn_cards, river_cards)
 

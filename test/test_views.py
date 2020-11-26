@@ -154,14 +154,16 @@ def test_compare_report_generation():
     new_data, _ , _ = read_data(actions, board, "MADE_HANDS")
 
     row_view = "MADE_HANDS"
-    column_view = "FLUSH_SUITS"
+    column_view = "FLUSH"
     old_views, old_megaview = combine_views(board, column_view, row_view, ignore_first_entry=False)
     old_views[0] = [[["sss"],["hhh"]]] + old_views[0]
     row_view = get_view(board,row_view)
     column_view = get_view(board,column_view)
 
-    test_view_types= ["MADE_HANDS", "DRAWS", "BLOCKERS", "DRAWS_BLOCKERS","FLUSH_SUITS","STR_DRAWS","PAIRS", "BOARD_RANK_INTERACTION"]
-
+    test_view_types = ["MADE_HANDS", "DRAWS", "BLOCKERS", "DRAWS_BLOCKERS","FLUSH","STRAIGHT",
+                             "BOARD_RANKS", "KEY_CARDS","POCKET_PAIRS"]
+    test_view_types = ["FLUSH","STRAIGHT",
+                             "BOARD_RANKS", "KEY_CARDS","POCKET_PAIRS"]
     # default row view
 
     for view in test_view_types:

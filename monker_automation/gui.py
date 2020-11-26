@@ -10,6 +10,7 @@ import time
 from tkinter import Tk
 import os
 import logging
+import mss
 
 from timebudget import timebudget
 
@@ -104,15 +105,23 @@ def enter_sequence_and_save_ranges(sequence, actions, board=""):
     time.sleep(SLEEP_AFTER_FINISH)
     return results
 
-@timebudget
+#@timebudget
 def available_buttons():
     buttons = {}
 
     # BACK is always on screen...take fixed coordinates
 
     tmp_screen = '.screenshot%s.png' % (datetime.datetime.now().strftime('%Y-%m%d_%H-%M-%S-%f'))
-    subprocess.call(['scrot', tmp_screen])
-    tmp = Image.open(tmp_screen)
+    #subprocess.call(['scrot', tmp_screen])
+    #tmp = Image.open(tmp_screen)
+
+    try:
+        sc = mss.mss().grab(mss.mss().monitors[0])
+        tmp = Image.frombytes("RGB", sc.size, sc.bgra, "raw", "BGRX")
+    except Exception as e:
+        subprocess.call(['scrot', tmp_screen])
+        tmp = Image.open(tmp_screen)
+
     buttons[BACK] = BACK_CO
     img = os.path.join(BUTTON_FILES_FOLDER, BUTTON_FILES[CHECK])
     #coordinates = pyautogui.locateCenterOnScreen(img, region=CHECK_CALL_REGION,grayscale=True)
@@ -154,8 +163,73 @@ def available_buttons():
                 buttons["BET"].append(["RAISE " + size, coordinates])
         if len(buttons["BET"]) == MAX_BETS_RAISES:
             break
-    os.unlink(tmp_screen)
+    if os.path.exists(tmp_screen):
+        os.unlink(tmp_screen)
     return buttons
+
+def available_buttons_literal():
+
+    buttons = {}
+    ranges = []
+    # BACK is always on screen...take fixed coordinates
+
+    tmp_screen = '.screenshot%s.png' % (datetime.datetime.now().strftime('%Y-%m%d_%H-%M-%S-%f'))
+
+    try:
+        sc = mss.mss().grab(mss.mss().monitors[0])
+        tmp = Image.frombytes("RGB", sc.size, sc.bgra, "raw", "BGRX")
+    except Exception as e:
+        subprocess.call(['scrot', tmp_screen])
+        tmp = Image.open(tmp_screen)
+
+    buttons[BACK] = BACK_CO
+
+    img = os.path.join(BUTTON_FILES_FOLDER, BUTTON_FILES[CHECK])
+    coordinates = pyautogui.locate(img,tmp,region=BUTTON_REGION,grayscale=True)
+    if coordinates:
+        buttons[CHECK] = pyautogui.center(coordinates)
+        ranges.append(CHECK)
+    else:
+        if CHECK in MISSING_RANGES:
+            ranges.append(CHECK)
+
+    img = os.path.join(BUTTON_FILES_FOLDER, BUTTON_FILES[CALL])
+    coordinates = pyautogui.locate(img,tmp,region=BUTTON_REGION,grayscale=True)
+    if coordinates:
+        buttons[CALL] = pyautogui.center(coordinates)
+        ranges.append(CALL)
+    else:
+        if CALL in MISSING_RANGES:
+            ranges.append(CALL)
+
+    img = os.path.join(BUTTON_FILES_FOLDER, BUTTON_FILES[FOLD])
+    coordinates = pyautogui.locate(img,tmp,region=BUTTON_REGION,grayscale=True)
+    if coordinates:
+        buttons[FOLD] = pyautogui.center(coordinates)
+        ranges.append(FOLD)
+    else:
+        if FOLD in MISSING_RANGES or CALL in ranges:
+            ranges.insert(0,FOLD)
+
+    buttons["BET"] = []
+
+    if CHECK in ranges:
+        bet_prefix = "BET "
+    else:
+        bet_prefix = "RAISE "
+
+    for size in POSSIBLE_BET_RAISE:
+        img = os.path.join(BUTTON_FILES_FOLDER, BUTTON_FILES[size])
+        coordinates = pyautogui.locate(img,tmp,region=CHECK_CALL_REGION,grayscale=True)
+        if coordinates:
+            coordinates = pyautogui.center(coordinates)
+            buttons["BET"].append([bet_prefix+size, coordinates])
+            ranges.append(bet_prefix+size)
+        if len(buttons["BET"]) == MAX_BETS_RAISES:
+            break
+#    if os.path.exists(tmp_screen):
+#        os.unlink(tmp_screen)
+    return buttons, ranges
 
 # returns list of available ranges based on
 # currently shown buttons and line window last action
@@ -183,11 +257,17 @@ def available_ranges(buttons):
 
 def read_situation_and_save_ranges():
     results = {}
-    results["board"] = copy_text(BOARD_CLICK)
+    if PREFLOP:
+        results["board"] = "2s2c2d2h"
+    else:
+        results["board"] = copy_text(BOARD_CLICK)
     results["line"] = copy_text(LINE_CLICK)
 
-    buttons = available_buttons()
-    actions = available_ranges(buttons)
+    if NEW_RANGE_DETECTION:
+        buttons, actions = available_buttons_literal()
+    else:
+        buttons = available_buttons()
+        actions = available_ranges(buttons)
 
     results["actions"] = actions
     results["button_coordinates"] = buttons
