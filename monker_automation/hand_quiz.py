@@ -197,23 +197,23 @@ class InputFrame(tk.Frame):
         self.action_button_frame = tk.Frame(root, padx=10, pady=10)
         self.image_frame = tk.Frame(root, padx=10, pady=10)
 
-        self.card_str_list = [tk.StringVar() for i in range(4)]
+        self.card_str_list = [tk.StringVar() for i in range(5)]
         self.card_labels = [tk.Label(self.card_frame,
                                      textvariable=self.card_str_list[i],
                                      padx=2,
-                                     font=INFO_FONT) for i in range(4)
+                                     font=INFO_FONT) for i in range(5)
                             ]
-        for i in range(4):
+        for i in range(5):
             self.card_labels[i].grid(row=0, column=i)
 
-        self.result_card_str_list = [tk.StringVar() for i in range(4)]
+        self.result_card_str_list = [tk.StringVar() for i in range(5)]
         self.result_card_frame = tk.Frame(root, padx=10, pady=10)
         self.result_card_labels = [tk.Label(self.result_card_frame,
                                             textvariable=self.result_card_str_list[i],
                                             padx=2,
-                                            font=INFO_FONT) for i in range(4)
+                                            font=INFO_FONT) for i in range(5)
                                    ]
-        for i in range(4):
+        for i in range(5):
             self.result_card_labels[i].grid(row=0, column=i)
 
         self.button_list = [self.create_button(i) for i in range(len(self.actions))]
@@ -281,8 +281,18 @@ class InputFrame(tk.Frame):
         self.update_output(self.current_hand, action, index)
 
     def load_image(self):
-        filename = os.path.join(
-            DEFAULT_REPORT_DIRECTORY, TABLE_PNG_NAME)
+        gui = tk.Tk()
+        clipboard_string = gui.clipboard_get()
+        gui.destroy()
+        if PLO5 or PLO5_DIR[0:45] in clipboard_string:
+            filename = os.path.join(
+                DEFAULT_REPORT_DIRECTORY,'table_plo5.png')
+        elif MANUAL_SAVE_RANGES:
+            filename = os.path.join(
+                DEFAULT_REPORT_DIRECTORY, TABLE_PNG_NAME_DUMMY)
+        else:
+            filename = os.path.join(
+                DEFAULT_REPORT_DIRECTORY, TABLE_PNG_NAME)
         load = Image.open(filename)
         load = load.resize((400,400))
         render = ImageTk.PhotoImage(load)

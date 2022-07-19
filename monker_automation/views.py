@@ -888,6 +888,8 @@ def flush_suits(board):
             if bd_fd and bd_fd[0][1] != turn_flushes[0][1]:
                 view+=regroup_list(bd_fd, BD_FD_GROUPING)
         return view
+    if flop_fd and turn_fd: #double fd
+        view+= [[flop_fd[-1][1:]+turn_fd[-1][1:]]]
     if flop_fd:
         view+=regroup_list(flop_fd,FD_GROUPING)
     if turn_fd:
@@ -896,6 +898,18 @@ def flush_suits(board):
         view+=regroup_list(flop_fd_blocker,FD_BLOCKER_GROUPING)
     if turn_fd_blocker:
         view+=regroup_list(turn_fd_blocker,FD_BLOCKER_GROUPING)
+    bd_suits = []
+    for bd_fd in flop_bd_fd:
+        if bd_fd:
+            if turn_fd:
+                if bd_fd[0][1] != turn_fd[0][1]:
+                    bd_suits.append(bd_fd[0][1]*2)
+            else:
+                bd_suits.append(bd_fd[0][1]*2)
+    if len(bd_suits) > 1:
+        bd_double_fd = itertools.combinations(bd_suits,2)
+        bd_d_fd = [''.join(x) for x in bd_double_fd]
+        view+=[bd_d_fd]
     for bd_fd in flop_bd_fd:
         if bd_fd:
             if turn_fd:
@@ -1327,9 +1341,10 @@ def print_view(view, view_type=VIEW_TYPES[0], view_folder=VIEW_FOLDER, filename=
 
 def try_it():
     board_string = "2d4c8d5cKc"
-    for iterations in range(0,1000):
+    for iterations in range(0,10):
         num_cards = random.randint(3,5)
         board_string = "".join(random.sample(CARDS,num_cards))
+        #board_string = "2d4c8c"
         board = board_util.parse_board(board_string)
         view_default = get_view(board_string, VIEW_TYPES[0])
         view_made = get_view(board_string, VIEW_TYPES[1])
@@ -1382,11 +1397,11 @@ def try_it():
 def flop_generation():
     boards=[]
     all_flops = itertools.combinations(CARDS,3)
-    # for iterations in range(0,1000):
-    #     board_string = "".join(random.sample(CARDS,3))
-    #     boards.append(board_string)
-    for flop in all_flops:
-        boards.append("".join(flop))
+    for iterations in range(0,50):
+         board_string = "".join(random.sample(CARDS,3))
+         boards.append(board_string)
+    #for flop in all_flops:
+    #    boards.append("".join(flop))
 
     boards_min = [
         "KsTs5s",
@@ -1694,8 +1709,10 @@ def flop_generation():
                  "4":0,
                  "3":0,
                  "2":0}
-    boards = boards_25pio
-    boards = boards_min
+    #boards = boards_25pio
+    #boards = boards_min
+    for board in boards:
+        print(board + ",")
     count_total=len(boards)
     for board in boards:
         board = board_util.parse_board(board)
@@ -1736,5 +1753,5 @@ def flop_generation():
     print(cath_percent)
 
 if (__name__ == '__main__'):
-    #flop_generation()
-    try_it()
+    flop_generation()
+    #try_it()

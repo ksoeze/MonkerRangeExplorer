@@ -54,11 +54,11 @@ def plot_default(total_results, action_results, actions,quiz=QUIZ):
 
     num_bets = 0
     for index in range(len(actions)):
-        if "CHECK" in actions[index] or "CALL" in actions[index]:
+        if "C" in actions[index]: #"CHECK" in actions[index] or "CALL" in actions[index]:
             color = "#8FBC8B"
-        elif "FOLD" in actions[index]:
+        elif "F" in actions[index]: #"FOLD" in actions[index]:
             color = "#6DA2C0"
-        elif "RAISE" in actions[index] or "BET" in actions[index]:
+        elif "R" in actions[index] or "B" in actions[index] or "I" in actions[index]: #"RAISE" in actions[index] or "BET" in actions[index] or "ALLIN" in actions[index]:
             if num_bets == 1:
                 color = "#B15B4A"
             elif num_bets == 2:
@@ -75,18 +75,18 @@ def plot_default(total_results, action_results, actions,quiz=QUIZ):
         if index == 0:
             y_axes = np.arange(len(total_results["v_str"][1:]))
             bar = ax2.barh(
-                y_axes, action_results[actions[index]]["p"][1:], 0.6, color=color)
+                y_axes, np.nan_to_num(action_results[actions[index]]["p"][1:]), 0.6, color=color)
             bar2 = ax1.barh(
-                y_axes, action_results[actions[index]]["p"][1:], 0.6, color=color)
+                y_axes, np.nan_to_num(action_results[actions[index]]["p"][1:]), 0.6, color=color)
             bars.append(bar)
             bars2.append(bar2)
         else:
-            base_value += np.array(action_results[actions[index - 1]]["p"][1:])
+            base_value += np.nan_to_num(np.array(action_results[actions[index - 1]]["p"][1:]))
             y_axes = np.arange(len(total_results["v_str"][1:]))
             bar = ax2.barh(
-                y_axes, action_results[actions[index]]["p"][1:], 0.6, left=base_value, color=color)
+                y_axes, np.nan_to_num(action_results[actions[index]]["p"][1:]), 0.6, left=base_value, color=color)
             bar2 = ax1.barh(
-                y_axes, action_results[actions[index]]["p"][1:], 0.6, left=base_value, color=color)
+                y_axes, np.nan_to_num(action_results[actions[index]]["p"][1:]), 0.6, left=base_value, color=color)
             bars.append(bar)
             bars2.append(bar2)
 

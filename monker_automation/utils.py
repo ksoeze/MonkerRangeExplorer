@@ -1,5 +1,15 @@
 #!/usr/bin/env python
 
+MONKER_BETA = True
+#MONKER_BETA = False
+
+PLO5_DIR="/home/johann/monker-beta/ranges/Omaha5/Postflop/SRP-EP-BTN/Js8c2h/BET75-/"
+PLO5 = False
+
+MANUAL_SAVE_RANGES=True
+MANUAL_SAVE_RANGES=False
+
+Y_OFFSET= 0 #845 # 827 #865
 
 # poker constants
 
@@ -47,36 +57,64 @@ MIN_WEIGHT = 0.001 #0.001
 
 
 # range constants
-
-RANGE_FOLDER = "/media/johann/MONKER/monker/ranges/"
+if MONKER_BETA:
+    RANGE_FOLDER = "/home/johann/monker-beta/ranges/"
+else:
+    RANGE_FOLDER = "/mnt/e196db6e-5358-4294-8cb4-208fe9585b0e/monker/ranges/"
 
 # gui reader constants
 
 BACK_CO = (3885, 923)
+BACK_CO = (1952, 2025+Y_OFFSET)
 CHECK_CO = (3955, 925)
+CHECK_CO = (1997, 2025+Y_OFFSET)
 BET_CO = (4039, 925)
+BET_CO = (2047, 2025+Y_OFFSET)
 # BUTTONS_CO = [(3955, 925), (4039, 925), (4123, 925), (4200, 925)]
-BOARD_CLICK = (4000, 255)
+
+if MONKER_BETA:
+    BOARD_CLICK = (4000, 250)  # monker beta
+    BOARD_CLICK = (2144, 1354+Y_OFFSET)
+else:
+    BOARD_CLICK = (4000, 255)
+    BOARD_CLICK = (2144, 1359+Y_OFFSET)
+#
 LINE_CLICK = (4040, 1000)
+LINE_CLICK = (2205, 2124+Y_OFFSET)
 # index 0 is for 1 range; index 2 for 2 ranges etc
-RANGE_CO = [[(4400, 95)],
-            [(4400, 95), (5400, 95)],
-            [(4400, 95), (4900, 95), (5400, 95)],
-            [(4400, 95), (4750, 95), (5050, 95), (5400, 95)],
-            [(4400, 95), (4650, 95), (4920, 95), (5150, 95), (5400, 95)],
-            [(4400, 95), (4600, 95), (4820, 95),
-             (5000, 95), (5200, 95), (5400, 95)],
+RANGE_CO = [[(4400, 95+Y_OFFSET)],
+            [(4400, 95+Y_OFFSET), (5400, 95+Y_OFFSET)],
+            [(4400, 95+Y_OFFSET), (4900, 95+Y_OFFSET), (5400, 95+Y_OFFSET)],
+            [(4400, 95+Y_OFFSET), (4750, 95+Y_OFFSET), (5050, 95+Y_OFFSET), (5400, 95+Y_OFFSET)],
+            [(4400, 95+Y_OFFSET), (4650, 95+Y_OFFSET), (4920, 95+Y_OFFSET), (5150, 95+Y_OFFSET), (5400, 95+Y_OFFSET)],
+            [(4400, 95+Y_OFFSET), (4600, 95+Y_OFFSET), (4820, 95+Y_OFFSET),
+             (5000, 95+Y_OFFSET), (5200, 95+Y_OFFSET), (5400, 95+Y_OFFSET)],
+            ]
+RANGE_CO = [[(2410, 1200+Y_OFFSET)],
+            [(2410, 1200+Y_OFFSET), (3691, 1200+Y_OFFSET)],
+            [(2410, 1200+Y_OFFSET), (3045, 1200+Y_OFFSET), (3691, 1200+Y_OFFSET)],
+            [(2410, 1200+Y_OFFSET), (2889, 1200+Y_OFFSET), (3286, 1200+Y_OFFSET), (3681, 1200+Y_OFFSET)],
+            [(2410, 1200+Y_OFFSET), (2761, 1200+Y_OFFSET), (3090, 1200+Y_OFFSET), (3362, 1200+Y_OFFSET), (3691, 1200+Y_OFFSET)],
+            [(2410, 1200+Y_OFFSET), (2685, 1200+Y_OFFSET), (2952, 1200+Y_OFFSET),
+             (3189, 1200+Y_OFFSET), (3454, 1200+Y_OFFSET), (3717, 1200+Y_OFFSET)],
             ]
 
 SAVE_OK = (4648, 637)
+SAVE_OK = (2842, 1749+Y_OFFSET)#(2842, 1751)
 CSV_SELECT = (4577, 534)
+CSV_SELECT = (2767, 1630+Y_OFFSET)#(2767, 1632)
 FILE_TEXT = (4592, 602)
+FILE_TEXT = (2817, 1713+Y_OFFSET)
 ZERO_HANDS_SELECT = (4664, 575)
+ZERO_HANDS_SELECT = (2847, 1679+Y_OFFSET)
 FILTER_Y_OFFSET = 10
 
 BOARD_SCREEN_REGION = (3842, 578, 450, 450)
+BOARD_SCREEN_REGION = (1929, 1677+Y_OFFSET, 450, 450)
 RANGE_SCREEN_REGION = (4298, 2, 1185, 98)
+RANGE_SCREEN_REGION = (2292, 1185+Y_OFFSET, 1518, 70)
 FILTER_SCREEN_REGION = (4963,967,500,80)
+FILTER_SCREEN_REGION = (2720,2091+Y_OFFSET,340,25)
 
 NUM_BACK = 10
 DELETE_BOARD = 7
@@ -97,9 +135,14 @@ BUTTON_FILES = {"CHECK": "check.png", "FOLD": "fold.png", "CALL": "call.png", "M
                 "35": "35.png", "40": "40.png", "50": "50.png", "60": "60.png",
                 "66": "66.png", "70": "70.png", "75": "75.png", "80": "80.png",
                 "90": "90.png", "100": "100.png", "AllIn": "allin.png"}
-BUTTON_FILES_FOLDER = "/home/johann/code/monker_automation/monker_automation/buttons/"
-BUTTON_REGION = (3940, 915, 4200, 931)
-CHECK_CALL_REGION = (3940, 915, 4000, 931)  # restrict for performance reasons
+if MONKER_BETA:
+    BUTTON_FILES_FOLDER = "/home/johann/code/monker_automation/monker_automation/buttons-beta-4k/"
+else:
+    BUTTON_FILES_FOLDER = "/home/johann/code/monker_automation/monker_automation/buttons-4k/"
+BUTTON_REGION = (3880, 915, 4200, 931) #(3940, 915, 4200, 931)
+BUTTON_REGION = (1932, 2018+Y_OFFSET, 2277, 2044+Y_OFFSET)
+CHECK_CALL_REGION = (3880, 915, 4000, 931) #(3940, 915, 4000, 931)  # restrict for performance reasons
+CHECK_CALL_REGION = (1932, 2018+Y_OFFSET, 2277, 2044+Y_OFFSET)
 
 # info tree creation
 LINE_START = "|"
@@ -182,6 +225,7 @@ FILTER_PNG_NAME="filter.png"
 # STRATEGY_PDF_NAME = "strategy.pdf"
 REPORT_PDF_NAME = "report.pdf"
 TABLE_PNG_NAME = "table.png"
+TABLE_PNG_NAME_DUMMY = "table_dummy.png"
 RANGE_HEADER_PNG_NAME = "range_header.png"
 PICKLE_INFOS = "spot_infos"
 EV_CVS = "hand_ev.cvs"
@@ -219,7 +263,7 @@ SCRIPT_VIEW_TYPE = ["DEFAULT", "MADE_HANDS"]
 TURN_CARDS = ["Ah","Kc","Jh","Tc","7c","6d","4d","2c"]
 TURN_CARDS = ["Ac","Ks","Kc","Qh","Qd","Jc","Js","Tc","9d","7h","6c","4d","2c"]
 # TURN_CARDS = ["Ac","Kc","Qc","Jc","Tc","9c","8c","7c","6c","5c","4c","3c","2c"]
-# TURN_CARDS = []
+TURN_CARDS = []
 # RIVER_CARDS = ["2h","Kd","Ah","7h", "Qd", "Kc"]
 # RIVER_CARDS = ["4h","Ah","Kh","Qh","Jd","3d","Ad","Qd","7h","6h"]
 # RIVER_CARDS = ["4h","Ah","Qh","Th","3d","Ad","Qd","3s","As","Ts"]
@@ -249,7 +293,7 @@ TURN_CARDS = ["Ac","Ks","Kc","Qh","Qd","Jc","Js","Tc","9d","7h","6c","4d","2c"]
 # RIVER_CARDS = ["Ah", "Kh", "Qh", "Jh", "Th", "8h", "7d", "4h", "Ad", "7d", "4d"]
 # RIVER_CARDS = ["2c", "Ad", "Th","Kd","Jh"]
 RIVER_CARDS = ["Ac","Ks","Kc","Qh","Qd","Jc","Tc","9d","7c","6c","6d"]
-RIVER_CARDS = []
+RIVER_CARDS = ["6d"]
 #RIVER_CARDS = ["9h", "9d", "Qc", "Tc", "Ac", "Ad"]
 # z.b. [[RAISE,RAISE]] für bet, vs bet und vs raise lines only
 INVALID_SEQUENCES = [[BET, RAISE]]
@@ -275,10 +319,10 @@ VALID_LINES = []
 POSSIBLE_BET_RAISE = ["25", "33", "50", "66", "100", "AllIn"]
 #POSSIBLE_BET_RAISE = ["50","100","AllIn"]
 POSSIBLE_BET_RAISE = ["MIN","33","40","66","100", "AllIn"]
-#POSSIBLE_BET_RAISE = ["30","50","70","100", "AllIn"]
+POSSIBLE_BET_RAISE = ["25","50","100", "AllIn"]
 #POSSIBLE_BET_RAISE = ["33","50","100","AllIn"]
 #POSSIBLE_BET_RAISE = ["50","100", "AllIn"]
-POSSIBLE_BET_RAISE = ["MIN","10","25","30","33","40","50","66","70","75","100","AllIn"]
+POSSIBLE_BET_RAISE = ["MIN","10","20","25","30","33","40","50","60","66","70","75","100","AllIn"]
 
 MAX_BETS_RAISES = 4
 QUIZ = False
@@ -298,8 +342,8 @@ NEW_RANGE_DETECTION=True
 NEW_RANGE_DETECTION=False
 #MISSING_RANGES=[CHECK,FOLD,CALL] this way but only the ones that dont have buttons but are actual ranges
 #MISSING_RANGES=[CALL]
-#MISSING_RANGES=[FOLD]
-MISSING_RANGES=[]
+MISSING_RANGES=[FOLD]
+#MISSING_RANGES=[]
 
 PREFLOP = False
 #PREFLOP = True
@@ -318,7 +362,8 @@ SHOW_STRATEGY=False #MAKES NO SENSE FOR NOW # show / dont show spot startegy whe
 #Range Analysis
 RANGE_ANALYSIS_VIEW_TYPES = ["MADE_HANDS", "DRAWS", "BLOCKERS", "DRAWS_BLOCKERS","FLUSH","STRAIGHT",
                              "BOARD_RANKS", "KEY_CARDS","POCKET_PAIRS","RANKS","SUITS",
-                             "PREFLOP_PAIRS_HIGH_CARD","PREFLOP_SUITS","PREFLOP_HIGH_CARD"]
+                             "PREFLOP_PAIRS_HIGH_CARD","PREFLOP_SUITS","PREFLOP_HIGH_CARD",
+                             "PREFLOP_CONNECTEDNESS"]
 EXCLUDE_DEFAULT = True
 PRINT_TOTAL_WEIGHTS = True
 EV_FILTER_CONDITION=[10,50,100,300,600,1000,2000]

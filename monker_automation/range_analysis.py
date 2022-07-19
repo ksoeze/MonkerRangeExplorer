@@ -118,13 +118,13 @@ def cut_lable(label):
 
 def plot_action(axs, heat_map, action, title="", subplot_row=0):
     heat_map_total = sum(heat_map.values())
-    if "CHECK" in action or "CALL" in action:
+    if "C" in action: #"CHECK" in action or "CALL" in action:
         color = "#8FBC8B"
         color = "Greens"
-    elif "FOLD" in action:
+    elif "F" in action: #"FOLD" in action:
         color = "#6DA2C0"
         color = "Blues"
-    elif "RAISE" in action or "BET" in action:
+    elif "R" in action or "B" in action or "I" in action: #"RAISE" in action or "BET" in action or "ALLIN in action:
         color = "Reds"
 
     heat_map_draw = (heat_map[action].div(heat_map_total)) * 100
@@ -223,11 +223,20 @@ def get_view_list(view_type, board):
     if view_type == "SUITS":
         return [[x] for x in SUITS]
     if view_type == "PREFLOP_PAIRS_HIGH_CARD":
-        view = [[x+x] for x in RANKS]
-        view.append(["AK","AQ","AJ"])
+        view = [["AA"]]
+        view.append(["KK"])
+        view.append(["QQ"])
+        view.append(["JJ"])
+        view.append(["TT","99","88"])
+        view.append(["77","66","55"])
+        view.append(["44","33","22"])
+        view.append(["AKQ","AKJ","AKT","AQJ","AQT"])
+        view.append(["AK"])
+        view.append(["AQ","AJ","AT"])
         view.append(["A"])
-        view.append(["KQ","KJ"])
+        view.append(["KQ","KJ","KT"])
         view.append(["K"])
+        view.append(["QJ","QT"])
         view.append(["Q"])
         view.append(["J","T"])
         return view
@@ -255,9 +264,25 @@ def get_view_list(view_type, board):
         view.append(["T9"])
         view.append(["T"])
         return view
+    if view_type == "PREFLOP_CONNECTEDNESS":
+        view=[]
+        view.append(["AKQJ","KQJT","QJT9","JT98","T987","9876","8765","7654","6543","5432","A432"])
+        view.append(["AKQT","AKJT","AQJT","KQJ9","KQT9","KJT9","QJT8","QJ98","QT98","JT97","JT87","J987","T986","T976","T876","9875","9865","9765","8764","8754","8654","7653","7643","7543","6542","6532","6432"])
+        view.append(["AKQ9","AKT9","AJT9","AKJ9","AQJ9","AQT9","KQJ8","KQT8","KJT8","KQ98","KJ98","KT98","QJT7","QJ97","QT97","QJ87","QT87","Q987","JT96","JT86","J986","JT76","J976","J876","T985","T975","T875","T965","T865","T765","9874","9864","9764","9854","9754","9654","8763","8753","8653","8743","8643","8543","7652","7642","7542","7632","7532","7432"])
+        view.append(["AKQ","KQJ","QJT","JT9","T98","987","876","765","654","543","432"])
+        view.append(["AKJ","AQJ","KQT","KJT","QJ9","QT9","JT8","J98","T97","T87","986","976","875","865","764","754","653","643","542","532"])
+        view.append(["AKT","AQT","AJT","KQ9","KJ9","KT9","QJ8","QT8","Q98","JT7","J97","J87","T96","T86","T76","985","975","965","874","864","854","763","753","743","652","642","632"])
+        view.append(["AK","KQ","QJ","JT","T9","98","87","76","65","54","43","32"])
+        view.append(["AQ","KJ","QT","J9","T8","97","86","75","64","53","42"])
+        return view
     logging.error("View Type not supported ({})".format(view_type))
     return []
 
+def sort_hand(hand):
+    #hand = [hand[0:2],hand[2:4],hand[4:6],hand[6:8]]
+    hand = [hand[idx:idx+2] for idx in range(0,len(hand),2)]
+    hand = sorted(hand, key=lambda x: RANK_ORDER[x[0]], reverse=True)
+    return ''.join(hand)
 
 def read_data(actions, board, filter_view):
     action_combinations = itertools.combinations(actions, 2)
@@ -265,7 +290,10 @@ def read_data(actions, board, filter_view):
     hand_infos = pd.DataFrame()
     for action in actions:
         file_name = os.path.join(RANGE_FOLDER, action + ".csv")
-        action_info = pd.read_csv(file_name)
+        if MONKER_BETA:
+            action_info = pd.read_csv(file_name,header=None)
+        else:
+            action_info = pd.read_csv(file_name)
         action_info.columns = ['Hand', action + ' Weight', action + ' EV']
         values={action + ' Weight': 0}
         action_info.fillna(value=values,inplace=True)
@@ -273,12 +301,19 @@ def read_data(actions, board, filter_view):
             hand_infos = action_info
         else:
             hand_infos = hand_infos.merge(action_info)
+        os.remove(file_name)
     # clean up low weight
     hand_infos['Total Weight'] = sum([hand_infos[x + " Weight"] for x in actions])
     hand_infos.drop(hand_infos[hand_infos['Total Weight'] < MIN_WEIGHT].index, inplace=True)
+    if MONKER_BETA: # convert ev to numeric to render invalid values to nan
+        cols = [action + ' EV' for action in actions]
+        for column in cols:
+            hand_infos[column] = pd.to_numeric(hand_infos[column],errors='coerce')
     for combination in action_combinations:
         hand_infos[combination[0] + " vs " + combination[1]] = hand_infos[combination[0] + " EV"] - hand_infos[
             combination[1] + " EV"]
+    if MONKER_BETA:
+        hand_infos['Hand'] = hand_infos['Hand'].apply(lambda x: sort_hand(x))
     view = get_view_list(filter_view, board)
     hand_infos = add_view_info(hand_infos, view, "", True)
     action_combinations = [x[0] + " vs " + x[1] for x in action_combinations]

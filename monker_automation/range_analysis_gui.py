@@ -198,7 +198,6 @@ def start_gui(actions=[],board=""):
             action_results = pickle.load(f)
             actions = pickle.load(f)
             board = pickle.load(f)
-
     if PREFLOP:
         board="2s2c2d2h"
         data, made_hand_filter, ev_filter = read_data(actions, board, "PREFLOP_PAIRS_HIGH_CARD")

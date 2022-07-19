@@ -193,15 +193,6 @@ def available_buttons_literal():
         if CHECK in MISSING_RANGES:
             ranges.append(CHECK)
 
-    img = os.path.join(BUTTON_FILES_FOLDER, BUTTON_FILES[CALL])
-    coordinates = pyautogui.locate(img,tmp,region=BUTTON_REGION,grayscale=True)
-    if coordinates:
-        buttons[CALL] = pyautogui.center(coordinates)
-        ranges.append(CALL)
-    else:
-        if CALL in MISSING_RANGES:
-            ranges.append(CALL)
-
     img = os.path.join(BUTTON_FILES_FOLDER, BUTTON_FILES[FOLD])
     coordinates = pyautogui.locate(img,tmp,region=BUTTON_REGION,grayscale=True)
     if coordinates:
@@ -210,6 +201,15 @@ def available_buttons_literal():
     else:
         if FOLD in MISSING_RANGES or CALL in ranges:
             ranges.insert(0,FOLD)
+
+    img = os.path.join(BUTTON_FILES_FOLDER, BUTTON_FILES[CALL])
+    coordinates = pyautogui.locate(img,tmp,region=BUTTON_REGION,grayscale=True)
+    if coordinates:
+        buttons[CALL] = pyautogui.center(coordinates)
+        ranges.append(CALL)
+    else:
+        if CALL in MISSING_RANGES:
+            ranges.append(CALL)
 
     buttons["BET"] = []
 
