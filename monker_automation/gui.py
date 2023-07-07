@@ -68,9 +68,13 @@ def save_range(position, filename, move_delay=MOUSE_MOVEMENT_DEL, click_delay=CL
     if HAND_QUIZ:
         move_click(ZERO_HANDS_SELECT, move_delay, click_delay)
     move_click(FILE_TEXT, move_delay, click_delay)
+    if MONKER_BETA:
+        filename+=".csv"
     pyautogui.typewrite(filename, interval=type_delay)
     move_click(SAVE_OK, move_delay, click_delay)
     time.sleep(SLEEP_AFTER_SAVE)
+    if MONKER_BETA:
+        move_click(MONKER_BETA_CLOSE_SAVE_RANGE,move_delay,click_delay)
 
 
 def save_ranges(actions, move_delay=MOUSE_MOVEMENT_DEL, click_delay=CLICK_DELAY):
@@ -148,6 +152,11 @@ def available_buttons():
     last_action = last_action[-8:]
     is_bet = any([CALL in last_action, "FLOP" in last_action,
                   "TURN" in last_action, "RIVER" in last_action])
+    #new monker beta the line field is empty so the last action string is still the board string ->
+    #ugly hack ^^ 2.2023
+    if not is_bet:
+        if last_action[0:2] in CARDS:
+            is_bet = True
 
     for size in POSSIBLE_BET_RAISE:
         img = os.path.join(BUTTON_FILES_FOLDER, BUTTON_FILES[size])

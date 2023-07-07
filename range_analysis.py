@@ -66,9 +66,13 @@ def generate_table_image(line,board,spot):
 
 def read_plo5_dir(hand_dir):
     gui = Tk()
-    clipboard_string = gui.clipboard_get()
-    gui.update()
-    gui.destroy()
+    try:
+        clipboard_string = gui.clipboard_get()
+        gui.update()
+        gui.destroy()
+    except:
+        clipboard_string = ""
+
     if PLO5_DIR[0:45] in clipboard_string:
         hand_dir = clipboard_string
     else:
@@ -115,7 +119,10 @@ if __name__ == '__main__':
         print("PLZ set HAND_QUIZ True to continue...exiting")
         exit()
     gui = Tk()
-    clipboard_string = gui.clipboard_get()
+    try:
+        clipboard_string = gui.clipboard_get()
+    except:
+        clipboard_string = ""
     gui.update()
     gui.destroy()
     if PLO5_DIR[0:45] in clipboard_string:

@@ -9,7 +9,7 @@ PLO5 = False
 MANUAL_SAVE_RANGES=True
 MANUAL_SAVE_RANGES=False
 
-Y_OFFSET= 0 #845 # 827 #865
+Y_OFFSET= 845 # 827 #865
 
 # poker constants
 
@@ -100,13 +100,26 @@ RANGE_CO = [[(2410, 1200+Y_OFFSET)],
             ]
 
 SAVE_OK = (4648, 637)
-SAVE_OK = (2842, 1749+Y_OFFSET)#(2842, 1751)
+if MONKER_BETA:
+    SAVE_OK = (3030, 1794+Y_OFFSET)#(2842, 1751)
+else:
+    SAVE_OK = (2842, 1749+Y_OFFSET)#(2842, 1751)
 CSV_SELECT = (4577, 534)
-CSV_SELECT = (2767, 1630+Y_OFFSET)#(2767, 1632)
+if MONKER_BETA:
+    CSV_SELECT = (2936, 1587+Y_OFFSET)#(2767, 1632)
+else:
+    CSV_SELECT = (2767, 1630+Y_OFFSET)#(2767, 1632)
 FILE_TEXT = (4592, 602)
-FILE_TEXT = (2817, 1713+Y_OFFSET)
+if MONKER_BETA:
+    FILE_TEXT = (2945, 1837+Y_OFFSET)
+else:
+    FILE_TEXT = (2817, 1713+Y_OFFSET)
 ZERO_HANDS_SELECT = (4664, 575)
-ZERO_HANDS_SELECT = (2847, 1679+Y_OFFSET)
+if MONKER_BETA:
+    ZERO_HANDS_SELECT = (2951, 1653+Y_OFFSET)
+else:
+    ZERO_HANDS_SELECT = (2847, 1679+Y_OFFSET)
+MONKER_BETA_CLOSE_SAVE_RANGE = (3069, 1444+Y_OFFSET)
 FILTER_Y_OFFSET = 10
 
 BOARD_SCREEN_REGION = (3842, 578, 450, 450)
@@ -132,7 +145,7 @@ BET = "BET"
 RAISE = "RAISE"
 BUTTON_FILES = {"CHECK": "check.png", "FOLD": "fold.png", "CALL": "call.png", "MIN": "min.png",
                 "10": "10.png", "15": "15.png", "20": "20.png", "25": "25.png", "30": "30.png", "33": "33.png",
-                "35": "35.png", "40": "40.png", "50": "50.png", "60": "60.png",
+                "35": "35.png", "40": "40.png", "50": "50.png", "55":"55.png","60": "60.png",
                 "66": "66.png", "70": "70.png", "75": "75.png", "80": "80.png",
                 "90": "90.png", "100": "100.png", "AllIn": "allin.png"}
 if MONKER_BETA:
@@ -141,8 +154,10 @@ else:
     BUTTON_FILES_FOLDER = "/home/johann/code/monker_automation/monker_automation/buttons-4k/"
 BUTTON_REGION = (3880, 915, 4200, 931) #(3940, 915, 4200, 931)
 BUTTON_REGION = (1932, 2018+Y_OFFSET, 2277, 2044+Y_OFFSET)
+BUTTON_REGION = (1932, 2018+Y_OFFSET, 350, 30)
 CHECK_CALL_REGION = (3880, 915, 4000, 931) #(3940, 915, 4000, 931)  # restrict for performance reasons
 CHECK_CALL_REGION = (1932, 2018+Y_OFFSET, 2277, 2044+Y_OFFSET)
+CHECK_CALL_REGION = (1932, 2018+Y_OFFSET, 350, 30)
 
 # info tree creation
 LINE_START = "|"
@@ -322,7 +337,7 @@ POSSIBLE_BET_RAISE = ["MIN","33","40","66","100", "AllIn"]
 POSSIBLE_BET_RAISE = ["25","50","100", "AllIn"]
 #POSSIBLE_BET_RAISE = ["33","50","100","AllIn"]
 #POSSIBLE_BET_RAISE = ["50","100", "AllIn"]
-POSSIBLE_BET_RAISE = ["MIN","10","20","25","30","33","40","50","60","66","70","75","100","AllIn"]
+POSSIBLE_BET_RAISE = ["MIN","10","20","25","30","33","40","50","55","60","66","70","75","100","AllIn"]
 
 MAX_BETS_RAISES = 4
 QUIZ = False

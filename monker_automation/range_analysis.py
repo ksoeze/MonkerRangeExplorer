@@ -150,13 +150,15 @@ def plot_action(axs, heat_map, action, title="", subplot_row=0):
 
 #@timebudget
 def plot(heat_map, actions, subtitle_infos):
-    fig, axs = plt.subplots(nrows=len(actions), ncols=2, figsize=(21, 21))
+    sns.set(font_scale=1.5)
+    fig, axs = plt.subplots(nrows=len(actions), ncols=2, figsize=(28, 28.5))
     fig.subplots_adjust(top=0.98, bottom=0.05, left=0.15, right=1, hspace=0.4,
                         wspace=0.3)
     row = 0
     for action in actions:
         plot_action(axs, heat_map, action, subtitle_infos[action], row)
         row += 1
+    sns.set(font_scale=1)
     return fig, axs
 
 
