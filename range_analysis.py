@@ -93,6 +93,9 @@ def read_plo5_dir(hand_dir):
     if len(files) > 6:
         print("Too many range files...in Line directory: {}".format(hand_dir))
         exit()
+    sort_order = ["CHECK","FOLD","CALL","BET","RAISE","ALLIN"]
+    files = sorted(files, key=lambda x: [sort_order.index(i) for i in sort_order if i in x][0])
+
     actions = files
     print("Found these actions:{}".format(actions))
     board = ''.join(board.split())

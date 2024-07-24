@@ -178,7 +178,10 @@ class InputFrame(tk.Frame):
         filename = os.path.join(
             DEFAULT_REPORT_DIRECTORY, img_name)
         load = Image.open(filename)
-        load = load.resize((800, 450))
+        if LAPTOP:
+            load = load.resize((550, 280))
+        else:
+            load = load.resize((800, 450))
         render = ImageTk.PhotoImage(load)
         img = tk.Label(frame, image=render)
         img.image = render
