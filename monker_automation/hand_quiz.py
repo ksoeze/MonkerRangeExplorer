@@ -287,9 +287,9 @@ class InputFrame(tk.Frame):
         if PLO5 or PLO5_DIR[0:45] in clipboard_string:
             filename = os.path.join(
                 DEFAULT_REPORT_DIRECTORY,'table_plo5.png')
-        elif MANUAL_SAVE_RANGES:
-            filename = os.path.join(
-                DEFAULT_REPORT_DIRECTORY, TABLE_PNG_NAME_DUMMY)
+        # elif MANUAL_SAVE_RANGES:
+        #     filename = os.path.join(
+        #         DEFAULT_REPORT_DIRECTORY, TABLE_PNG_NAME_DUMMY)
         else:
             filename = os.path.join(
                 DEFAULT_REPORT_DIRECTORY, TABLE_PNG_NAME)

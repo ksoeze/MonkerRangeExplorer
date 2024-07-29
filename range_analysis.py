@@ -11,6 +11,7 @@ import shutil
 
 def manual_hand_ranges():
     # without pyautogui...save ranges per hand to cvs and copy board into clipboard
+
     files = os.listdir(RANGE_FOLDER)
     files = [r for r in files if ".csv" in r]
     files = sorted(files, key=lambda x:os.path.getctime(os.path.join(RANGE_FOLDER,x)))
@@ -24,6 +25,7 @@ def manual_hand_ranges():
     actions = [r.replace(".csv","") for r in files]
     print("Found these actions:{}".format(actions))
     if PREFLOP:
+        generate_table_image("","","")
         return actions,"2h2s2c2d"
     gui = Tk()
     board = gui.clipboard_get()
@@ -39,6 +41,7 @@ def manual_hand_ranges():
             print(board)
             exit()
     print("Board seems to be: {}".format(board))
+    generate_table_image("",board,"")
     return actions,board
 
 def generate_table_image(line,board,spot):
@@ -54,15 +57,17 @@ def generate_table_image(line,board,spot):
 
     imgDraw = ImageDraw.Draw(img)
     imgDraw.text((100,50), spot, font=font, fill="black")
-    for i in range(0,6,2):
+    board = board.replace(" ","")
+    for i in range(0,len(board),2):
         card = board[i:i+2]
         color = SUIT_COLORS[card[1]]
         card = card[0]+SUIT_SIGN_DIC[card[1]]
-        font = ImageFont.truetype("arial.ttf", size=100)
-        imgDraw.text((100+i*60,150), card, font=font, fill=color)
+        font = ImageFont.truetype("arial.ttf", size=60)
+        imgDraw.text((100+i*40,150), card, font=font, fill=color)
     font = ImageFont.truetype("arial.ttf", size=30)
     imgDraw.text((60,350), line, font=font, fill="black")
     img.save(os.path.join(DEFAULT_REPORT_DIRECTORY,'table_plo5.png'))
+    img.save(os.path.join(DEFAULT_REPORT_DIRECTORY,'table.png'))
 
 def read_plo5_dir(hand_dir):
     gui = Tk()
