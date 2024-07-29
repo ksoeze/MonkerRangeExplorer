@@ -1,4 +1,3 @@
-#+TITLE: Monker Range Explorer Tool
 #+AUTHOR: Johann
 #+DATE: 2024-07-15
 #+OPTIONS: toc:t
@@ -30,8 +29,8 @@ To run this application locally, follow these steps:
 
 1. Clone the repository:
    #+BEGIN_SRC bash
-   git clone https://github.com/ TODO
-   cd poker-range-analysis-tool
+   git https://github.com/ksoeze/MonkerRangeExplorer
+   cd /path/to/MonkerRange/Explorer
    #+END_SRC
 
 2. Install the required dependencies:
@@ -51,7 +50,7 @@ This is the default mode. No further configuration is required, but manually sav
 *** Auto Range Saving
 This mode uses pyautogui to automatically save the ranges from an open Monker solver window, saving time and effort. However, it requires some customization to your setup/screen resolution. Here are the main steps to set it up:
 
-1) Create reference images/screenshots of all possible buttons you use (see ./buttons/ for examples). Ensure the sections are different from one another.
+1) Create reference images/screenshots of all possible buttons you use (see ./buttons/ for examples). Ensure that the crop is smaller than the button itself but still different from eachother.
 2) Use a tool to position and size the Monker window reproducibly. Here is a script using xdotool:
    #+BEGIN_SRC bash
    #!/bin/bash
@@ -60,6 +59,8 @@ This mode uses pyautogui to automatically save the ranges from an open Monker so
    xdotool windowsize $id 1908 1011
    xdotool windowmove $id 222 122
 
+
+   # activates environment based on machine and starts range analysis
    cp_name=$(hostname)
 
    if [ "$cp_name" = "vision23" ]; then
@@ -94,8 +95,8 @@ Manually save the Monker ranges to the ./ranges folder. Save each range as a .cs
 - FOLD for blue
 - CHECK or CALL for green
 - BET or RAISE for red (include size for clarity, e.g., BET33.csv)
-
-Additionally, save the board string from the Monker interface to the clipboard to generate hand buckets.
+The ranges are ordered based on save date. Therefore save them in the order you want them to be listed in the graphics.
+Additionally, save the board string from the Monker interface to the clipboard (gives an error message otherwise).
 
 *** Automatic Save Ranges
 If pyautogui variables and reference images are set correctly, ensure Monker is positioned correctly and the board string is accurate.
@@ -151,6 +152,7 @@ At startup it prints the distribution matrix of the whole range.
 - Quiz:
   Displays a random hand where you choose an action. The handlist is the same as for the graphics (after applying update), so you can study specific hand classes you feel unsure about. The row below shows the results of the previous hand, including action percentages and EV (if calculated by Monker) of all actions converted to BB. After drilling the spot for a number of hands, print a summary to the terminal showing your biggest EV mistakes and overall frequencies compared to GTO strategy. This helps you understand if you play a spot too actively or passively compared to Monker.
 
+  #+begin_example
   Example output:
   Printing Hands where you lost more than 0.1 chips:
   KsQs5d2d: GTO: RAISE 100   EV: 18.54   YOU: RAISE 50    which loses 0.10
@@ -171,6 +173,8 @@ At startup it prints the distribution matrix of the whole range.
   RAISE 100   6.3%  | 5.1%
   ------------------------------------------------------------
   ------------------------------------------------------------
+  #+end_example
+
 
 
 *** Right Panel
