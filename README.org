@@ -1,0 +1,222 @@
+#+TITLE: Monker Range Explorer Tool
+#+AUTHOR: Johann
+#+DATE: 2024-07-15
+#+OPTIONS: toc:t
+
+* Monker Range Explorer
+
+** Description
+This tool processes Monker ranges (Preflop and Postflop) to create automatic, human-friendly range buckets, and visualizes the overall strategy for the spot in an elegant way. The matrix view allows combining different hand features to understand which hand attributes correspond to specific actions.
+
+In addition to strategy overviews for all made hands, draws, blockers, etc., there is a detailed breakdown of how often each bucket appears in one's overall range and action ranges. This helps identify the driving factors for a GTO strategy in a specific spot.
+
+To explore a spot or hand category in depth, multiple filter options are available. In situations where many hands are indifferent between two actions in EV, you can filter for hand features with significant EV differences to find patterns. An integrated quiz allows you to practice the spot overall or focus on challenging hand buckets. When drilling numerous hand combinations, you can generate a spot summary listing your biggest EV mistakes and compare your overall action frequencies to GTO frequencies, helping you identify if you tend to play too passively or aggressively.
+
+** Features
+- Detailed strategy overview for PLO spots solved by Monker, providing a comprehensible graphic overview of the total strategy for a spot, as opposed to Monker's hard-to-study hand lists.
+- Multiple filter options and the ability to combine different auto-generated hand classes/buckets.
+- Auto-generated hand classes and buckets that can also be used as views in the Monker interface.
+- Superfast quiz with instant feedback, including EVs, and a summary of your overall strategy compared to the GTO solution after drilling.
+- Filter by EV feature to find patterns in spots where the solver's hand placements are unclear.
+
+** Screenshots
+[[./img/screen1.png]]
+[[./img/screen2.png]]
+[[./img/example-usage.gif]]
+
+** Installation
+
+To run this application locally, follow these steps:
+
+1. Clone the repository:
+   #+BEGIN_SRC bash
+   git clone https://github.com/ TODO
+   cd poker-range-analysis-tool
+   #+END_SRC
+
+2. Install the required dependencies:
+
+   It is strongly recommended to create a virtual environment with a tool of your choice.
+
+   #+BEGIN_SRC bash
+   pip install -r requirements.txt
+   #+END_SRC
+
+** Configuration
+
+*** Manual Range Saving
+
+This is the default mode. No further configuration is required, but manually saving and naming the ranges from Monker can be cumbersome if you use it extensively. This mode only shows the board cards, not the full screenshot of the Monker spot. To get started, proceed to the Usage section.
+
+*** Auto Range Saving
+This mode uses pyautogui to automatically save the ranges from an open Monker solver window, saving time and effort. However, it requires some customization to your setup/screen resolution. Here are the main steps to set it up:
+
+1) Create reference images/screenshots of all possible buttons you use (see ./buttons/ for examples). Ensure the sections are different from one another.
+2) Use a tool to position and size the Monker window reproducibly. Here is a script using xdotool:
+   #+BEGIN_SRC bash
+   #!/bin/bash
+
+   id=$(xdotool search --desktop $(xdotool get_desktop) --name "MonkerSolver" | tail -1)
+   xdotool windowsize $id 1908 1011
+   xdotool windowmove $id 222 122
+
+   cp_name=$(hostname)
+
+   if [ "$cp_name" = "vision23" ]; then
+       . /home/johann/.pyenv/versions/monker_automation/bin/activate
+   else
+       ENV=monker_automation
+       source $WORKON_HOME/$ENV/bin/activate
+   fi
+
+   cd /home/johann/code/monker_automation
+   python range_analysis.py
+   #+END_SRC
+
+3) Edit variables in utils.py:
+   - MONKER_BETA = True # for Monker Solver 2 (use False for Monker Solver 1)
+   - MANUAL_SAVE_RANGES = False # to enable automatic range saving
+   - Adjust coordinates as necessary and set RANGE_FOLDER to the default folder where Monker saves ranges.
+
+
+TODO as I am writing this I realise there are probably much easier and more robust ways to automate the range saving without generating reference images etc. might update it in the near future since this setup is to cumbersome for most I guess and manuel range sparks no joy.
+This method is a relict from the starting point where I generated pdf reports of the whole tree which I dont really use anymore.
+
+Here a screencast how it is supposed to work:
+First I just make sure that the board cards are listet - the rest is automatically
+
+[[./img/auto-save-ranges.gif]]
+
+** Usage
+
+*** Manual Save Ranges
+Manually save the Monker ranges to the ./ranges folder. Save each range as a .csv file, including 0% hands. Use appropriate naming conventions for correct coloring:
+- FOLD for blue
+- CHECK or CALL for green
+- BET or RAISE for red (include size for clarity, e.g., BET33.csv)
+
+Additionally, save the board string from the Monker interface to the clipboard to generate hand buckets.
+
+*** Automatic Save Ranges
+If pyautogui variables and reference images are set correctly, ensure Monker is positioned correctly and the board string is accurate.
+
+*** Startup
+Start the script from terminal - make sure not to move the mouse during automatic save ranges mode
+#+BEGIN_SRC bash
+source environment
+python range_analysis.py
+#+end_src
+keep the terminal open since some information is presented there.
+At startup it prints the distribution matrix of the whole range.
+
+** Interface description
+
+*** Left Panel Top to Bottom
+
+- Hand Filter:
+  Restrict the range to certain hands or hand classes.
+  Syntax is from ProPokerTools, including some smart syntax like in my other project, Omaha Range Explorer.
+  Example: On a board of KdQd4h,
+  - KQ+ results in KK, QQ, 44, KQ
+  - 9T+ results in JT, AJ, AT, 9T
+  Try it out - it shows the range after applying the Hand Filter, including the percentage of the total range. If you use invalid syntax, it ignores it, so verify if the filter applies as expected.
+- Exclude Filter:
+  Works identically to Hand Filter but excludes the specified range.
+- Made Hand Category:
+  Similar to above, but you can select one of the automatically generated hand classes. The items are exclusive, meaning selecting K4 on a KQ4 board doesn't include hands like KK4, KQ4, etc. Monker syntax would be K4!>KQ.
+- Filter by delta EV + Filter EV Condition:
+  The matrix view can sometimes make it difficult to see patterns between two actions, and it may seem like the solver mixes "randomly." Filter by delta EV lets you compare hands with the maximum EV difference between two actions, providing clues about which hand properties incentivize specific actions. Filter EV Condition sets the number of hands to compare. Use low numbers for tight ranges and higher numbers for wide ranges.
+  Another explanation: The resulting hands are the "best" hands for action A and the "best" hands for action B. When you quiz the spot, you should get all hands right since these are the clearest decisions. If not, you're likely missing a key point in the spot's strategy.
+  Use this for spots where the solver mixes all actions, and in bluff catch spots with wide ranges where it isn't clear what blockers or anti-blockers decide between fold/call or call/bluff-raise.
+  In GTO spots, it's usually more important to get overall frequencies right than the exact blocker selection. Don't overvalue clear results from a small subset of hands in your range.
+  Additionally, selecting this feature and updating the view prints an EV "regret" for taking only one action against a fixed equilibrium strategy. Although not a valid GTO concept, it helps explore exploitative approaches. For example, on monotone boards with wide ranges, the solver often bets at low/medium frequency with small sizing. But the EV differences between check range, bet range, or GTO frequencies are small against a static GTO response. This enables strategy adaptation to different opponent tendencies.
+- Row View, Column View:
+  Select the views for the action matrix on the right. Views are described below. Set different default options in utils.py.
+  The exclude option means every category excludes the previous categories (each hand can only be in one category). When disabled, categories are independent and can overlap (left graphics' right percentages don't add up to 100% as hands can be in more than one category).
+  I find it sometimes helpful to plot made hands or draws on the row view with exclude enabled, and key cards on the column view with exclude disabled, to see which cards influence actions within hand classes.
+  Invert may be helpful (I dont really use it): When enabled, a hand class includes all hands except the listed item.
+  All selections and different row/column views are designed to identify human-readable and implementable patterns in the solver strategy without missing the big picture. Different views and combinations can be useful for various spots.
+- Update:
+  After changing input settings, reload the graphics and handlist for the quiz.
+
+- First graphics:
+  Shows the row view items with all actions as stacked diagrams. Left numbers are the percentage of this category of the overall range. Right numbers are the same but added up. When not using exclude or using inverted, these numbers don't add up to 100%, which is expected and correct behavior.
+
+- Second graphics:
+  Shows how each action range is composed, giving a good overview of the most relevant parts of the range. Missing a value bet with a hand that is 2% of the overall betting range is less critical than missing 20% of your value bet range.
+
+- Table image:
+  Screenshot of the Monker table for spot information. Unfortunately, this doesn't work with manual hand saving - it only shows the board without stacks/positions.
+
+- Quiz:
+  Displays a random hand where you choose an action. The handlist is the same as for the graphics (after applying update), so you can study specific hand classes you feel unsure about. The row below shows the results of the previous hand, including action percentages and EV (if calculated by Monker) of all actions converted to BB. After drilling the spot for a number of hands, print a summary to the terminal showing your biggest EV mistakes and overall frequencies compared to GTO strategy. This helps you understand if you play a spot too actively or passively compared to Monker.
+
+  Example output:
+  Printing Hands where you lost more than 0.1 chips:
+  KsQs5d2d: GTO: RAISE 100   EV: 18.54   YOU: RAISE 50    which loses 0.10
+  KhQc9s6s: GTO: CALL        EV: 9.07    YOU: RAISE 100   which loses 0.16
+  KhQsTd2s: GTO: RAISE 100   EV: 10.64   YOU: CALL        which loses 0.17
+  JdTd7c4s: GTO: RAISE 50    EV: 13.43   YOU: CALL        which loses 0.20
+  KhQh9d6d: GTO: RAISE 50    EV: 21.75   YOU: RAISE 100   which loses 0.22
+  AhKsQs4s: GTO: RAISE 50    EV: 15.40   YOU: CALL        which loses 0.44
+  ------------------------------------------------------------
+  ------------------------------------------------------------
+  You played 39 hands
+  You got 77% right
+  You lost 0.04 chips per hand
+  Action Frequencies (GTO | YOU):
+  FOLD        22.3% | 17.9%
+  CALL        57.2% | 71.8%
+  RAISE 50    14.2% | 5.1%
+  RAISE 100   6.3%  | 5.1%
+  ------------------------------------------------------------
+  ------------------------------------------------------------
+
+
+*** Right Panel
+
+- The first row of graphics shows the action frequencies for all categories and their combinations. The second row shows the range distribution.
+- Explanation of the matrix view:
+  - The first column shows the action percentage of each row category overall.
+  - The last row shows the action percentage of each column category overall.
+  - The bottom left field matches the total action percentage.
+  - All other fields are combinations of row and column items.
+  For example, when using made_hands and draws on the KQ4 board, the row with KQ reads as follows:
+  - KQ overall calls 68% and raises 32%
+  - KQ:Add raises 100%
+  - KQ:dd raises 100%
+  - KQ:gs raises 97%
+  - KQ:Ad calls 87%
+  and so on.
+
+- The right graphics work the same way and show the percentage of the item within the overall action range.
+  For example:
+  - KQ makes up 13.6% of the Raise 50% range.
+  - KQ:Add makes up 0.4% of the Raise 50% range.
+
+  This is important because often you see clear patterns in the matrix on the left, but when looking at the range distribution, you realize that the "clear" action categories make up only a small part of the overall range, and the biggest categories in terms of the number of hands are the mixed ones.
+  When I see a huge category with unclear patterns, I filter for it and try to find patterns within by using different views, etc.
+
+*** VIEWS
+
+The views are always generated based on the board cards. There is probably not "one" way to define them since, in practice, these buckets would change based on ranges, SPR, etc. Here is a brief overview and explanation of all possible views. You can change the bucketing in utils.py if you think one view has too many or too few categories.
+- Made Hands: List of made hands.
+- Draws: First flush draws, then straight draws.
+  Straight draws usually include wraps, OESD, GS, etc., based on "nuttyness." A weak wrap might be counted as OESD or a weak OESD as GS.
+  This view also works on rivers and considers the turn draws (functions as a "busted" draw view then).
+- Blockers: Blocker cards to made hands and the main draws on the board.
+- Draws_Blockers: Combination of the draws and blockers views.
+- Flush: All flush-related combos. This can include flush and flush blockers or flush draws and flush draw blockers, as well as backdoor flush draws.
+- Straight: Everything related to straights and straight draws - includes made hands and blockers as well as straight draws and future blockers.
+- Board Ranks: Every board rank (useful for paired boards, etc.).
+- Key Cards: A fairly arbitrary collection of single cards that could be driving action factors on a given board. Mostly blockers and future blocker cards.
+- Pocket Pairs: All pocket pairs.
+- Ranks: All ranks.
+- Preflop Views: As explained and defined by hand in monker_automation.py line 223+.
+
+
+** License
+This project is licensed under the MIT License - see the =LICENSE= file for details.
+
+** Contact
+The software is provided as-is with no plans for further features or major changes. For short questions or minor changes, feel free to reach out.
