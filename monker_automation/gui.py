@@ -12,7 +12,10 @@ import os
 import logging
 import mss
 
-from timebudget import timebudget
+import pyscreeze
+
+pyscreeze.USE_IMAGE_NOT_FOUND_EXCEPTION = False
+#from timebudget import timebudget
 
 
 def goto_start(position=BACK_CO, click_delay=CLICK_DELAY, move_delay=MOUSE_MOVEMENT_DEL, num_back=NUM_BACK):

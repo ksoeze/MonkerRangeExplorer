@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 from monker_automation.views import get_view, expand_range
 from monker_automation.range import view_item_to_str
 from monker_automation.plot import plot_default, plot_range_distribution
-from timebudget import timebudget
+#from timebudget import timebudget
 
 def create_regex_from_item(item):
     if len(item) == 1:
@@ -101,7 +101,7 @@ def heatmap(actions, data, row_list, column_list, exclude_row=True, exclude_colu
         heat_map[action] = pd.DataFrame(index=row_index, columns=column_index)
         for row in row_index:
             for col in column_index:
-                heat_map[action][col][row] = get_conditional_sum(temp_data, action, "ROW", "COLUMN", row, col)
+                heat_map[action].loc[row,col] = get_conditional_sum(temp_data, action, "ROW", "COLUMN", row, col)
     #
     # result_manager = Manager()
     # heat_map = result_manager.dict()
@@ -128,10 +128,23 @@ def plot_action(axs, heat_map, action, title="", subplot_row=0):
         color = "Reds"
 
     heat_map_draw = (heat_map[action].div(heat_map_total)) * 100
+    
+    # First, fill NA values
+    filled_heat_map_draw = heat_map_draw.iloc[::-1].map(lambda x: np.nan if pd.isna(x) else x)
 
-    g = sns.heatmap(heat_map_draw.iloc[::-1].fillna(value=np.nan), annot=True,
-                    yticklabels=1, linewidths=1, cmap=color,
-                    ax=axs[subplot_row][0], vmin=0, vmax=100, fmt=".0f")
+    #filled_heat_map_draw = heat_map_draw.iloc[::-1].fillna(value=np.nan)
+
+    # Then, infer object dtypes
+    #filled_heat_map_draw = filled_heat_map_draw.infer_objects(copy=False)
+
+    # Finally, create the heatmap
+    g = sns.heatmap(filled_heat_map_draw, annot=True,
+                yticklabels=1, linewidths=1, cmap=color,
+                ax=axs[subplot_row][0], vmin=0, vmax=100, fmt=".0f")
+
+    # g = sns.heatmap(heat_map_draw.iloc[::-1].fillna(value=np.nan), annot=True,
+    #                 yticklabels=1, linewidths=1, cmap=color,
+    #                 ax=axs[subplot_row][0], vmin=0, vmax=100, fmt=".0f")
     axs[subplot_row][0].title.set_text(action + " frequencies " + title)
     g.set_yticklabels([cut_lable(x) for x in g.get_yticklabels()], rotation=0)
     g.set_xticklabels([cut_lable(x) for x in g.get_xticklabels()], rotation=80)
@@ -139,7 +152,8 @@ def plot_action(axs, heat_map, action, title="", subplot_row=0):
     # print weights
     heat_map_draw = heat_map[action].div(heat_map[action]["total"]["total"]) * 100
 
-    g = sns.heatmap(heat_map_draw.iloc[::-1].fillna(value=np.nan), annot=True,
+    filled_heat_map_draw = heat_map_draw.iloc[::-1].map(lambda x: np.nan if pd.isna(x) else x)
+    g = sns.heatmap(filled_heat_map_draw, annot=True,
                     yticklabels=1, linewidths=1, cmap=color,
                     ax=axs[subplot_row][1], vmin=0, vmax=100, fmt=".1f")
     axs[subplot_row][1].title.set_text(action + " range distribution in % " + title)

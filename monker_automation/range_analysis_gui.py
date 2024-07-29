@@ -2,7 +2,7 @@
 import logging
 import os
 import pickle
-from timebudget import timebudget
+#from timebudget import timebudget
 import tkinter as tk
 from tkinter import ttk
 
