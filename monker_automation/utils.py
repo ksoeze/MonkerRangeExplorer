@@ -1,13 +1,18 @@
 #!/usr/bin/env python
 
+# default True - when False the script tries to use the automatic range saving from the monker gui
+# this requires extra setup steps (save reference images of buttons, setup pyautogui, exact positioning of the monker window etc)
+MANUAL_SAVE_RANGES=True
+# Only relevant when using the automatic ranges saving stuff 
+# Monker 1 and Monker 2 have different graphics and positioning 
 MONKER_BETA = True
-#MONKER_BETA = False
 
+# Private PLO 5-Card spots 
 PLO5_DIR="/home/johann/monker-beta/ranges/Omaha5/Postflop/SRP-EP-BTN/Js8c2h/BET75-/"
 PLO5 = False
 
-MANUAL_SAVE_RANGES=True
-MANUAL_SAVE_RANGES=False
+## ------------------------------------------------------------------------------------------------------------------------------
+## ** ALL Settings for range retrieval on different devices - not nessasary with manual range saving 
 
 Y_OFFSET= 0 #845 # 827 #865
 
@@ -32,6 +37,8 @@ if LAPTOP:
 else:
     Y_LAPTOP_OFFSET = 0
     X_LAPTOP_OFFSET = 0
+
+# --------------------------------------------------------------------------------------------------------------    
 # poker constants
 
 RANKS = list("AKQJT98765432")
@@ -53,6 +60,13 @@ STRAIGHTS = [list("AKQJT"), list("KQJT9"), list("QJT98"), list("JT987"), list(
 INVALID_CHAR = '#'
 
 # view constants
+# These variables define how many hands are grouped to one cathegory 
+# For exable FD_GROUPING = [ 1,2,2] means flushdraws are bucketed like this 
+# [NDF], [2nd NDF, 3rd NDF], [4st NDF, 5st NDF], [all other lower flushdraws]
+# did not change things a long time but might be usefull for powerusers to get more or less grained cathegory in the overviews
+# you have to be carefull not to make too many buckets because at some point the overview doesnt fit properly anymore and you get 
+# bad graphics / overlapping / nonreadable legends
+
 QUAD_BOARD_PAIR_GROUPING = [1, 1, 2, 2, 3]
 PAIRED_BOARD_FULL_OR_BETTER_GROUPING = [2, 2]
 FLUSH_GROUPING = [1, 1, 2,2]
@@ -69,22 +83,31 @@ BOARD_INTERACTION_GROUPING = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 VIEW_TYPES = ["DEFAULT", "MADE_HANDS", "DRAWS", "BLOCKERS", "DRAWS_BLOCKERS", "FLUSH","STRAIGHT",
     "BOARD_RANKS", "KEY_CARDS","POCKET_PAIRS","CUSTOM"]
 
+# if you want to use the different views directly in monker put the path to the monkerinstallation/Views folder here.
+# to use this feature put PRINT_VIEWS = True in line 392
 VIEW_FOLDER = "/media/johann/MONKER/monker/Views/"
 DEFAULT_VIEW_NAME = "OVERVIEW"
 TOP_VIEW_LINE = "180\n"
 MIN_WEIGHT = 0.001 #0.001
 
 # custom views
-
-
 # range constants
+# here put the ranges directory where you save your exported ranges 
+# can be the default ranges folder of monker or somewhere else
+# ATTENTION: the script deletes the exportet .cvs ranges after usage since only the ranges for the current spot should be in there 
+# additional folders like preflop ranges etc in this folder are ok and are not touched
+
 if MONKER_BETA:
-    RANGE_FOLDER = "/home/johann/monker-beta/ranges/"
+    RANGE_FOLDER = "./ranges/" #/home/johann/monker-beta/ranges/"
 else:
-    RANGE_FOLDER = "/home/johann/monker-1/ranges/"
+    RANGE_FOLDER = "./ranges/" #/home/johann/monker-1/ranges/"
 
 # gui reader constants
-
+# here all the positioning of the monker buttons etc are set 
+# not relevant for manual range saving 
+# it changed over the years for different monitor setups / screen resolutions / devices but overall quite straight forward
+# if you really wanna use it and have looked through the code a bit but cant figure it out - feel free to file a github issue and I might help out
+ 
 BACK_CO = (3885+X_LAPTOP_OFFSET, 923+Y_LAPTOP_OFFSET)
 BACK_CO = (1952+X_LAPTOP_OFFSET, 2025+Y_OFFSET+Y_LAPTOP_OFFSET)
 CHECK_CO = (3955+X_LAPTOP_OFFSET, 925+Y_LAPTOP_OFFSET)
@@ -192,6 +215,10 @@ CHECK_CALL_REGION = (1932, 2018+Y_OFFSET, 2277, 2044+Y_OFFSET)
 CHECK_CALL_REGION = (1932+X_LAPTOP_OFFSET, 2018+Y_OFFSET+Y_LAPTOP_OFFSET, 350, 30)
 
 # info tree creation
+# these constants are for the old pdf report generation tool 
+# I dont use it anymore since I prefere the much more rich matrix view + quiz 
+# It used to "walk" through monker trees automatically and generate a pdf report of all main spots 
+# only works when you have setup all auto range saving stuff correctly
 LINE_START = "|"
 
 # standard lines
@@ -262,7 +289,7 @@ OOP_CALL_CALL_BET = OOP_CALL_vsBET + [CALL] + CARD_DUMMY
 # analysis
 
 DEFAULT_VIEW_RESULT_FILENAME = "/home/johann/code/monker_automation/RESULTS.org"
-DEFAULT_REPORT_DIRECTORY = "/home/johann/Documents/poker/monker-documentation/MonkerReports/"
+DEFAULT_REPORT_DIRECTORY = "./report"
 DEFAULT_REPORT_VIEW_DIR = "/home/johann/Documents/poker/monker-documentation/MonkerReports/views/"
 DEFAULT_REPORT_MATCHER_DIRECTORY = "/home/johann/Documents/poker/monker-documentation/MonkerReports/matcher/"
 STRATEGY_PNG_NAME = "strat.png"
@@ -291,7 +318,6 @@ MAX_LABEL_LENGTH = 20
 
 # SCRIPT SETTINGS
 
-# ZEILEN mit # sind nur Kommentare
 # View AUSWAHL = ["DEFAULT", "MADE_HANDS", "DRAWS", "BLOCKERS", "DRAWS_BLOCKERS", "CUSTOM"]
 SCRIPT_VIEW_TYPE = ["DEFAULT", "MADE_HANDS"]
 # SCRIPT_VIEW_TYPE = ["DEFAULT","MADE_HANDS", "DRAWS", "BLOCKERS", "DRAWS_BLOCKERS"]
@@ -302,52 +328,15 @@ SCRIPT_VIEW_TYPE = ["DEFAULT", "MADE_HANDS"]
 # flush blank, flush pairing (top or 2nd card paring), A (nf card) flush
 
 # TURN_CARDS = ["2h","Ks","Ah","Qh","7h","9h","Jh","5d","Qd","Ad"]
-# TURN_CARDS = ["8h","Kd","Kh","7h","2h","Ah","5h","Ts","3s","As"]
-# TURN_CARDS = ["5s","5d","5c", "Ac", "Jh", "7s", "9h", "9c", "Ts", "Th", "Qh", "Ks"]
-# TURN_CARDS = ["5h","5c", "Qc", "Th", "7s", "9h", "As", "Kh", "Jc","6d"]
-# TURN_CARDS = ["8h","8c", "6c", "Ah", "7s", "3h", "2h", "Kh", "Jc","6d","Qs"]
-# ["As","Ks","5s","Ts","9c","9s"]
-TURN_CARDS = ["Ah","Kc","Jh","Tc","7c","6d","4d","2c"]
-TURN_CARDS = ["Ac","Ks","Kc","Qh","Qd","Jc","Js","Tc","9d","7h","6c","4d","2c"]
-# TURN_CARDS = ["Ac","Kc","Qc","Jc","Tc","9c","8c","7c","6c","5c","4c","3c","2c"]
 TURN_CARDS = []
-# RIVER_CARDS = ["2h","Kd","Ah","7h", "Qd", "Kc"]
-# RIVER_CARDS = ["4h","Ah","Kh","Qh","Jd","3d","Ad","Qd","7h","6h"]
-# RIVER_CARDS = ["4h","Ah","Qh","Th","3d","Ad","Qd","3s","As","Ts"]
-# RIVER_CARDS = ["4h","Ad","Ac","Th","Jh","4d","9c","6c"]
-# RIVER_CARDS = ["4h","Ah","3h","6h","8s","As","3s","7c","Kc","Qc"]
-# RIVER_CARDS = ["8h","As","Ac","7h","8s","3s","5d","4c","3c","2c","Kc","Jh"]
-# RIVER_CARDS = ["4h","6h","Ah","Kh","4d","Ad","7c","Qd"]
-# RIVER_CARDS = ["4h","Ah","Th","9h","3d","Ad","Qd"]
-# RIVER_CARDS = ["8h","6h","4h","Ah","As","7d","2d","3h","Kh","Qh"]
-# RIVER_CARDS = ["8h","Ah","7c","Kh","8s","As","8d","Ad","7d"]
-# RIVER_CARDS = ["8h","As","Ac","7h","8s","3s","5d","4c","3c","2c","Kc"]
-# RIVER_CARDS = ["Qh","Ah","Jh","6h","8s","Ks","As","Td","3c","4c","7d"]
-# RIVER_CARDS=["Th","Ah","7h","8h","Ts","As","5s","Kd","Qd"]
-# RIVER_CARDS=["6h","Ah","Tc","Kh","3s","Ks","Js"]
-# RIVER_CARDS=["2h","Ah","9h","Kd","Ad","Qh","7h"]
-# RIVER_CARDS=["4h","Ah","Qh","Th","Jh","3d","Kd","9d"]
-# RIVER_CARDS=["2h","Kh","9h","Ah","Ad","Qh","Th","7h","6h"]
-# RIVER_CARDS=["2h","Ah","Qh","Ks","Qs","Jh","5h","8h","Th"]
-# RIVER_CARDS=["4h","Ah","Qh","3s","Js","Ks","8h"]
-# RIVER_CARDS=["4h","Kh","Ah","Qh","7d","3s","Js","Ks","8h"]
-# RIVER_CARDS=["4h","Ah","Qh","3s","Js","Ks","8h"]
-# RIVER_CARDS=["4h","Kh","Ah","Jh","7h","3s","Js","Ks","8h","9h"]
-# RIVER_CARDS=["3d","Ad","Ah","4h","8s","As","2c","3h","Kh","Qh"]
-# RIVER_CARDS = ["Ac","Kc","Qc","Jc","Tc","9c","8c","7c","6c","5s","4c","3c","2c"]
-# RIVER_CARDS = ["2c","Ac","Ts","Ks","7s","Jc","Qh","2h","Ah","Jh","Kh"]
-# RIVER_CARDS = ["3c", "Ac", "Kc", "Jc", "9d", "8c", "6c", "Qc", "Tc", "7d", "5d", "Ad", "Td"]
-# RIVER_CARDS = ["Ah", "Kh", "Qh", "Jh", "Th", "8h", "7d", "4h", "Ad", "7d", "4d"]
-# RIVER_CARDS = ["2c", "Ad", "Th","Kd","Jh"]
-RIVER_CARDS = ["Ac","Ks","Kc","Qh","Qd","Jc","Tc","9d","7c","6c","6d"]
+# RIVER_CARDS = ["Ac","Ks","Kc","Qh","Qd","Jc","Tc","9d","7c","6c","6d"]
 RIVER_CARDS = ["6d"]
-#RIVER_CARDS = ["9h", "9d", "Qc", "Tc", "Ac", "Ad"]
 # z.b. [[RAISE,RAISE]] für bet, vs bet und vs raise lines only
 INVALID_SEQUENCES = [[BET, RAISE]]
 INVALID_SEQUENCES = [[RAISE, RAISE]]
 #INVALID_SEQUENCES = []
 
-# siehe lines.txt
+# see lines.txt
 VALID_LINES = [
     OOP_BET, IP_BET,
     OOP_BET_BET, IP_BET_BET,
@@ -363,11 +352,6 @@ VALID_LINES = [
 ]
 VALID_LINES = []
 # auswahl: ["10","20","25","30","35","40","50","60","66","70","75","80","100","AllIn"]
-POSSIBLE_BET_RAISE = ["25", "33", "50", "66", "100", "AllIn"]
-#POSSIBLE_BET_RAISE = ["50","100","AllIn"]
-POSSIBLE_BET_RAISE = ["MIN","33","40","66","100", "AllIn"]
-POSSIBLE_BET_RAISE = ["25","50","100", "AllIn"]
-#POSSIBLE_BET_RAISE = ["33","50","100","AllIn"]
 #POSSIBLE_BET_RAISE = ["50","100", "AllIn"]
 POSSIBLE_BET_RAISE = ["MIN","10","20","25","30","33","40","50","55","60","66","70","75","100","AllIn"]
 
@@ -385,7 +369,6 @@ SHUTDOWN = False
 # NEW RANGE DETECTION (only works for range analysis and not report generation)
 # asumes all ranges are available as buttons -> so for end of line ranges you have to set it to the old system
 # or add the missing CHECK FOLD CALL options to MISSING_BUTTONS (use right order)
-NEW_RANGE_DETECTION=True
 NEW_RANGE_DETECTION=False
 #MISSING_RANGES=[CHECK,FOLD,CALL] this way but only the ones that dont have buttons but are actual ranges
 #MISSING_RANGES=[CALL]
