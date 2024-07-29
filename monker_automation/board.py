@@ -3,26 +3,12 @@
 #
 # Filename: board.py
 # Description:
-# Author: Johann Ertl
-# Maintainer:
 # Created: Don Mar 17 10:47:22 2016 (+0100)
-# Version:
-# Last-Updated:
-#           By:
-#     Update #: 0
-# URL:
-# Keywords:
-# Compatibility:
-#
-#
 
 # Commentary:
 #
 # Ignores 2nd 2 pair on paired board: Q5 is not in list on AQ544 board
 # HILO not working correctly [16-11-2017]
-#
-
-# Change Log:
 #
 
 # Code:
