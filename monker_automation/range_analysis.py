@@ -128,6 +128,11 @@ def plot_action(axs, heat_map, action, title="", subplot_row=0):
         color = "Reds"
 
     heat_map_draw = (heat_map[action].div(heat_map_total)) * 100
+
+    if PRINT_TOTAL_WEIGHTS:
+        heat_map_draw.to_csv(
+            os.path.join(EXPORTED_VALUES_FOLDER, f'{action}.csv'),
+            sep=';', index=True)  
     
     # First, fill NA values
     filled_heat_map_draw = heat_map_draw.iloc[::-1].map(lambda x: np.nan if pd.isna(x) else x)
@@ -152,7 +157,13 @@ def plot_action(axs, heat_map, action, title="", subplot_row=0):
     # print weights
     heat_map_draw = heat_map[action].div(heat_map[action]["total"]["total"]) * 100
 
+    if PRINT_TOTAL_WEIGHTS:
+        heat_map_draw.to_csv(
+            os.path.join(EXPORTED_VALUES_FOLDER, f'{action}_WEIGHTS.csv'),
+            sep=';')    
+
     filled_heat_map_draw = heat_map_draw.iloc[::-1].map(lambda x: np.nan if pd.isna(x) else x)
+
     g = sns.heatmap(filled_heat_map_draw, annot=True,
                     yticklabels=1, linewidths=1, cmap=color,
                     ax=axs[subplot_row][1], vmin=0, vmax=100, fmt=".1f")
@@ -495,10 +506,21 @@ def update_plot(data, actions, board, hand_filter, hand_filter_exclude, filter_i
     print("Total Weights:")
     heat_map_total = sum(heat.values())
     heat_map_total_weight = heat_map_total.div(heat_map_total["total"]["total"])*100
-    heat_map_total_weight=heat_map_total_weight.iloc[::-1]
+    #heat_map_total_weight=heat_map_total_weight.iloc[::-1]
+
+    # Create export directory if it doesn't exist and clear existing CSV files
+    export_folder = './exported_values/'
+    os.makedirs(export_folder, exist_ok=True)
+    for filename in os.listdir(export_folder):
+        if filename.endswith('.csv'):
+            os.remove(os.path.join(export_folder, filename))
 
     if PRINT_TOTAL_WEIGHTS:
         heat_map_total_weight_ = heat_map_total_weight.copy()
+        # Export total weights heat map to CSV
+        heat_map_total_weight.to_csv(
+        os.path.join(export_folder, 'TOTAL_WEIGHTS.csv'),
+        sep=';', index=True,)       
         heat_map_total_weight_.columns = [x[:15]+"..." if len(x)>18 else x for x in heat_map_total_weight.columns]
         with pd.option_context('display.max_rows', None,
                                'display.max_columns', None,
@@ -513,7 +535,7 @@ def update_plot(data, actions, board, hand_filter, hand_filter_exclude, filter_i
                                                                             heat[action]["total"]["total"] /
                                                                             combo_counts["final"] * 100
                                                                             if combo_counts["final"] else 0)
-
+          
     fig, axs = plot(heat, actions, subtitle_infos)
     plot_bar(heat, actions)
     return fig, combo_counts
