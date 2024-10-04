@@ -131,7 +131,7 @@ def plot_action(axs, heat_map, action, title="", subplot_row=0):
 
     if PRINT_TOTAL_WEIGHTS:
         heat_map_draw.to_csv(
-            os.path.join(EXPORTED_VALUES_FOLDER, f'{action}.csv'),
+            os.path.join('./exported_values/', f'{action}.csv'),
             sep=';', index=True)  
     
     # First, fill NA values
@@ -159,7 +159,7 @@ def plot_action(axs, heat_map, action, title="", subplot_row=0):
 
     if PRINT_TOTAL_WEIGHTS:
         heat_map_draw.to_csv(
-            os.path.join(EXPORTED_VALUES_FOLDER, f'{action}_WEIGHTS.csv'),
+            os.path.join('./exported_values/', f'{action}_WEIGHTS.csv'),
             sep=';')    
 
     filled_heat_map_draw = heat_map_draw.iloc[::-1].map(lambda x: np.nan if pd.isna(x) else x)
