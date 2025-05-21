@@ -118,24 +118,26 @@ def cut_lable(label):
 
 def plot_action(axs, heat_map, action, title="", subplot_row=0):
     heat_map_total = sum(heat_map.values())
-    if "C" in action: #"CHECK" in action or "CALL" in action:
+    if "C" in action or "c" in action: #"CHECK" in action or "CALL" in action:
         color = "#8FBC8B"
         color = "Greens"
-    elif "F" in action: #"FOLD" in action:
+    elif "F" in action or "f" in action: #"FOLD" in action:
         color = "#6DA2C0"
         color = "Blues"
-    elif "R" in action or "B" in action or "I" in action: #"RAISE" in action or "BET" in action or "ALLIN in action:
+    elif "R" in action or "B" in action or "I" in action or "r" in action or "b" in action or "i" in action : #"RAISE" in action or "BET" in action or "ALLIN in action:
         color = "Reds"
 
     heat_map_draw = (heat_map[action].div(heat_map_total)) * 100
 
     if PRINT_TOTAL_WEIGHTS:
-        heat_map_draw.to_csv(
+        heat_map_export = heat_map_draw.iloc[::-1].map(lambda x: 0 if pd.isna(x) else x)
+        heat_map_export = heat_map_export.map(lambda x: f"{x:.4f}".replace('.', ',') if isinstance(x, float) else x)
+        heat_map_export.to_csv(
             os.path.join('./exported_values/', f'{action}.csv'),
-            sep=';', index=True)  
-    
+            sep=';',index=True)  
     # First, fill NA values
     filled_heat_map_draw = heat_map_draw.iloc[::-1].map(lambda x: np.nan if pd.isna(x) else x)
+    
 
     #filled_heat_map_draw = heat_map_draw.iloc[::-1].fillna(value=np.nan)
 
@@ -160,7 +162,7 @@ def plot_action(axs, heat_map, action, title="", subplot_row=0):
     if PRINT_TOTAL_WEIGHTS:
         heat_map_draw.to_csv(
             os.path.join('./exported_values/', f'{action}_WEIGHTS.csv'),
-            sep=';')    
+            sep=';', decimal=',')    
 
     filled_heat_map_draw = heat_map_draw.iloc[::-1].map(lambda x: np.nan if pd.isna(x) else x)
 

@@ -54,11 +54,11 @@ def plot_default(total_results, action_results, actions,quiz=QUIZ):
 
     num_bets = 0
     for index in range(len(actions)):
-        if "C" in actions[index]: #"CHECK" in actions[index] or "CALL" in actions[index]:
+        if "C" in actions[index] or "c" in actions[index]: #"CHECK" in actions[index] or "CALL" in actions[index]:
             color = "#8FBC8B"
-        elif "F" in actions[index]: #"FOLD" in actions[index]:
+        elif "F" in actions[index] or "f" in actions[index]: #"FOLD" in actions[index]:
             color = "#6DA2C0"
-        elif "R" in actions[index] or "B" in actions[index] or "I" in actions[index]: #"RAISE" in actions[index] or "BET" in actions[index] or "ALLIN" in actions[index]:
+        elif "R" in actions[index] or "B" in actions[index] or "I" in actions[index] or "r" in actions[index] or "b" in actions[index] or "i" in actions[index]: #"RAISE" in actions[index] or "BET" in actions[index] or "ALLIN" in actions[index]:
             if num_bets == 1:
                 color = "#B15B4A"
             elif num_bets == 2:

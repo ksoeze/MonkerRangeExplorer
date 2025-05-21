@@ -9,6 +9,23 @@ import logging
 import pprint
 import itertools
 
+def combine_two_ranks(rank1, rank2):
+    """Combines two ranks into a string with higher rank first.
+
+    Args:
+        rank1: First rank (character from RANKS)
+        rank2: Second rank (character from RANKS)
+
+    Returns:
+        String with the two ranks, higher rank first
+    """
+    if rank1 in RANKS and rank2 in RANKS:
+        if RANK_ORDER[rank1] >= RANK_ORDER[rank2]:
+            return rank1 + rank2
+        else:
+            return rank2 + rank1
+    return rank1 + rank2  # fallback for non-rank inputs
+
 def regroup_list(hand_list, pattern):
     return_hand_list = []
     for i in pattern:
@@ -180,10 +197,12 @@ def paired_board(board):
 
     if not flushes and not straights[0]:
         # trips + kickers
-        view.append([kickers[0] + intersections[0]])
-        view.append([kickers[1] + intersections[0],
-                     kickers[2] + intersections[0]])
-
+        # view.append([kickers[0] + intersections[0]])
+        # view.append([kickers[1] + intersections[0],
+        #              kickers[2] + intersections[0]])
+        view.append([combine_two_ranks(kickers[0], intersections[0])])
+        view.append([combine_two_ranks(kickers[1], intersections[0]),
+                     combine_two_ranks(kickers[2], intersections[0])])
     # trips
     view.append([intersections[0]])
 
@@ -284,10 +303,12 @@ def paired_board_made(board):
             view.append(straights[2])
 
     if not flushes and not straights[0]:
-        view.append([kickers[0] + intersections[0]])
-        view.append([kickers[1] + intersections[0],
-                     kickers[2] + intersections[0]])
-
+        # view.append([kickers[0] + intersections[0]])
+        # view.append([kickers[1] + intersections[0],
+        #              kickers[2] + intersections[0]])
+        view.append([combine_two_ranks(kickers[0], intersections[0])])
+        view.append([combine_two_ranks(kickers[1], intersections[0]),
+                     combine_two_ranks(kickers[2], intersections[0])])
     view.append([intersections[0]])
 
     # add undertrips if possible
