@@ -8,7 +8,7 @@ mss==9.0.1
 numpy==2.0.1
 packaging==24.1
 pandas==2.2.2
-pillow==10.4.0
+pillow==12.3.0
 PyAutoGUI==0.9.54
 PyGetWindow==0.0.9
 PyMsgBox==1.0.9
